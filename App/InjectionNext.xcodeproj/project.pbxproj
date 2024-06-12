@@ -13,6 +13,9 @@
 		224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FD2C08BBE300B71C79 /* InjectionServer.swift */; };
 		224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */; };
 		224E58032C08C44900B71C79 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = 224E58022C08C44900B71C79 /* Popen */; };
+		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
+		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
+		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
 		22F5171D2C0E657D00DF88FA /* copy_test_frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
@@ -58,6 +61,7 @@
 		224E57FC2C08BAE200B71C79 /* InjectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionClient.h; path = ../../Sources/InjectionNextC/include/InjectionClient.h; sourceTree = "<group>"; };
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
+		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unhider.swift; sourceTree = "<group>"; };
 		22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_test_frameworks.sh; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -89,7 +93,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2217BE812C0A65C20032A832 /* Fortify in Frameworks */,
+				22E3D98D2C19009900BB234E /* DLKitC in Frameworks */,
 				BBB64FEC1FD585D50020BE47 /* WebKit.framework in Frameworks */,
+				22E3D98B2C19009900BB234E /* DLKit in Frameworks */,
 				BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */,
 				224E57FB2C08978F00B71C79 /* SwiftRegex in Frameworks */,
 				BBB64DE51FD571310020BE47 /* libz.tbd in Frameworks */,
@@ -140,6 +146,7 @@
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
+				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -182,6 +189,8 @@
 				224E57FA2C08978F00B71C79 /* SwiftRegex */,
 				224E58022C08C44900B71C79 /* Popen */,
 				2217BE802C0A65C20032A832 /* Fortify */,
+				22E3D98A2C19009900BB234E /* DLKit */,
+				22E3D98C2C19009900BB234E /* DLKitC */,
 			);
 			productName = InjectionIII;
 			productReference = BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */;
@@ -222,6 +231,7 @@
 				224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */,
 				224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */,
 				2217BE7F2C0A65C20032A832 /* XCRemoteSwiftPackageReference "Fortify" */,
+				22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */,
 			);
 			productRefGroup = BB439B661FABA64300B4F50B /* Products */;
 			projectDirPath = "";
@@ -285,6 +295,7 @@
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */,
+				22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,6 +530,14 @@
 				minimumVersion = 2.1.5;
 			};
 		};
+		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnno1962/DLKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.4.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -536,6 +555,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */;
 			productName = Popen;
+		};
+		22E3D98A2C19009900BB234E /* DLKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */;
+			productName = DLKit;
+		};
+		22E3D98C2C19009900BB234E /* DLKitC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */;
+			productName = DLKitC;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

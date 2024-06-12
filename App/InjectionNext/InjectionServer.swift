@@ -102,7 +102,7 @@ class InjectionServer: SimpleSocket {
                 }
             case .tmpPath:
                 if let tmpPath = readString() {
-                    log("Tmp path: "+tmpPath)
+                    print("Tmp path: "+tmpPath)
                     self.tmpPath = tmpPath
                 } else {
                     error("**** Bad tmp ****")
@@ -111,6 +111,7 @@ class InjectionServer: SimpleSocket {
                 appDelegate.setMenuIcon(.ok)
             case .failed:
                 appDelegate.setMenuIcon(.error)
+                Unhider.startUnhide()
             case .exit:
                 log("**** exit ****")
                 return

@@ -138,6 +138,9 @@ class MonitorXcode {
                         workingDir = work
                     } else if arg != "-Xfrontend" &&
                                 arg != "-experimental-allow-module-with-compiler-errors" {
+                        if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
+                            Unhider.packageFrameworks = arg
+                        }
                         args.append(arg)
                     }
                 }
