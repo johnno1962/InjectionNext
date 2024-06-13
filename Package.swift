@@ -13,7 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/johnno1962/InjectionLite",
-                 .upToNextMajor(from: "1.2.15")),
+                 .upToNextMajor(from: "1.2.16")),
         .package(url: "https://github.com/krzysztofzablocki/Inject",
                  .upToNextMajor(from: "1.5.0"))
     ],

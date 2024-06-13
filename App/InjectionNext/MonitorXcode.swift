@@ -61,10 +61,12 @@ class MonitorXcode {
         //print(msg)
         #endif
     }
-    func log(_ msg: String) {
+    @discardableResult
+    func log(_ msg: String) -> Bool {
         let msg = APP_PREFIX+msg
         print(msg)
         InjectionServer.currentClient?.sendCommand(.log, with: msg)
+        return true
     }
     
     init() {
@@ -92,28 +94,36 @@ class MonitorXcode {
         }
     }
     
+    var buffer = [CChar](repeating: 0, count: 10_000)
+
     func processSourceKitOutput(from xcodeStdout: Popen) {
-        func readString() -> String? {
-//            guard let data = xcodeStdout.readData(),
-//                  let line1 = String(data: data, encoding: .isoLatin1),
-//                  let iso1 = line1.data(using: .utf8),
-//                  let line = String(data: iso1, encoding: .isoLatin1),
-//                  let iso = line.data(using: .utf8),
-//                  let utf8 = String(data: iso, encoding: .utf8),
-//                  var string: String = utf8[#""(.*)""#] else { return nil }
-//            if string.contains("/VVV") {
-//                print(line.unicodeScalars.map {$0.value})
-//                print(string.unicodeScalars.map {$0.value})
-//            }
-//            if let str = String(data: string.data(using: .isoLatin1)!, encoding: .utf8) {
-//                string = str
-//            }
-            guard let line = xcodeStdout.readLine(),
-                  var string: String = line[#""(.*)""#] else { return nil }
-            debug(">>>"+line+"<<<")
-            string[#"\\([^tn])"#, group: 0] = "$1"
-            return string
+        func readQuotedString() -> String? {
+            var offset = 0, doubleQuotes = Int32(UInt8(ascii: "\""))
+            while let line = fgets(&buffer[offset], CInt(buffer.count-offset),
+                                   xcodeStdout.fileStream) {
+                offset += strlen(line)
+                if offset > 0 && buffer[offset-1] == UInt8(ascii: "\n") {
+                    if let start = strchr(buffer, doubleQuotes),
+                       let end = strrchr(start+1, doubleQuotes) {
+                        end[0] = 0
+                        var out = String(cString: start+1)
+                        if strstr(start+1, "\\\"") != nil {
+                            out = out.replacingOccurrences(of: "\\\"", with: "\"")
+                        }
+                        return out
+                    }
+                    
+                    return nil
+                }
+                
+                var grown = [CChar](repeating: 0, count: buffer.count*2)
+                strcpy(&grown, buffer)
+                buffer = grown
+            }
+            
+            return nil
         }
+        
         while let line = xcodeStdout.readLine() {
             debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -124,7 +134,7 @@ class MonitorXcode {
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
                 var files = "", fcount = 0, args = [String](), workingDir = "/tmp"
-                while let arg = readString() {
+                while let arg = readQuotedString() {
                     if arg.hasSuffix(".swift") {
                         files += arg+"\n"
                         fcount += 1
@@ -132,7 +142,7 @@ class MonitorXcode {
                         _ = xcodeStdout.readLine()
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
-                           let swork = readString() {
+                           let swork = readQuotedString() {
                             work = swork
                         }
                         workingDir = work
@@ -144,7 +154,7 @@ class MonitorXcode {
                         args.append(arg)
                     }
                 }
-                guard let source = readString() ?? readString() else {
+                guard let source = readQuotedString() ?? readQuotedString() else {
                     continue
                 }
                 if let prev = compilations[source]?.arguments ?? lastArguments,
@@ -172,7 +182,7 @@ class MonitorXcode {
                 }
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
-                  let _ = xcodeStdout.readLine(), let source = readString() {
+                  let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Fie saved "+source)
                 Self.compileQueue.async {
                     self.inject(source: source)
@@ -232,15 +242,17 @@ class MonitorXcode {
     }
     
     func recompile(source: String) ->  String? {
-        let isSwift = source.hasSuffix(".swift")
-        let filesfile = tmpbase+".filelist"
-        let object = tmpbase+".o"
         guard let stored = compilations[source] else {
             error("Retrying: \(source) not ready.")
             pendingSource = source
             return nil
         }
         
+        let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
+        let object = tmpbase+"_\(uniqueObject).o"
+        let isSwift = source.hasSuffix(".swift")
+        let filesfile = tmpbase+".filelist"
+
         unlink(object)
         unlink(filesfile)
         try? stored.swiftFiles.write(toFile: filesfile, atomically: false,
