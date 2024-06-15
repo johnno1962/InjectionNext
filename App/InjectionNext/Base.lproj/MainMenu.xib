@@ -650,23 +650,30 @@
             <items>
                 <menuItem title="Launch Xcode" toolTip="Luach supervised Xcode" id="B7f-B2-5ZH">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Open Project"/>
+                    <accessibility description="Launch Xcode"/>
                     <connections>
                         <action selector="runXcode:" target="Voe-Tx-rLC" id="HLd-Lq-tj9"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Select Xcode" toolTip="Select Path to desired Xcode" id="XlL-4Y-oKk">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Open Project"/>
+                    <accessibility description="Select Xcode"/>
                     <connections>
                         <action selector="selectXcode:" target="Voe-Tx-rLC" id="rCK-bY-XeP"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Enable Devices" toolTip="Enable injecting on a device" id="s0A-3D-ThA">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Open Project"/>
+                    <accessibility description="Evable Devices"/>
                     <connections>
                         <action selector="deviceEnable:" target="Voe-Tx-rLC" id="OAF-ab-cCp"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Unhide Symbols" toolTip="Make a pass over object files unhiding defualt argument generators" id="FEE-8j-48e">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <accessibility description="Unhide symbols"/>
+                    <connections>
+                        <action selector="unhideSymbols:" target="Voe-Tx-rLC" id="6qL-3s-BHb"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Compiler Injection" hidden="YES" toolTip="Experimental" id="haX-yQ-yaN">
@@ -703,7 +710,7 @@
                             <rect key="frame" x="4" y="5" width="334" height="39"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField toolTip="Enter expanded codesigning identity from build logs." focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzf-xB-GlM">
+                                <textField toolTip="Enter expanded codesigning identity from build logs." verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzf-xB-GlM">
                                     <rect key="frame" x="8" y="8" width="249" height="21"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Idenity" drawsBackground="YES" id="OSD-Nr-QNY">
@@ -741,7 +748,7 @@
                             <binding destination="Voe-Tx-rLC" name="value" keyPath="defaults.testing" id="bbI-8I-gnF"/>
                         </connections>
                     </button>
-                    <textField focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rw0-Sb-xW5">
+                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rw0-Sb-xW5">
                         <rect key="frame" x="20" y="12" width="336" height="48"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="-framework XCTest -lXCTestSwiftSupport" drawsBackground="YES" id="XCE-C6-jqh">

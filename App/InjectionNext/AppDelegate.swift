@@ -121,6 +121,10 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         MonitorXcode.deviceLibraries = librariesField.stringValue
     }
 
+    @IBAction func unhideSymbols(_ sender: NSMenuItem) {
+        Unhider.startUnhide()
+    }
+
     func setMenuIcon(_ state: InjectionState) {
         DispatchQueue.main.async {
             let tiffName = "Injection"+state.rawValue

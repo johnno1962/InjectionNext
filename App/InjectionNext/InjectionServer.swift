@@ -112,7 +112,10 @@ class InjectionServer: SimpleSocket {
             case .failed:
                 appDelegate.setMenuIcon(.error)
             case .unhide:
-                Unhider.startUnhide()
+                if !Unhider.reunhide() {
+                    log("Injection failed to load. If this was due to a default " +
+                        "argument. Select the app's menu item \"Unhide Symbols\".")
+                }
             case .exit:
                 log("**** exit ****")
                 return
