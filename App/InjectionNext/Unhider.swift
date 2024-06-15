@@ -41,19 +41,35 @@ open class Unhider {
             do {
                 try Fortify.protect {
                     log("Starting \"unhide\" for "+intermediates.path+"...")
-                    var unhidden = Set<String>(), files = 0
-                    let enumerator = FileManager.default
-                        .enumerator(atPath: intermediates.path)
-                    while let path = enumerator?.nextObject() as? String {
-                        guard path.hasSuffix(".o") else { continue }
-                        unhide(object: intermediates
-                            .appendingPathComponent(path).path, &unhidden)
-                        files += 1
+                    var configs = [String: Set<String>]()
+                    var symbols = 0, files = 0
+                    
+                    for module in try FileManager.default
+                        .contentsOfDirectory(atPath: intermediates.path) {
+                        for config in try FileManager.default
+                            .contentsOfDirectory(atPath: intermediates
+                                .appendingPathComponent(module).path) {
+                            var unhidden = configs[config] ?? Set()
+                            symbols -= unhidden.count
+                            
+                            let platform = intermediates
+                                .appendingPathComponent(module+"/"+config)
+                            var enumerator = FileManager.default
+                                .enumerator(atPath: platform.path)
+                            while let path = enumerator?.nextObject() as? String {
+                                guard path.hasSuffix(".o") else { continue }
+                                unhide(object: platform
+                                    .appendingPathComponent(path).path, &unhidden)
+                                files += 1
+                            }
+
+                            configs[config] = unhidden
+                            symbols += unhidden.count
+                        }
                     }
-                    log("""
-                        Exported \(unhidden.count) symbols in \
-                        \(files) files, please restart your app.
-                        """)
+
+                    log("Exported \(symbols) symbols in \(files)" +
+                        " object files, please restart your app.")
                 }
             } catch {
                 log("⚠️ Unhide error: \(error)")
