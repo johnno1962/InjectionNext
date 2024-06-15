@@ -45,8 +45,6 @@ class MonitorXcode {
     let tmpbase = "/tmp/injectionNext"
     var compilations = [String: Compilation]()
     var pendingSource: String?
-    var lastArguments: [String]?
-    var lastFilelist: String?
 
     func error(_ msg: String) {
         let msg = "⚠️ "+msg
@@ -94,21 +92,21 @@ class MonitorXcode {
         }
     }
     
-    var buffer = [CChar](repeating: 0, count: 10_000)
-
     func processSourceKitOutput(from xcodeStdout: Popen) {
+        var buffer = [CChar](repeating: 0, count: Popen.initialLineBufferSize)
         func readQuotedString() -> String? {
-            var offset = 0, doubleQuotes = Int32(UInt8(ascii: "\""))
+            var offset = 0
+            let doubleQuote = Int32(UInt8(ascii: "\"")), escaped = #"\""#
             while let line = fgets(&buffer[offset], CInt(buffer.count-offset),
                                    xcodeStdout.fileStream) {
                 offset += strlen(line)
                 if offset > 0 && buffer[offset-1] == UInt8(ascii: "\n") {
-                    if let start = strchr(buffer, doubleQuotes),
-                       let end = strrchr(start+1, doubleQuotes) {
+                    if let start = strchr(buffer, doubleQuote),
+                       let end = strrchr(start+1, doubleQuote) {
                         end[0] = 0
                         var out = String(cString: start+1)
-                        if strstr(start+1, "\\\"") != nil {
-                            out = out.replacingOccurrences(of: "\\\"", with: "\"")
+                        if strstr(start+1, escaped) != nil {
+                            out = out.replacingOccurrences(of: escaped, with: "\"")
                         }
                         return out
                     }
@@ -124,6 +122,7 @@ class MonitorXcode {
             return nil
         }
         
+        var lastArguments: [String]?, lastFilelist: String?
         while let line = xcodeStdout.readLine() {
             debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -154,7 +153,8 @@ class MonitorXcode {
                         args.append(arg)
                     }
                 }
-                guard let source = readQuotedString() ?? readQuotedString() else {
+                guard args.count > 0,
+                      let source = readQuotedString() ?? readQuotedString() else {
                     continue
                 }
                 if let prev = compilations[source]?.arguments ?? lastArguments,
@@ -182,8 +182,8 @@ class MonitorXcode {
                 }
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
-                  let _ = xcodeStdout.readLine(), let source = readQuotedString() {
-                print("Fie saved "+source)
+                let _ = xcodeStdout.readLine(), let source = readQuotedString() {
+                print("File saved "+source)
                 Self.compileQueue.async {
                     self.inject(source: source)
                 }
@@ -216,7 +216,7 @@ class MonitorXcode {
                    let dylib = link(object: object, dylib: dylibPath, platform:
                             platform, arch: connected?.arch ?? compilerArch),
                    let data = codesign(dylib: dylib, platform: platform) {
-                    log("Prepared dylib: "+dylib)
+                    print("Prepared dylib: "+dylib)
                     InjectionServer.commandQueue.sync {
                         guard let client = InjectionServer.currentClient else {
                             appDelegate.setMenuIcon(.ready)

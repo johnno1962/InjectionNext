@@ -63,6 +63,8 @@ open class InjectionNext: SimpleSocket {
                 .sync(execute: { loader.loadAndPatch(in: dylib) }) {
                 loader.sweeper.sweepAndRunTests(image: image, classes: classes)
                 succeeded = true
+            } else {
+                writeCommand(InjectionResponse.unhide.rawValue, with: nil)
             }
             writeCommand(succeeded ? InjectionResponse.injected.rawValue :
                             InjectionResponse.failed.rawValue, with: nil)

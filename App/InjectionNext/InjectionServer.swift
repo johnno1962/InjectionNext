@@ -111,6 +111,7 @@ class InjectionServer: SimpleSocket {
                 appDelegate.setMenuIcon(.ok)
             case .failed:
                 appDelegate.setMenuIcon(.error)
+            case .unhide:
                 Unhider.startUnhide()
             case .exit:
                 log("**** exit ****")

@@ -450,7 +450,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -473,7 +473,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -527,7 +527,7 @@
 			repositoryURL = "https://github.com/johnno1962/Popen";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.5;
+				minimumVersion = 2.1.6;
 			};
 		};
 		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {

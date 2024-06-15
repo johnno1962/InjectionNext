@@ -64,11 +64,13 @@ open class Unhider {
 
         var patched = 0, global: UInt8 = 0xf
         for entry in object.entries.filter({
-            $0.entry.pointee.n_type & UInt8(N_PEXT) != 0 &&
+            $0.name[strlen($0.name)-1] == UInt8(ascii: "_") &&
             $0.symbol[#"A\d*_$"#] && unhidden.insert($0.symbol).inserted }) {
-            entry.entry.pointee.n_type = global
-            entry.entry.pointee.n_desc = UInt16(N_GSYM)
-            patched += 1
+            if entry.entry.pointee.n_type & UInt8(N_PEXT) != 0 {
+                entry.entry.pointee.n_type = global
+                entry.entry.pointee.n_desc = UInt16(N_GSYM)
+                patched += 1
+            }
         }
        
         if patched != 0 && !object.save(to: path) {
