@@ -20,8 +20,9 @@ open class Unhider {
     
     static var packageFrameworks: String?
     static let unhideQueue = DispatchQueue(label: "Unhider")
+    static var unhiddens = [String: Set<String>]()
     static var lastUnhidden = [String: Date]()
-    
+
     open class func log(_ msg: String) {
         InjectionServer.currentClient?.log(msg)
     }
@@ -41,7 +42,6 @@ open class Unhider {
             do {
                 try Fortify.protect {
                     log("Starting \"unhide\" for "+intermediates.path+"...")
-                    var configs = [String: Set<String>]()
                     var symbols = 0, files = 0
                     
                     for module in try FileManager.default
@@ -49,12 +49,12 @@ open class Unhider {
                         for config in try FileManager.default
                             .contentsOfDirectory(atPath: intermediates
                                 .appendingPathComponent(module).path) {
-                            var unhidden = configs[config] ?? Set()
+                            var unhidden = unhiddens[config] ?? Set()
                             symbols -= unhidden.count
                             
                             let platform = intermediates
                                 .appendingPathComponent(module+"/"+config)
-                            var enumerator = FileManager.default
+                            let enumerator = FileManager.default
                                 .enumerator(atPath: platform.path)
                             while let path = enumerator?.nextObject() as? String {
                                 guard path.hasSuffix(".o") else { continue }
@@ -63,7 +63,7 @@ open class Unhider {
                                 files += 1
                             }
 
-                            configs[config] = unhidden
+                            unhiddens[config] = unhidden
                             symbols += unhidden.count
                         }
                     }
@@ -85,8 +85,8 @@ open class Unhider {
 
         var patched = 0, global: UInt8 = 0xf
         for entry in object.entries.filter({
-            $0.entry.pointee.n_type & UInt8(N_PEXT) != 0 &&
-            $0.symbol[#"A\d*_$"#] && unhidden.insert($0.symbol).inserted }) {
+            $0.symbol[#"A\d*_$"#] && unhidden.insert($0.symbol).inserted &&
+            $0.entry.pointee.n_type & UInt8(N_PEXT) != 0 }) {
             entry.entry.pointee.n_type = global
             entry.entry.pointee.n_desc = UInt16(N_GSYM)
             patched += 1
