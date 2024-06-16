@@ -18,10 +18,10 @@ import Popen
 
 open class Unhider {
     
-    static var packageFrameworks: String?
+    static var unhiddens = [String: [String: Set<String>]]()
     static let unhideQueue = DispatchQueue(label: "Unhider")
-    static var unhiddens = [String: Set<String>]()
     static var lastUnhidden = [String: Date]()
+    static var packageFrameworks: String?
 
     open class func log(_ msg: String) {
         InjectionServer.currentClient?.log(msg)
@@ -30,7 +30,7 @@ open class Unhider {
     open class func startUnhide() {
         guard var derivedData = packageFrameworks.flatMap({
             URL(fileURLWithPath: $0) }) else {
-            log("⚠️ packageFrameworks not set")
+            log("⚠️ packageFrameworks not set, view a Swift source.")
             return
         }
         for _ in 1...5 {
@@ -38,18 +38,19 @@ open class Unhider {
         }
         let intermediates = derivedData
             .appendingPathComponent("Build/Intermediates.noindex")
-        unhideQueue.sync {
+        unhideQueue.async {
             do {
                 try Fortify.protect {
-                    log("Starting \"unhide\" for "+intermediates.path+"...")
-                    var symbols = 0, files = 0
-                    
+                    var symbols = 0, files = 0, project = intermediates.path
+                    var configs = unhiddens[project] ?? [String: Set<String>]()
+                    log("Starting \"unhide\" for "+project+"...")
+
                     for module in try FileManager.default
-                        .contentsOfDirectory(atPath: intermediates.path) {
+                        .contentsOfDirectory(atPath: project) {
                         for config in try FileManager.default
                             .contentsOfDirectory(atPath: intermediates
                                 .appendingPathComponent(module).path) {
-                            var unhidden = unhiddens[config] ?? Set()
+                            var unhidden = configs[config] ?? Set()
                             symbols -= unhidden.count
                             
                             let platform = intermediates
@@ -63,12 +64,13 @@ open class Unhider {
                                 files += 1
                             }
 
-                            unhiddens[config] = unhidden
+                            configs[config] = unhidden
                             symbols += unhidden.count
                         }
                     }
 
-                    log("Exported \(symbols) symbols in \(files)" +
+                    unhiddens[project] = configs
+                    log("\(symbols) symbols exported in \(files)" +
                         " object files, please restart your app.")
                 }
             } catch {
@@ -92,12 +94,11 @@ open class Unhider {
             patched += 1
         }
 
-        if patched != 0 {
-            if !object.save(to: path) {
-                log("⚠️ Could not save "+path)
-            } else if let stat = Fstat(path: path) {
-                lastUnhidden[path] = stat.modified
-            }
+        if patched == 0 { return }
+        if !object.save(to: path) {
+            log("⚠️ Could not save "+path)
+        } else if let stat = Fstat(path: path) {
+            lastUnhidden[path] = stat.modified
         }
     }
     

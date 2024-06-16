@@ -13,6 +13,7 @@
 		224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FD2C08BBE300B71C79 /* InjectionServer.swift */; };
 		224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */; };
 		224E58032C08C44900B71C79 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = 224E58022C08C44900B71C79 /* Popen */; };
+		229127F12C1EEF69005D7625 /* Experimental.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC17029253ED117002E823F /* Experimental.swift */; };
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
@@ -84,7 +85,7 @@
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
 		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
-		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Experimental.swift; path = ../HotReloading/Sources/injectiond/Experimental.swift; sourceTree = "<group>"; };
+		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Experimental.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -291,6 +292,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
+				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
@@ -450,7 +452,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -473,7 +475,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

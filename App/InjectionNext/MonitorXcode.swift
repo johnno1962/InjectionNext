@@ -43,8 +43,8 @@ class MonitorXcode {
     static weak var runningXcode: MonitorXcode?
 
     let tmpbase = "/tmp/injectionNext"
-    var compilations = [String: Compilation]()
-    var pendingSource: String?
+    var compilations = [String: Compilation](), pendingSource: String?
+    var lastSource: String?, lastFilelist: String?, lastArguments: [String]?
 
     func error(_ msg: String) {
         let msg = "⚠️ "+msg
@@ -122,7 +122,6 @@ class MonitorXcode {
             return nil
         }
         
-        var lastArguments: [String]?, lastFilelist: String?
         while let line = xcodeStdout.readLine() {
             debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -157,6 +156,7 @@ class MonitorXcode {
                       let source = readQuotedString() ?? readQuotedString() else {
                     continue
                 }
+                lastSource = source
                 if let prev = compilations[source]?.arguments ?? lastArguments,
                     args == prev {
                     args = prev
