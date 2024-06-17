@@ -2,7 +2,7 @@
 // https://docs.swift.org/swift-book
 
 #if DEBUG
-import InjectionLite
+import InjectionImpl
 import InjectionNextC
 
 @objc(InjectionNext)
@@ -38,7 +38,7 @@ open class InjectionNext: SimpleSocket {
         platform += "X"
         #endif
         
-        Recompiler.platform = platform
+        Reloader.platform = platform
         
         #if arch(x86_64)
         let arch = "x86_64"
@@ -59,7 +59,7 @@ open class InjectionNext: SimpleSocket {
         var loader = Reloader()
         func injectAndSweep(_ dylib: String) {
             var succeeded = false
-            if let (image, classes) = InjectionLite.injectionQueue
+            if let (image, classes) = Reloader.injectionQueue
                 .sync(execute: { loader.loadAndPatch(in: dylib) }) {
                 loader.sweeper.sweepAndRunTests(image: image, classes: classes)
                 succeeded = true
@@ -85,7 +85,7 @@ open class InjectionNext: SimpleSocket {
                 }
             case .xcodePath:
                 if let xcodePath = readString() {
-                    Recompiler.xcodeDev = xcodePath+"/Contents/Developer"
+                    Reloader.xcodeDev = xcodePath+"/Contents/Developer"
                 }
             case .load:
                 guard let dylib = readString() else {

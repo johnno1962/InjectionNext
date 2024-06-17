@@ -125,6 +125,10 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         Unhider.startUnhide()
     }
 
+    @IBAction func resetUnhiding(_ sender: NSMenuItem) {
+        Unhider.unhiddens.removeAll()
+    }
+
     func setMenuIcon(_ state: InjectionState) {
         DispatchQueue.main.async {
             let tiffName = "Injection"+state.rawValue

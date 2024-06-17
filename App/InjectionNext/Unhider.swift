@@ -18,7 +18,7 @@ import Popen
 
 open class Unhider {
     
-    static var unhiddens = [String: [String: Set<String>]]()
+    static var unhiddens = [String: [String: [String: String]]]()
     static let unhideQueue = DispatchQueue(label: "Unhider")
     static var lastUnhidden = [String: Date]()
     static var packageFrameworks: String?
@@ -41,36 +41,34 @@ open class Unhider {
         unhideQueue.async {
             do {
                 try Fortify.protect {
-                    var symbols = 0, files = 0, project = intermediates.path
-                    var configs = unhiddens[project] ?? [String: Set<String>]()
+                    var patched = 0, files = 0, project = intermediates.path
+                    var configs = unhiddens[project] ?? [String: [String: String]]()
                     log("Starting \"unhide\" for "+project+"...")
 
                     for module in try FileManager.default
                         .contentsOfDirectory(atPath: project) {
-                        for config in try FileManager.default
+                        for config in (try? FileManager.default
                             .contentsOfDirectory(atPath: intermediates
-                                .appendingPathComponent(module).path) {
-                            var unhidden = configs[config] ?? Set()
-                            symbols -= unhidden.count
-                            
+                                .appendingPathComponent(module).path)) ?? [] {
+                            var unhidden = configs[config] ?? [String: String]()
+
                             let platform = intermediates
                                 .appendingPathComponent(module+"/"+config)
                             let enumerator = FileManager.default
                                 .enumerator(atPath: platform.path)
                             while let path = enumerator?.nextObject() as? String {
                                 guard path.hasSuffix(".o") else { continue }
-                                unhide(object: platform
+                                patched += unhide(object: platform
                                     .appendingPathComponent(path).path, &unhidden)
                                 files += 1
                             }
 
                             configs[config] = unhidden
-                            symbols += unhidden.count
                         }
                     }
 
                     unhiddens[project] = configs
-                    log("\(symbols) symbols exported in \(files)" +
+                    log("\(patched) symbols exported in \(files)" +
                         " object files, please restart your app.")
                 }
             } catch {
@@ -79,42 +77,36 @@ open class Unhider {
         }
     }
     
-    open class func unhide(object path: String, _ unhidden: inout Set<String>) {
+    open class func unhide(object path: String, 
+                           _ unhidden: inout [String: String]) -> Int {
         guard let object = FileSymbols(path: path) else {
             log("⚠️ Could not load "+path)
-            return
+            return 0
         }
 
         var patched = 0, global: UInt8 = 0xf
-        for entry in object.entries.filter({
-            $0.symbol[#"A\d*_$"#] && unhidden.insert($0.symbol).inserted &&
-            $0.entry.pointee.n_type & UInt8(N_PEXT) != 0 }) {
-            entry.entry.pointee.n_type = global
-            entry.entry.pointee.n_desc = UInt16(N_GSYM)
-            patched += 1
-        }
-
-        if patched == 0 { return }
-        if !object.save(to: path) {
-            log("⚠️ Could not save "+path)
-        } else if let stat = Fstat(path: path) {
-            lastUnhidden[path] = stat.modified
-        }
-    }
-    
-    open class func reunhide() -> Bool {
-        var exported = false
-        unhideQueue.sync {
-            var unhidden = Set<String>()
-            for (path, when) in lastUnhidden {
-                if Fstat(path: path)?.modified != when {
-                    unhide(object: path, &unhidden)
-                    log("Re-exported "+URL(fileURLWithPath: path)
-                        .lastPathComponent+", restart your app.")
-                    exported = true
-                }
+        for entry in object.entries.filter({ $0.symbol[#"A\d*_$"#] &&
+            (unhidden[$0.symbol] == nil || unhidden[$0.symbol] == path) }) {
+            unhidden[entry.symbol] = path
+            if entry.entry.pointee.n_type & UInt8(N_PEXT) != 0 {
+                entry.entry.pointee.n_type = global
+                entry.entry.pointee.n_desc = UInt16(N_GSYM)
+                patched += 1
             }
         }
-        return exported
+
+        if patched != 0 {
+            if !object.save(to: path) {
+                log("⚠️ Could not save "+path)
+            } else if let stat = Fstat(path: path) {
+                if let written = lastUnhidden[path],
+                   stat.modified != written {
+                    log("\(patched) re-exported in " +
+                        URL(fileURLWithPath: path).lastPathComponent)
+                }
+                lastUnhidden[path] = stat.modified
+            }
+        }
+        return patched
     }
 }

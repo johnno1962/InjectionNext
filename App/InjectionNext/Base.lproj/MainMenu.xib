@@ -66,6 +66,13 @@
                         <action selector="unhideSymbols:" target="Voe-Tx-rLC" id="6qL-3s-BHb"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Reset Unhiding" hidden="YES" toolTip="Reset internal storage" id="ysc-5y-buR">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <accessibility description="Rest Unhiding"/>
+                    <connections>
+                        <action selector="resetUnhiding:" target="Voe-Tx-rLC" id="wee-I2-883"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Compiler Injection" hidden="YES" toolTip="Experimental" id="haX-yQ-yaN">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Open Project"/>
