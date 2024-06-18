@@ -41,7 +41,7 @@ open class Unhider {
         unhideQueue.async {
             do {
                 try Fortify.protect {
-                    var patched = 0, files = 0, project = intermediates.path
+                    var patched = [String](), files = 0, project = intermediates.path
                     var configs = unhiddens[project] ?? [String: [String: String]]()
                     log("Starting \"unhide\" for "+project+"...")
 
@@ -68,7 +68,7 @@ open class Unhider {
                     }
 
                     unhiddens[project] = configs
-                    log("\(patched) symbols exported in \(files)" +
+                    log("\(patched.count) symbols exported in \(files)" +
                         " object files, please restart your app.")
                 }
             } catch {
@@ -78,30 +78,32 @@ open class Unhider {
     }
     
     open class func unhide(object path: String, 
-                           _ unhidden: inout [String: String]) -> Int {
+                           _ unhidden: inout [String: String]) -> [String] {
         guard let object = FileSymbols(path: path) else {
             log("⚠️ Could not load "+path)
-            return 0
+            return []
         }
 
-        var patched = 0, global: UInt8 = 0xf
-        for entry in object.entries.filter({ $0.symbol[#"A\d*_$"#] &&
+        var patched = [String](), global: UInt8 = 0xf
+        for entry in object.entries.filter({
+            $0.entry.pointee.n_sect != NO_SECT &&
+            $0.symbol.hasPrefix("$s") && $0.symbol[#"A\d*_$"#] &&
             (unhidden[$0.symbol] == nil || unhidden[$0.symbol] == path) }) {
             unhidden[entry.symbol] = path
             if entry.entry.pointee.n_type & UInt8(N_PEXT) != 0 {
                 entry.entry.pointee.n_type = global
                 entry.entry.pointee.n_desc = UInt16(N_GSYM)
-                patched += 1
+                patched.append(entry.symbol)
             }
         }
 
-        if patched != 0 {
+        if !patched.isEmpty {
             if !object.save(to: path) {
                 log("⚠️ Could not save "+path)
             } else if let stat = Fstat(path: path) {
                 if let written = lastUnhidden[path],
                    stat.modified != written {
-                    log("\(patched) re-exported in " +
+                    log("\(patched.count) symbols re-exported in " +
                         URL(fileURLWithPath: path).lastPathComponent)
                 }
                 lastUnhidden[path] = stat.modified
