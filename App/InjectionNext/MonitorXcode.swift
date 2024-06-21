@@ -44,7 +44,10 @@ class MonitorXcode {
 
     let tmpbase = "/tmp/injectionNext"
     var compilations = [String: Compilation](), pendingSource: String?
-    var lastSource: String?, lastFilelist: String?, lastArguments: [String]?
+    var lastFilelist: String?, lastArguments: [String]?
+    var lastSource: String?, lastError: String?
+    var prepared = [String: String]()
+    var compileNumber = 0
 
     func error(_ msg: String) {
         let msg = "⚠️ "+msg
@@ -132,11 +135,11 @@ class MonitorXcode {
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
                 var files = "", fcount = 0, args = [String](), workingDir = "/tmp"
-                while let arg = readQuotedString() {
+                while var arg = readQuotedString() {
                     if arg.hasSuffix(".swift") {
                         files += arg+"\n"
                         fcount += 1
-                    } else if arg == "-fsyntax-only" {
+                    } else if arg == "-fsyntax-only" || arg == "-o" {
                         _ = xcodeStdout.readLine()
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
@@ -145,9 +148,13 @@ class MonitorXcode {
                         }
                         workingDir = work
                     } else if arg != "-Xfrontend" &&
-                                arg != "-experimental-allow-module-with-compiler-errors" {
+                        arg != "-experimental-allow-module-with-compiler-errors" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                             Unhider.packageFrameworks = arg
+                        } else if arg.hasPrefix("-I") {
+                            let llvmIncs = "/llvm-macosx-arm64/lib"
+                            arg = arg.replacingOccurrences(of: llvmIncs,
+                                with: "/../buildbot_osx"+llvmIncs)
                         }
                         args.append(arg)
                     }
@@ -169,7 +176,7 @@ class MonitorXcode {
                 } else {
                     lastFilelist = files
                 }
-                print("Updating \(fcount) files \(args.count) args "+source+" "+line)
+                print("Updating \(args.count) args with \(fcount) swift files "+source+" "+line)
                 let update = Compilation(arguments: args, swiftFiles: files,
                                          workingDir: workingDir)
                 self.compilations[source] = update ////
@@ -197,6 +204,9 @@ class MonitorXcode {
                 appDelegate.setMenuIcon(.busy)
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
+                compileNumber += 1
+                lastError = nil
+
                 let isCompiler = connected == nil && source.hasSuffix(".cpp")
                 let compilerTmp = "/tmp/compilertron_patches"
                 let compilerPlatform = "MacOSX"
@@ -205,11 +215,14 @@ class MonitorXcode {
                 let platform = connected?.platform ?? compilerPlatform
                 let sourceName = URL(fileURLWithPath: source)
                     .deletingPathExtension().lastPathComponent
-                let dylibName = DYLIB_PREFIX +
-                    "\(sourceName)_\(connected?.injectionNumber ?? 0).dylib"
+                if connected == nil, let previous = prepared[sourceName] {
+                    unlink(previous)
+                }
+                let dylibName = DYLIB_PREFIX + sourceName +
+                    "_\(connected?.injectionNumber ?? compileNumber).dylib"
                 let dylibPath = (connected?.isLocalClient != false ?
                                  tmpPath : "/tmp") + dylibName
-                
+
                 if connected != nil || isCompiler, tmpPath != compilerTmp ||
                     isCompiler && mkdir(compilerTmp, 0o777) != -999,
                    let object = recompile(source: source),
@@ -217,6 +230,7 @@ class MonitorXcode {
                             platform, arch: connected?.arch ?? compilerArch),
                    let data = codesign(dylib: dylib, platform: platform) {
                     print("Prepared dylib: "+dylib)
+                    prepared[sourceName] = dylib
                     InjectionServer.commandQueue.sync {
                         guard let client = InjectionServer.currentClient else {
                             appDelegate.setMenuIcon(.ready)
@@ -259,17 +273,23 @@ class MonitorXcode {
                                    encoding: .utf8)
     
         log("Recompiling: "+source)
+        let compiler = Self.xcodePath +
+            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/" +
+            (isSwift ? "swift-frontend" : "clang")
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source] :
             ["-c", source]) + ["-o", object, "-DINJECTING"]
-        if let errors = Popen.task(exec: Self.xcodePath +
-            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/" +
-            (isSwift ? "swift-frontend" : "clang"),
-                                   arguments: stored.arguments + languageSpecific,
-                                   cd: stored.workingDir, errors: nil),
-            errors.contains(": error: ") {
-            error("Recompile failed for: \(source)\n"+errors)
-            return nil
+        print(([compiler] + stored.arguments +
+               languageSpecific).joined(separator: " "))
+        if let errors = Popen.task(exec: compiler,
+               arguments: stored.arguments + languageSpecific,
+               cd: stored.workingDir, errors: nil) {
+            print(">>>", errors)
+            if errors.contains(" error: ") {
+                error("Recompile failed for: \(source)\n"+errors)
+                lastError = errors
+                return nil
+            }
         }
         
         return object
@@ -328,6 +348,7 @@ class MonitorXcode {
 
         if let errors = Popen.system(linkCommand, errors: true) {
             error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            lastError = errors
             return nil
         }
 
@@ -348,6 +369,7 @@ class MonitorXcode {
             """
         if let errors = Popen.system(codesign, errors: true) {
             error("Codesign failed \(codesign) errors:\n"+errors)
+            lastError = errors
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
     }

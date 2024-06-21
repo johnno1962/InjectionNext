@@ -29,6 +29,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet var identityField: NSTextField!
     @IBOutlet var deviceTesting: NSButton!
     @IBOutlet var librariesField: NSTextField!
+    @IBOutlet var lastErrorField: NSTextView!
     @objc let defaults = UserDefaults.standard
     var compilerWork = false
 
@@ -91,6 +92,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         var openPort = ""
         if sender.state == .on {
             identityField.window?.makeKeyAndOrderFront(sender)
+            NSApplication.shared.activate(ignoringOtherApps: true)
             _ = startMulticastOnce
             openPort = "*"
         }
@@ -127,6 +129,13 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
     @IBAction func resetUnhiding(_ sender: NSMenuItem) {
         Unhider.unhiddens.removeAll()
+    }
+
+    @IBAction func showlastError(_ sender: NSMenuItem) {
+        lastErrorField.string = MonitorXcode
+            .runningXcode?.lastError ?? "No error."
+        lastErrorField.window?.makeKeyAndOrderFront(sender)
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
     func setMenuIcon(_ state: InjectionState) {
