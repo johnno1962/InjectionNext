@@ -82,7 +82,7 @@ class InjectionServer: SimpleSocket {
             return
         }
         
-        sendCommand(.xcodePath, with: MonitorXcode.xcodePath)
+        sendCommand(.xcodePath, with: Recompiler.xcodePath)
         
         while true {
             let commandInt = readInt()

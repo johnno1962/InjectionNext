@@ -26,7 +26,7 @@ code changes required to load binary code bundles etc required and you can
 leave the InjectionNext package configured into your project permanently as
 its code is only included for a DEBUG build. Your code changes take effect
 when you save a source for an app that has this package as a dependency
-and has connected to the InjectIonNext app which has run Xcode.
+and has connected to the InjectIonNext app which has launched Xcode.
 
 As ever, it is important to add the options `-Xlinker` and `-interposable` 
 (without double quotes and on separate lines) to the "Other Linker Flags" of 
@@ -54,8 +54,6 @@ app bundle. Whenever you start to get code signing errors restart Xcode.
 This version of injection is a jealous technology and doesn't interact well
 with the SwiftUI #Preview macro. To avoid problems, surround your previews 
 with `#if !INJECTING` which will be defined when recompiling for injection.
-The package also brings in the [Inject](https://github.com/krzysztofzablocki/Inject)
-package containing the primitives you need to use for working with SwiftUI.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
@@ -68,8 +66,8 @@ The colors of the menu bar icon bar correspond to:
 * Green while it is recompiling a saved source.
 * Yellow if the source has failed to compile.
 
-Please note you can only inject changes to code inside a function body. 
-You can not add/remove or rename properties with storage or add or 
+Please note: you can only inject changes to code inside a function body
+and you can not add/remove or rename properties with storage or add or 
 reorder methods on a non final class or change function arguments.
 
 The fabulous app icon is thanks to Katya of [pixel-mixer.com](http://pixel-mixer.com/).

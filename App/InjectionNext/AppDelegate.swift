@@ -45,7 +45,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         statusItem.isEnabled = true
         statusItem.title = appName
 
-        librariesField.stringValue = MonitorXcode.deviceLibraries
+        librariesField.stringValue = Recompiler.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setMenuIcon(.idle)
 
@@ -73,11 +73,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         let open = NSOpenPanel()
         open.prompt = "Select Xcode"
         open.directoryURL = URL(fileURLWithPath:
-            MonitorXcode.xcodePath).deletingLastPathComponent()
+            Recompiler.xcodePath).deletingLastPathComponent()
         open.canChooseDirectories = false
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
-            MonitorXcode.xcodePath = path
+            Recompiler.xcodePath = path
             sender.toolTip = path
         }
     }
@@ -120,7 +120,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }
 
     @IBAction func updateLibraries(_ sender: NSTextField) {
-        MonitorXcode.deviceLibraries = librariesField.stringValue
+        Recompiler.deviceLibraries = librariesField.stringValue
     }
 
     @IBAction func unhideSymbols(_ sender: NSMenuItem) {
@@ -133,7 +133,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
     @IBAction func showlastError(_ sender: NSMenuItem) {
         lastErrorField.string = MonitorXcode
-            .runningXcode?.lastError ?? "No error."
+            .runningXcode?.recompiler.lastError ?? "No error."
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }

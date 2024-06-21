@@ -13,70 +13,26 @@ import Popen
 
 class MonitorXcode {
     
-    struct Compilation {
-        let arguments: [String]
-        var swiftFiles: String
-        var workingDir: String
-    }
-    
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
-    static let librariesDefault = "libraries"
-    static let xcodePathDefault = "XcodePath"
-    static var deviceLibraries: String {
-        get {
-            appDelegate.defaults.string(forKey: librariesDefault) ??
-                "-framework XCTest -lXCTestSwiftSupport"
-        }
-        set {
-            appDelegate.defaults.setValue(newValue, forKey: librariesDefault)
-        }
-    }
-    static var xcodePath: String {
-        get {
-            appDelegate.defaults.string(forKey: xcodePathDefault) ??
-                "/Applications/Xcode.app"
-        }
-        set {
-            appDelegate.defaults.setValue(newValue, forKey: xcodePathDefault)
-        }
-    }
     static weak var runningXcode: MonitorXcode?
 
-    let tmpbase = "/tmp/injectionNext"
-    var compilations = [String: Compilation](), pendingSource: String?
-    var lastFilelist: String?, lastArguments: [String]?
-    var lastSource: String?, lastError: String?
-    var prepared = [String: String]()
-    var compileNumber = 0
+    var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
+    var recompiler = Recompiler()
 
-    func error(_ msg: String) {
-        let msg = "⚠️ "+msg
-        NSLog(msg)
-        log(msg)
-    }
-    func error(_ err: Error) {
-        error("Internal app error: \(err)")
-    }
     func debug(_ msg: String) {
         #if DEBUG
         //print(msg)
         #endif
     }
-    @discardableResult
-    func log(_ msg: String) -> Bool {
-        let msg = APP_PREFIX+msg
-        print(msg)
-        InjectionServer.currentClient?.sendCommand(.log, with: msg)
-        return true
-    }
     
     init() {
         #if DEBUG
-        let tee = " | tee \(tmpbase).log"
+        let tee = " | tee \(recompiler.tmpbase).log"
         #else
         let tee = ""
         #endif
-        if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; export LANG=en_GB.UTF-8 && " + "'\(Self.xcodePath)/Contents/MacOS/Xcode' 2>&1\(tee)") {
+        if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
+            "'\(Recompiler.xcodePath)/Contents/MacOS/Xcode' 2>&1\(tee)") {
             Self.runningXcode = self
             DispatchQueue.global().async {
                 while true {
@@ -88,7 +44,7 @@ class MonitorXcode {
                         }
                         break
                     } catch {
-                        self.error(error)
+                        self.recompiler.error(error)
                     }
                 }
             }
@@ -164,27 +120,29 @@ class MonitorXcode {
                     continue
                 }
                 lastSource = source
-                if let prev = compilations[source]?.arguments ?? lastArguments,
+                if let prev = recompiler.compilations[source]?.arguments ?? lastArguments,
                     args == prev {
                     args = prev
                 } else {
                     lastArguments = args
                 }
-                if let prev = compilations[source]?.swiftFiles ?? lastFilelist,
+                if let prev = recompiler.compilations[source]?.swiftFiles ?? lastFilelist,
                     files == prev {
                     files = prev
                 } else {
                     lastFilelist = files
                 }
                 print("Updating \(args.count) args with \(fcount) swift files "+source+" "+line)
-                let update = Compilation(arguments: args, swiftFiles: files,
-                                         workingDir: workingDir)
-                self.compilations[source] = update ////
+                let update = Recompiler.Compilation(
+                    arguments: args, swiftFiles: files, workingDir: workingDir)
+                // The folling line should be on the compileQueue
+                // but it seems to provoke a Swift compiler bug.
+                self.recompiler.compilations[source] = update
                 Self.compileQueue.async {
-                    if source == self.pendingSource {
+                    if source == self.recompiler.pendingSource {
                         print("Pending "+source)
-                        self.pendingSource = nil
-                        self.inject(source: source)
+                        self.recompiler.pendingSource = nil
+                        self.recompiler.inject(source: source)
                     }
                 }
             } else if line ==
@@ -192,185 +150,9 @@ class MonitorXcode {
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("File saved "+source)
                 Self.compileQueue.async {
-                    self.inject(source: source)
+                    self.recompiler.inject(source: source)
                 }
             }
         }
-    }
-    
-    func inject(source: String) {
-        do {
-            try Fortify.protect {
-                appDelegate.setMenuIcon(.busy)
-                let connected = InjectionServer.currentClient
-                connected?.injectionNumber += 1
-                compileNumber += 1
-                lastError = nil
-
-                let isCompiler = connected == nil && source.hasSuffix(".cpp")
-                let compilerTmp = "/tmp/compilertron_patches"
-                let compilerPlatform = "MacOSX"
-                let compilerArch = "arm64"
-                let tmpPath = connected?.tmpPath ?? compilerTmp
-                let platform = connected?.platform ?? compilerPlatform
-                let sourceName = URL(fileURLWithPath: source)
-                    .deletingPathExtension().lastPathComponent
-                if connected == nil, let previous = prepared[sourceName] {
-                    unlink(previous)
-                }
-                let dylibName = DYLIB_PREFIX + sourceName +
-                    "_\(connected?.injectionNumber ?? compileNumber).dylib"
-                let dylibPath = (connected?.isLocalClient != false ?
-                                 tmpPath : "/tmp") + dylibName
-
-                if connected != nil || isCompiler, tmpPath != compilerTmp ||
-                    isCompiler && mkdir(compilerTmp, 0o777) != -999,
-                   let object = recompile(source: source),
-                   let dylib = link(object: object, dylib: dylibPath, platform:
-                            platform, arch: connected?.arch ?? compilerArch),
-                   let data = codesign(dylib: dylib, platform: platform) {
-                    print("Prepared dylib: "+dylib)
-                    prepared[sourceName] = dylib
-                    InjectionServer.commandQueue.sync {
-                        guard let client = InjectionServer.currentClient else {
-                            appDelegate.setMenuIcon(.ready)
-                            return
-                        }
-                        if client.isLocalClient {
-                            client.writeCommand(InjectionCommand
-                                .load.rawValue, with: dylib)
-                        } else {
-                            client.writeCommand(InjectionCommand
-                                .inject.rawValue, with: dylibName)
-                            client.write(data)
-                        }
-                    }
-                } else {
-                    appDelegate.setMenuIcon(.error)
-                    error("Injection failed.")
-                }
-            }
-        } catch {
-            self.error(error)
-        }
-    }
-    
-    func recompile(source: String) ->  String? {
-        guard let stored = compilations[source] else {
-            error("Retrying: \(source) not ready.")
-            pendingSource = source
-            return nil
-        }
-        
-        let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
-        let object = tmpbase+"_\(uniqueObject).o"
-        let isSwift = source.hasSuffix(".swift")
-        let filesfile = tmpbase+".filelist"
-
-        unlink(object)
-        unlink(filesfile)
-        try? stored.swiftFiles.write(toFile: filesfile, atomically: false,
-                                   encoding: .utf8)
-    
-        log("Recompiling: "+source)
-        let compiler = Self.xcodePath +
-            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/" +
-            (isSwift ? "swift-frontend" : "clang")
-        let languageSpecific = (isSwift ?
-            ["-c", "-filelist", filesfile, "-primary-file", source] :
-            ["-c", source]) + ["-o", object, "-DINJECTING"]
-        print(([compiler] + stored.arguments +
-               languageSpecific).joined(separator: " "))
-        if let errors = Popen.task(exec: compiler,
-               arguments: stored.arguments + languageSpecific,
-               cd: stored.workingDir, errors: nil) {
-            print(">>>", errors)
-            if errors.contains(" error: ") {
-                error("Recompile failed for: \(source)\n"+errors)
-                lastError = errors
-                return nil
-            }
-        }
-        
-        return object
-    }
-    
-    func link(object: String, dylib: String, platform: String, arch: String) -> String? {
-        let xcodeDev = Self.xcodePath+"/Contents/Developer"
-        let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
-
-        var osSpecific = ""
-        switch platform {
-        case "iPhoneSimulator":
-            osSpecific = "-mios-simulator-version-min=9.0"
-        case "iPhoneOS":
-            osSpecific = "-miphoneos-version-min=9.0"
-        case "AppleTVSimulator":
-            osSpecific = "-mtvos-simulator-version-min=9.0"
-        case "AppleTVOS":
-            osSpecific = "-mtvos-version-min=9.0"
-        case "MacOSX":
-            let target = "" /*compileCommand
-                .replacingOccurrences(of: #"^.*( -target \S+).*$"#,
-                                      with: "$1", options: .regularExpression)*/
-            osSpecific = "-mmacosx-version-min=10.11"+target
-        case "XRSimulator": fallthrough case "XROS":
-            osSpecific = ""
-        default:
-            log("Invalid platform \(platform)")
-            // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
-        }
-
-        let toolchain = xcodeDev+"/Toolchains/XcodeDefault.xctoolchain"
-        let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
-        var testingOptions = ""
-        if DispatchQueue.main.sync(execute: {
-            appDelegate.deviceTesting.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync(execute: {
-                appDelegate.librariesField.stringValue = Self.deviceLibraries
-                return Self.deviceLibraries })
-            let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
-            testingOptions = """
-                -F "\(platformDev)/Library/Frameworks" \
-                -L "\(platformDev)/usr/lib" \(otherOptions)
-                """
-        }
-        let linkCommand = """
-            "\(toolchain)/usr/bin/clang" -arch "\(arch)" \
-                -Xlinker -dylib -isysroot "__PLATFORM__" \
-                -L"\(toolchain)/usr/lib/swift/\(platform.lowercased())" \(osSpecific) \
-                -undefined dynamic_lookup -dead_strip -Xlinker -objc_abi_version \
-                -Xlinker 2 -Xlinker -interposable -fobjc-arc \(testingOptions) \
-                -fprofile-instr-generate \(object) -L "\(frameworks)" -F "\(frameworks)" \
-                -rpath "\(frameworks)" -o \"\(dylib)\" -rpath /usr/lib/swift \
-                -rpath "\(toolchain)/usr/lib/swift-5.5/\(platform.lowercased())"
-            """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
-
-        if let errors = Popen.system(linkCommand, errors: true) {
-            error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
-            lastError = errors
-            return nil
-        }
-
-        return dylib
-    }
-    
-    func codesign(dylib: String, platform: String) -> Data? {
-        var identity = "-"
-        if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
-            identity = appDelegate.identityField.stringValue
-        }
-        let codesign = """
-            (export CODESIGN_ALLOCATE="\(Self.xcodePath+"/Contents/Developer"
-             )/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate"; \
-            if /usr/bin/file \"\(dylib)\" | /usr/bin/grep ' shared library ' >/dev/null; \
-            then /usr/bin/codesign --force -s "\(identity)" \"\(dylib)\";\
-            else exit 1; fi)
-            """
-        if let errors = Popen.system(codesign, errors: true) {
-            error("Codesign failed \(codesign) errors:\n"+errors)
-            lastError = errors
-        }
-        return try? Data(contentsOf: URL(fileURLWithPath: dylib))
     }
 }
