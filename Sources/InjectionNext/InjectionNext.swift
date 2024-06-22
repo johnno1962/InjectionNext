@@ -101,6 +101,8 @@ open class InjectionNext: SimpleSocket {
                 let dylib = NSTemporaryDirectory() + dylibName
                 try! data.write(to: URL(fileURLWithPath: dylib))
                 injectAndSweep(dylib)
+            case .EOF:
+                return
             default:
                 error("**** @unknown case ****")
                 return
