@@ -7,31 +7,35 @@
 //
 //  $Id: //depot/HotReloading/Sources/injectiond/AppDelegate.swift#76 $
 //
-
+//  Implementation Toolbar menu "UI".
+//
 import Cocoa
 
 var appDelegate: AppDelegate!
 
 enum InjectionState: String {
-    case ok = "OK"
-    case idle = "Idle"
-    case busy = "Busy"
-    case ready = "Ready"
-    case error = "Error"
+    case ok = "OK" // Orange
+    case idle = "Idle" // Blue
+    case busy = "Busy" // Green
+    case ready = "Ready" // Purple
+    case error = "Error" // Yellow
 }
 
 @objc(AppDelegate)
 class AppDelegate : NSObject, NSApplicationDelegate {
 
-    @IBOutlet var window: NSWindow!
+    // Status menu
     @IBOutlet weak var statusMenu: NSMenu!
     @IBOutlet var statusItem: NSStatusItem!
+    // Codesigning identity
     @IBOutlet var identityField: NSTextField!
+    // Enable injection on deivces
     @IBOutlet var deviceTesting: NSButton!
+    // Testing libraries to link with
     @IBOutlet var librariesField: NSTextField!
+    // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
     @objc let defaults = UserDefaults.standard
-    var compilerWork = false
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -45,10 +49,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         statusItem.isEnabled = true
         statusItem.title = appName
 
-        librariesField.stringValue = Recompiler.deviceLibraries
-        InjectionServer.startServer(INJECTION_ADDRESS)
-        setMenuIcon(.idle)
-
         if let quit = statusMenu.item(at: statusMenu.items.count-1) {
             quit.title = "Quit "+appName
             if let build = Bundle.main
@@ -61,8 +61,24 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
             InjectionServer.error("Please quit Xcode and\nuse this app to launch it.")
         }
+ 
+        librariesField.stringValue = Recompiler.deviceLibraries
+        InjectionServer.startServer(INJECTION_ADDRESS)
+        setMenuIcon(.idle)
     }
-    
+
+    func setMenuIcon(_ state: InjectionState) {
+        DispatchQueue.main.async {
+            let tiffName = "Injection"+state.rawValue
+            if let path = Bundle.main.path(forResource: tiffName, ofType: "tif"),
+                let image = NSImage(contentsOfFile: path) {
+    //            image.template = TRUE;
+                self.statusItem.image = image
+                self.statusItem.alternateImage = image
+            }
+        }
+    }
+
     @IBAction func runXcode(_ sender: Any) {
         if MonitorXcode.runningXcode == nil {
             _ = MonitorXcode()
@@ -82,7 +98,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         }
     }
     
-    lazy var startMulticastOnce: () = {
+    lazy var startHostLocatingServerOnce: () = {
         InjectionServer.broadcastServe(HOTRELOADING_MULTICAST,
                                        port: HOTRELOADING_PORT)
     }()
@@ -93,16 +109,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if sender.state == .on {
             identityField.window?.makeKeyAndOrderFront(sender)
             NSApplication.shared.activate(ignoringOtherApps: true)
-            _ = startMulticastOnce
+            _ = startHostLocatingServerOnce
             openPort = "*"
         }
         InjectionServer.stopServer()
         InjectionServer.startServer(openPort+INJECTION_ADDRESS)
-    }
-    
-    @IBAction func compilerEnable(_ sender: NSMenuItem) {
-        sender.state = sender.state == .off ? .on : .off
-        compilerWork = sender.state == .on
     }
     
     @IBAction func testingEnable(_ sender: NSButton) {
@@ -116,6 +127,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             let pasteBoard = NSPasteboard.general
             pasteBoard.declareTypes([.string], owner:nil)
             pasteBoard.setString(buildPhase, forType:.string)
+            InjectionServer.error("Run Script, Build Phase to " +
+                  "copy testing libraries added to clipboard.")
         }
     }
 
@@ -136,17 +149,5 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             .runningXcode?.recompiler.lastError ?? "No error."
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
-    }
-
-    func setMenuIcon(_ state: InjectionState) {
-        DispatchQueue.main.async {
-            let tiffName = "Injection"+state.rawValue
-            if let path = Bundle.main.path(forResource: tiffName, ofType: "tif"),
-                let image = NSImage(contentsOfFile: path) {
-    //            image.template = TRUE;
-                self.statusItem.image = image
-                self.statusItem.alternateImage = image
-            }
-        }
     }
 }

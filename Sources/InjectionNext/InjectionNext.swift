@@ -1,6 +1,11 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-
+//
+//  InjectionNext.swift
+//  InjectionNext Package
+//
+//  Created by John Holdsworth on 30/05/2024.
+//
+//  Client app side of injection using implementation of InjectionLite.
+//
 #if DEBUG
 import InjectionImpl
 import InjectionNextC
@@ -15,10 +20,12 @@ open class InjectionNext: SimpleSocket {
         log("⚠️ "+msg)
     }
     
+    /// Connection from client app opened in ClientBoot.mm arrives here
     open override func runInBackground() {
         super.write(INJECTION_VERSION)
         super.write(INJECTION_KEY)
         
+        // Find client platform
         #if os(macOS) || targetEnvironment(macCatalyst)
         var platform = "Mac"
         #elseif os(tvOS)
@@ -46,17 +53,18 @@ open class InjectionNext: SimpleSocket {
         let arch = "arm64"
         #endif
         
+        // Let server side know the platform and architecture
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
         writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
 
         log("\(platform) connection to app established, waiting for commands.")
-        processCommands()
+        processCommandsFromApp()
         log("Connection lost, disconnecting.")
     }
         
-    func processCommands() {
-        var loader = Reloader()
+    func processCommandsFromApp() {
+        var loader = Reloader() // InjectionLite injection implementation
         func injectAndSweep(_ dylib: String) {
             var succeeded = false
             if let (image, classes) = Reloader.injectionQueue
@@ -69,6 +77,7 @@ open class InjectionNext: SimpleSocket {
             writeCommand(succeeded ? InjectionResponse.injected.rawValue :
                             InjectionResponse.failed.rawValue, with: nil)
         }
+        
         while true {
             let commandInt = readInt()
             guard let command = InjectionCommand(rawValue: commandInt) else {

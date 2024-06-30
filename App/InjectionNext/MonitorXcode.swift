@@ -5,7 +5,13 @@
 //  Created by John H on 30/05/2024.
 //  Copyright © 2024 John Holdsworth. All rights reserved.
 //
-
+//  Launches Xcode and monitors console output for SourceKit
+//  logging messages which reveal the compiler arguments to
+//  use for the file currently being edited (Used for real
+//  time syntax and error checking by the SourceKit daemon).
+//  Captures this information and passes it onto a Recompiler
+//  instance to process and inject when edited file is saved.
+//
 import Foundation
 import SwiftRegex
 import Fortify
@@ -13,10 +19,13 @@ import Popen
 
 class MonitorXcode {
     
-    static let compileQueue = DispatchQueue(label: "InjectionCompile")
+    // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
-
+    // One compilation at a time.
+    static let compileQueue = DispatchQueue(label: "InjectionCompile")
+    // Trying to avoid fragmenting memory
     var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
+    // The service to reomcpile and inject a source file.
     var recompiler = Recompiler()
 
     func debug(_ msg: String) {
@@ -42,8 +51,9 @@ class MonitorXcode {
                             self.processSourceKitOutput(from: xcodeStdout)
                             appDelegate.setMenuIcon(.idle)
                         }
-                        break
+                        break // break on clean exit and EOF.
                     } catch {
+                        // Continue processing on error
                         self.recompiler.error(error)
                     }
                 }
@@ -90,13 +100,16 @@ class MonitorXcode {
                  line == "  key.request: source.request.relatedidents,") &&
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
-                var files = "", fcount = 0, args = [String](), workingDir = "/tmp"
+                var swiftFiles = "", args = [String](),
+                    fileCount = 0, workingDir = "/tmp"
                 while var arg = readQuotedString() {
                     if arg.hasSuffix(".swift") {
-                        files += arg+"\n"
-                        fcount += 1
+                        swiftFiles += arg+"\n"
+                        fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
                         _ = xcodeStdout.readLine()
+//                    } else if arg == "-serialize-debugging-options" {
+//                        continue
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
                            let swork = readQuotedString() {
@@ -115,32 +128,34 @@ class MonitorXcode {
                         args.append(arg)
                     }
                 }
-                guard args.count > 0,
-                      let source = readQuotedString() ?? readQuotedString() else {
+                guard args.count > 0, let source = 
+                        readQuotedString() ?? readQuotedString() else {
                     continue
                 }
                 lastSource = source
-                if let prev = recompiler.compilations[source]?.arguments ?? lastArguments,
-                    args == prev {
-                    args = prev
+                if let previous = recompiler
+                    .compilations[source]?.arguments ?? lastArguments,
+                    args == previous {
+                    args = previous
                 } else {
                     lastArguments = args
                 }
-                if let prev = recompiler.compilations[source]?.swiftFiles ?? lastFilelist,
-                    files == prev {
-                    files = prev
+                if let previous = recompiler
+                    .compilations[source]?.swiftFiles ?? lastFilelist,
+                    swiftFiles == previous {
+                    swiftFiles = previous
                 } else {
-                    lastFilelist = files
+                    lastFilelist = swiftFiles
                 }
-                print("Updating \(args.count) args with \(fcount) swift files "+source+" "+line)
+                print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
                 let update = Recompiler.Compilation(
-                    arguments: args, swiftFiles: files, workingDir: workingDir)
+                    arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
                 // The folling line should be on the compileQueue
-                // but it seems to provoke a Swift compiler bug.
+                // but it seems to provoke a compiler bug.
                 self.recompiler.compilations[source] = update
                 Self.compileQueue.async {
                     if source == self.recompiler.pendingSource {
-                        print("Pending "+source)
+                        print("Delayed injection of "+source)
                         self.recompiler.pendingSource = nil
                         self.recompiler.inject(source: source)
                     }
@@ -148,7 +163,7 @@ class MonitorXcode {
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
-                print("File saved "+source)
+                print("Injecting saved file "+source)
                 Self.compileQueue.async {
                     self.recompiler.inject(source: source)
                 }

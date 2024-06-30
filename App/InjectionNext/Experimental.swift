@@ -7,18 +7,21 @@
 //
 //  $Id: //depot/HotReloading/Sources/injectiond/Experimental.swift#35 $
 //
-
+//  Some regular expressions to automatically prepare SwiftU sources.
+//
 import Cocoa
 import SwiftRegex
 
 extension AppDelegate {
 
+    /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
         if let lastSource = MonitorXcode.runningXcode?.lastSource {
             prepare(source: lastSource)
         }
     }
 
+    /// Prepare all sources in the current target for injection.
     @IBAction func prepareProject(_ sender: NSMenuItem) {
         for source in MonitorXcode.runningXcode?.lastFilelist?
             .components(separatedBy: "\n").dropLast() ?? [] {
@@ -26,6 +29,7 @@ extension AppDelegate {
         }
     }
     
+    /// Use regular expresssions to patch .enableInjection() and @ObserveInject into a source
     func prepare(source: String) {
         let fileURL = URL(fileURLWithPath: source)
         guard let original = try? String(contentsOf: fileURL) else {
