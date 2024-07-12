@@ -51,10 +51,6 @@ inserted into the clipboard which you should add to your project as a
 "Run Script" "Build Phase" to copy the required libraries into the
 app bundle. Whenever you start to get code signing errors restart Xcode.
 
-This version of injection is a jealous technology and doesn't interact well
-with the SwiftUI #Preview macro. To avoid problems, surround your previews 
-with `#if !INJECTING` which will be defined when recompiling for injection.
-
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
 

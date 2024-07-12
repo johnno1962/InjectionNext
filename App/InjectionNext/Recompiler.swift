@@ -103,42 +103,42 @@ struct Recompiler {
                 let useFilesystem = connected?.isLocalClient != false
                 let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
 
-                if let object = recompile(source: source),
+                guard let object = recompile(source: source, platform: platform),
                    tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
                    let dylib = link(object: object, dylib: dylibPath, platform:
                             platform, arch: connected?.arch ?? compilerArch),
-                   let data = codesign(dylib: dylib, platform: platform) {
-                    print("Prepared dylib: "+dylib)
-                    prepared[sourceName] = dylib
-                    InjectionServer.commandQueue.sync {
-                        guard let client = InjectionServer.currentClient else {
-                            appDelegate.setMenuIcon(.ready)
-                            return
-                        }
-                        if useFilesystem {
-                            client.writeCommand(InjectionCommand
-                                .load.rawValue, with: dylib)
-                        } else {
-                            client.writeCommand(InjectionCommand
-                                .inject.rawValue, with: dylibName)
-                            client.write(data)
-                        }
-                        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-                            .filter({ strncmp($0.name, "_$s", 3) == 0 &&
-                                strstr($0.name, "fU") == nil }) // closures
-                            .map({ String(cString: $0.name) }).sorted() {
-//                            print(symbols)
-                            if let exported = client.exports[source],
-                               exported != symbols {
-                                error("Symbols altered, this is not supported." +
-                                      " \(symbols.count) c.f. \(exported.count)")
-                            }
-                            client.exports[source] = symbols
-                        }
-                    }
-                } else {
+                   let data = codesign(dylib: dylib, platform: platform) else {
                     appDelegate.setMenuIcon(.error)
-                    error("Injection failed.")
+                    return error("Injection failed.")
+                }
+
+                print("Prepared dylib: "+dylib)
+                prepared[sourceName] = dylib
+                InjectionServer.commandQueue.sync {
+                    guard let client = InjectionServer.currentClient else {
+                        appDelegate.setMenuIcon(.ready)
+                        return
+                    }
+                    if useFilesystem {
+                        client.writeCommand(InjectionCommand
+                            .load.rawValue, with: dylib)
+                    } else {
+                        client.writeCommand(InjectionCommand
+                            .inject.rawValue, with: dylibName)
+                        client.write(data)
+                    }
+                    if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
+                        .filter({ strncmp($0.name, "_$s", 3) == 0 &&
+                                  strstr($0.name, "fU") == nil }) // closures
+                        .map({ String(cString: $0.name) }).sorted() {
+//                            print(symbols)
+                        if let exported = client.exports[source],
+                           exported != symbols {
+                            error("Symbols altered, this is not supported." +
+                                  " \(symbols.count) c.f. \(exported.count)")
+                        }
+                        client.exports[source] = symbols
+                    }
                 }
             }
         } catch {
@@ -148,7 +148,7 @@ struct Recompiler {
     
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
-    mutating func recompile(source: String) ->  String? {
+    mutating func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
             error("Retrying: \(source) not ready.")
             pendingSource = source
@@ -166,11 +166,23 @@ struct Recompiler {
                                    encoding: .utf8)
     
         log("Recompiling: "+source)
-        let compiler = Self.xcodePath +
-            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/" +
+        let toolchain = Self.xcodePath +
+            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
+        let compiler = toolchain + "/usr/bin/" +
             (isSwift ? "swift-frontend" : "clang")
+        let platformDev = Self.xcodePath + "/Contents/Developer/Platforms/" +
+            platform.replacingOccurrences(of: "Simulator", with: "OS") +
+            ".platform/Developer"
         let languageSpecific = (isSwift ?
-            ["-c", "-filelist", filesfile, "-primary-file", source] :
+            ["-c", "-filelist", filesfile, "-primary-file", source,
+             "-external-plugin-path",
+             platformDev+"/usr/lib/swift/host/plugins#" +
+             platformDev+"/usr/bin/swift-plugin-server",
+             "-external-plugin-path",
+             platformDev+"/usr/local/lib/swift/host/plugins#" +
+             platformDev+"/usr/bin/swift-plugin-server",
+             "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
+             "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source]) + ["-o", object, "-DINJECTING"]
         
         // Call compiler process
@@ -211,7 +223,7 @@ struct Recompiler {
         case "XRSimulator": fallthrough case "XROS":
             osSpecific = ""
         default:
-            log("Invalid platform \(platform)")
+            error("Invalid platform \(platform)")
             // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
         }
 

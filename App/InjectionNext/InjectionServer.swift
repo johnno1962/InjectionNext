@@ -17,21 +17,21 @@ import Fortify
 
 class InjectionServer: SimpleSocket {
     
-    // So commands from differnt queues don't get mixed up
+    /// So commands from differnt threads don't get mixed up
     static let commandQueue = DispatchQueue(label: "InjectionCommand")
-    // Current connection to client app. There can be only one.
+    /// Current connection to client app. There can be only one.
     static weak var currentClient: InjectionServer?
     
-    /// Last symbols exported
+    /// Sorted last symbols exported by source.
     var exports = [String: [String]]()
-    // Keeps dynamic library file names unique.
+    /// Keeps dynamic library file names unique.
     var injectionNumber = 0
-    // Some defaults
+    /// Some defaults
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
-
-    // Pops up an alert panel
+    
+    /// Pops up an alert panel for networking
     @discardableResult
     override public class func error(_ message: String) -> Int32 {
         let saveno = errno
@@ -55,7 +55,7 @@ class InjectionServer: SimpleSocket {
         }
     }
 
-    // Rwote message into Xcode console of client app.
+    // Write message into Xcode console of client app.
     open func log(_ msg: String) {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
         sendCommand(.log, with: APP_PREFIX+msg)
@@ -67,11 +67,11 @@ class InjectionServer: SimpleSocket {
     // Simple validation to weed out invalid connections
     func validateConnection() -> CInt? {
         let clientVersion = readInt()
-        return clientVersion == INJECTION_VERSION &&
-            readString()?.hasPrefix(NSHomeDirectory()) == true ?
-            clientVersion : nil
+        guard clientVersion == INJECTION_VERSION &&
+            readString()?.hasPrefix(NSHomeDirectory()) == true else { return nil }
+        return clientVersion
     }
-    
+
     // On a new connection starts executing here
     override func runInBackground() {
         do {
@@ -79,15 +79,15 @@ class InjectionServer: SimpleSocket {
                 Self.currentClient = self
                 appDelegate.setMenuIcon(.ok)
                 processResponses()
-                Self.commandQueue.sync {}
                 appDelegate.setMenuIcon(MonitorXcode
                     .runningXcode != nil ? .ready : .idle)
             }
         } catch {
             self.error("\(self) error \(error)")
         }
+        Self.commandQueue.sync {} // flush messages
     }
-    
+
     func processResponses() {
         guard let _ = validateConnection() else {
             sendCommand(.invalid, with: nil)
@@ -130,10 +130,8 @@ class InjectionServer: SimpleSocket {
             case .failed:
                 appDelegate.setMenuIcon(.error)
             case .unhide:
-//                if !Unhider.reunhide() {
-                    log("Injection failed to load. If this was due to a default " +
-                        "argument. Select the app's menu item \"Unhide Symbols\".")
-//                }
+                log("Injection failed to load. If this was due to a default " +
+                    "argument. Select the app's menu item \"Unhide Symbols\".")
             case .exit:
                 log("**** exit ****")
                 return
