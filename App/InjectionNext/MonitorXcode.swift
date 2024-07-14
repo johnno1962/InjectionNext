@@ -108,14 +108,18 @@ class MonitorXcode {
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
                         _ = xcodeStdout.readLine()
-//                    } else if arg == "-serialize-debugging-options" {
-//                        continue
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
                            let swork = readQuotedString() {
                             work = swork
                         }
                         workingDir = work
+                    } else if args.last == "-I" &&
+                                arg.contains("/Index.noindex/Build/Products/") {
+                        // expands out default argument generators
+                        args += [arg.replacingOccurrences(
+                            of: "/Index.noindex/Build/Products/",
+                            with: "/Build/Products/"), "-I", arg]
                     } else if arg != "-Xfrontend" &&
                         arg != "-experimental-allow-module-with-compiler-errors" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {

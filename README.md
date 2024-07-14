@@ -33,7 +33,8 @@ As ever, it is important to add the options `-Xlinker` and `-interposable`
 the targets of your project (for the `Debug` configuration only) to enable 
 "interposing". Otherwise, you will only be able to inject non-final class methods.
 To inject SwiftUI sucessfully a couple of minor code changes to each View are 
-required. Consult the https://github.com/johnno1962/HotSwiftUI README.
+required. Consult the https://github.com/johnno1962/HotSwiftUI README or you
+can make these changes automatically using the menu item "Prepare SwiftUI/".
 
 ![Icon](App/interposable.png)
 

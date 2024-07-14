@@ -20,12 +20,15 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     elif [ "$PLATFORM_NAME" == "iphoneos" ]; then
      BUNDLE=${1:-maciOSInjection}
      rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/{Frameworks,PrivateFrameworks}/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$COPY/Frameworks/" &&
+     # Xcode 16's new way of bundling tests
+     TESTING="/tmp/Testing.$PLATFORM_NAME.framework"
+     if [ -d "$COPY/Frameworks/Testing.framework" ]; then
+        rsync -a "$COPY/Frameworks/Testing.framework"/* "$TESTING/"
+     elif [ -d "$TESTING" ]; then
+        rsync -a "$TESTING"/* "$COPY/Frameworks/Testing.framework/"
+     fi
      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks"/{XC*,*.dylib};
     else
      BUNDLE=${1:-iOSInjection}
     fi
-#    rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
-#    /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
-#    codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$STRACE" "$COPY" &&
-#    defaults write com.johnholdsworth.InjectionIII "$PROJECT_FILE_PATH" $EXPANDED_CODE_SIGN_IDENTITY
 fi

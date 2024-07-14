@@ -170,17 +170,17 @@ struct Recompiler {
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
         let compiler = toolchain + "/usr/bin/" +
             (isSwift ? "swift-frontend" : "clang")
-        let platformDev = Self.xcodePath + "/Contents/Developer/Platforms/" +
+        let platformUsr = Self.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
-            ".platform/Developer"
+            ".platform/Developer/usr/"
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
              "-external-plugin-path",
-             platformDev+"/usr/lib/swift/host/plugins#" +
-             platformDev+"/usr/bin/swift-plugin-server",
+             platformUsr+"lib/swift/host/plugins#" +
+             platformUsr+"bin/swift-plugin-server",
              "-external-plugin-path",
-             platformDev+"/usr/local/lib/swift/host/plugins#" +
-             platformDev+"/usr/bin/swift-plugin-server",
+             platformUsr+"local/lib/swift/host/plugins#" +
+             platformUsr+"bin/swift-plugin-server",
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source]) + ["-o", object, "-DINJECTING"]

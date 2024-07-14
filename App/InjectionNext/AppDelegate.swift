@@ -118,10 +118,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     
     @IBAction func testingEnable(_ sender: NSButton) {
         if sender.state == .on, let script = Bundle.main
-            .path(forResource: "copy_test_frameworks", ofType: "sh") {
+            .url(forResource: "copy_test_frameworks", withExtension: "sh") {
             let buildPhase = """
-                if [ -f "\(script)" ]; then
-                    "\(script)"
+                RESOURCES="\(script.deletingLastPathComponent().path)"
+                if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
+                    "$RESOURCES/\(script.lastPathComponent)"
                 fi
                 """
             let pasteBoard = NSPasteboard.general

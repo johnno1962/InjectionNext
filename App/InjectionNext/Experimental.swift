@@ -36,10 +36,11 @@ extension AppDelegate {
             return
         }
 
+        print("Patching", source)
         var patched = original
         patched[#"""
             ^((\s+)(public )?(var body:|func body\([^)]*\) -\>) some View \{\n\#
-            (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|\s*\n)+)(?<!#endif\n)\2\}\n
+            (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|(\s*|#.+)\n)+)(?<!#endif\n)\2\}\n
             """#.anchorsMatchLines] = """
             $1$2    .enableInjection()
             $2}
