@@ -72,9 +72,8 @@ extension AppDelegate {
                 #if DEBUG
                 import Combine
 
-                public let injectionObserver = InjectionObserver()
-
                 public class InjectionObserver: ObservableObject {
+                    public static let shared = InjectionObserver()
                     @Published var injectionNumber = 0
                     var cancellable: AnyCancellable? = nil
                     let publisher = PassthroughSubject<Void, Never>()
@@ -97,15 +96,15 @@ extension AppDelegate {
                     }
                     public func onInjection(bumpState: @escaping () -> ()) -> some SwiftUI.View {
                         return self
-                            .onReceive(injectionObserver.publisher, perform: bumpState)
+                            .onReceive(InjectionObserver.shared.publisher, perform: bumpState)
                             .eraseToAnyView()
                     }
                 }
 
-                @available(iOS 13.0, *)
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
                 @propertyWrapper
                 public struct ObserveInjection: DynamicProperty {
-                    @ObservedObject private var iO = injectionObserver
+                    @ObservedObject private var iO = InjectionObserver.shared
                     public init() {}
                     public private(set) var wrappedValue: Int {
                         get {0} set {}
@@ -123,7 +122,7 @@ extension AppDelegate {
                     }
                 }
 
-                @available(iOS 13.0, *)
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
                 @propertyWrapper
                 public struct ObserveInjection {
                     public init() {}
