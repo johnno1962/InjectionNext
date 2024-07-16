@@ -119,7 +119,7 @@ class MonitorXcode {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: "/Index.noindex/Build/Products/",
-                            with: "/Build/Products/"), "-I", arg]
+                            with: "/Build/Products/")] //, "-I", arg]
                     } else if arg != "-Xfrontend" &&
                         arg != "-experimental-allow-module-with-compiler-errors" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
