@@ -114,12 +114,13 @@ class MonitorXcode {
                             work = swork
                         }
                         workingDir = work
-                    } else if args.last == "-I" &&
+                    } else if (args.last == "-I" ||
+                               args.last == "-Xcc" && arg.hasPrefix("-I")) &&
                                 arg.contains("/Index.noindex/Build/Products/") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: "/Index.noindex/Build/Products/",
-                            with: "/Build/Products/")] //, "-I", arg]
+                            with: "/Build/Products/")]
                     } else if arg != "-Xfrontend" &&
                         arg != "-experimental-allow-module-with-compiler-errors" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
