@@ -91,6 +91,7 @@ class MonitorXcode {
             return nil
         }
         
+        let indexBuild = "/Index.noindex/Build/"
         while let line = xcodeStdout.readLine() {
             debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -114,14 +115,17 @@ class MonitorXcode {
                             work = swork
                         }
                         workingDir = work
+                    } else if args.last == "-vfsoverlay" &&
+                                arg.contains(indexBuild) {
+                        // injecting tests without having run tests
+                        args.removeLast()
                     } else if /*(args.last == "-I" || args.last == "-F" ||
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
-                                arg.contains("/Index.noindex/Build/") &&
-                                    !arg.hasSuffix(".yaml") {
+                        arg.contains(indexBuild) && !arg.hasSuffix(".yaml") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
-                            of: "/Index.noindex/Build/", with: "/Build/")]
+                            of: indexBuild, with: "/Build/")]
                     } else if arg != "-Xfrontend" &&
                         arg != "-experimental-allow-module-with-compiler-errors" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
@@ -157,7 +161,7 @@ class MonitorXcode {
                 let update = Recompiler.Compilation(
                     arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
                 // The folling line should be on the compileQueue
-                // but it seems to provoke a compiler bug.
+                // but it seems to provoke a Swift compiler bug.
                 self.recompiler.compilations[source] = update
                 Self.compileQueue.async {
                     if source == self.recompiler.pendingSource {

@@ -127,15 +127,21 @@ struct Recompiler {
                             .inject.rawValue, with: dylibName)
                         client.write(data)
                     }
+                    // Seek to highlight potentially unsupported injections.
                     if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-                        .filter({ strncmp($0.name, "_$s", 3) == 0 &&
-                                  strstr($0.name, "fU") == nil }) // closures
+                        .filter({ entry in
+                            lazy var symbol: String = String(cString: entry.name)
+                            return strncmp(entry.name, "_$s", 3) == 0 &&
+                            strstr(entry.name, "fU") == nil && // closures
+                            !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
+                            !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
                         .map({ String(cString: $0.name) }).sorted() {
-//                            print(symbols)
+//                        print(symbols)
                         if let exported = client.exports[source],
                            exported != symbols {
                             error("Symbols altered, this may not be supported." +
                                   " \(symbols.count) c.f. \(exported.count)")
+                            print(exported.difference(from: symbols))
                         }
                         client.exports[source] = symbols
                     }
