@@ -134,7 +134,7 @@ struct Recompiler {
 //                            print(symbols)
                         if let exported = client.exports[source],
                            exported != symbols {
-                            error("Symbols altered, this is not supported." +
+                            error("Symbols altered, this may not be supported." +
                                   " \(symbols.count) c.f. \(exported.count)")
                         }
                         client.exports[source] = symbols

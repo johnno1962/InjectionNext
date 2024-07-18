@@ -114,10 +114,11 @@ class MonitorXcode {
                             work = swork
                         }
                         workingDir = work
-                    } else if (args.last == "-I" || args.last == "-F" ||
+                    } else if /*(args.last == "-I" || args.last == "-F" ||
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
-                                   arg.hasPrefix("-fmodule-map-file="))) &&
-                                arg.contains("/Index.noindex/Build/") {
+                                   arg.hasPrefix("-fmodule-map-file="))) &&*/
+                                arg.contains("/Index.noindex/Build/") &&
+                                    !arg.hasSuffix(".yaml") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: "/Index.noindex/Build/", with: "/Build/")]
