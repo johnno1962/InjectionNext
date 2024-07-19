@@ -91,6 +91,7 @@ class MonitorXcode {
             return nil
         }
         
+        let indexBuild = "/Index.noindex/Build/"
         while let line = xcodeStdout.readLine() {
             debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -114,15 +115,23 @@ class MonitorXcode {
                             work = swork
                         }
                         workingDir = work
-                    } else if (args.last == "-I" ||
-                               args.last == "-Xcc" && arg.hasPrefix("-I")) &&
-                                arg.contains("/Index.noindex/Build/Products/") {
+                    } else if args.last == "-vfsoverlay" &&
+                                arg.contains(indexBuild) {
+                        // injecting tests without having run tests
+                        args.removeLast()
+                    // Xcode seems to maintain two sets of "build inputs"
+                    // i.e. .swiftmodule, .modulemap etc. files and it
+                    // seems the main build allows you to avoid "unhiding"
+                    // whereas the paths provided to SourceKit are for the
+                    // Index.noindex/Build tree of inputs. Switch them.
+                    } else if /*(args.last == "-I" || args.last == "-F" ||
+                               args.last == "-Xcc" && (arg.hasPrefix("-I") ||
+                                   arg.hasPrefix("-fmodule-map-file="))) &&*/
+                        arg.contains(indexBuild) && !arg.hasSuffix(".yaml") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
-                            of: "/Index.noindex/Build/Products/",
-                            with: "/Build/Products/")]
-                    } else if arg != "-Xfrontend" &&
-                        arg != "-experimental-allow-module-with-compiler-errors" {
+                            of: indexBuild, with: "/Build/")]
+                    } else if arg != "-Xfrontend" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                             Unhider.packageFrameworks = arg
                         } else if arg.hasPrefix("-I") {
@@ -156,7 +165,7 @@ class MonitorXcode {
                 let update = Recompiler.Compilation(
                     arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
                 // The folling line should be on the compileQueue
-                // but it seems to provoke a compiler bug.
+                // but it seems to provoke a Swift compiler bug.
                 self.recompiler.compilations[source] = update
                 Self.compileQueue.async {
                     if source == self.recompiler.pendingSource {

@@ -4,7 +4,7 @@
 
 Using a feature of Apple's linker this implementation of Code Injection
 allows you to update the implementation (i.e. body) of functions in your
-app without having to relauch it. This can save a developer a significant
+app without having to relaunch it. This can save a developer a significant
 amount of time tweaking code or iterating over a design.
 
 This repo is a refesh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
@@ -22,8 +22,8 @@ resulting `InjectionNext.app` and use that to re-launch Xcode using the menu ite
 `Launch Xcode` from the status bar. You then add this repo as a Swift package 
 dependency of your project and that should be all that is required for injection 
 in the simulator, injection on devices and injection of a MacOS app. No more 
-code changes required to load binary code bundles etc required and you can
-leave the InjectionNext package configured into your project permanently as
+code changes required to load binary code bundles etc and you can leave 
+the InjectionNext package configured into your project permanently as
 its code is only included for a DEBUG build. Your code changes take effect
 when you save a source for an app that has this package as a dependency
 and has connected to the InjectIonNext app which has launched Xcode.
