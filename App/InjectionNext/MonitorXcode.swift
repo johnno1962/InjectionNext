@@ -119,6 +119,11 @@ class MonitorXcode {
                                 arg.contains(indexBuild) {
                         // injecting tests without having run tests
                         args.removeLast()
+                    // Xcode seems to maintain two sets of "build inputs"
+                    // i.e. .swiftmodule, .modulemap etc. files and it
+                    // seems the main build allows you to avoid "unhiding"
+                    // whereas the paths provided to SourceKit are for the
+                    // Index.noindex/Build tree of inputs. Switch them.
                     } else if /*(args.last == "-I" || args.last == "-F" ||
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
@@ -126,8 +131,7 @@ class MonitorXcode {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
-                    } else if arg != "-Xfrontend" &&
-                        arg != "-experimental-allow-module-with-compiler-errors" {
+                    } else if arg != "-Xfrontend" {
                         if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                             Unhider.packageFrameworks = arg
                         } else if arg.hasPrefix("-I") {
