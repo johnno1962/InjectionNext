@@ -74,6 +74,17 @@ class MonitorXcode {
                        let end = strrchr(start+1, doubleQuote) {
                         end[0] = 0
                         var out = String(cString: start+1)
+                        // Xcode uses NSLog to log internal UTF8 strings
+                        // using %s which uses the macOS system encoding.
+                        // https://en.wikipedia.org/wiki/Mac_OS_Roman
+                        // For now we need to do the following dance
+                        // to revert scrambled non-ASCII file paths.
+                        if out.hasPrefix("/") &&
+                            !FileManager.default.fileExists(atPath: out),
+                           let data = out.data(using: .macOSRoman),
+                           let recovered = String(data: data, encoding: .utf8) {
+                            out = recovered
+                        }
                         if strstr(start+1, escaped) != nil {
                             out = out.replacingOccurrences(of: escaped, with: "\"")
                         }
