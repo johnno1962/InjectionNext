@@ -66,6 +66,7 @@ open class InjectionNext: SimpleSocket {
     func processCommandsFromApp() {
         var loader = Reloader() // InjectionLite injection implementation
         func injectAndSweep(_ dylib: String) {
+            Reloader.injectionNumber += 1
             var succeeded = false
             if let (image, classes) = Reloader.injectionQueue
                 .sync(execute: { loader.loadAndPatch(in: dylib) }) {
