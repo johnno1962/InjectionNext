@@ -13,7 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/johnno1962/InjectionLite",
-                 .upToNextMajor(from: "2.0.5")),
+                 .upToNextMajor(from: "2.0.6")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
