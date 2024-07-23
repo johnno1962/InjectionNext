@@ -18,6 +18,7 @@
 #define INJECTION_VERSION 4001
 #define INJECTION_ADDRESS HOTRELOADING_PORT
 extern NSString *INJECTION_KEY;
+#undef APP_NAME
 #define APP_NAME "InjectionNext"
 #define APP_PREFIX "🔥 "
 #define DYLIB_PREFIX "/eval_injection_" // Was expected by DLKit

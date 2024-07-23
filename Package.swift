@@ -11,18 +11,15 @@ let package = Package(
             name: "InjectionNext",
             targets: ["InjectionNext"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/johnno1962/InjectionLite",
-                 .upToNextMajor(from: "2.0.7")),
-    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "InjectionNext", dependencies: ["InjectionNextC",
-                .product(name: "InjectionImpl", package: "InjectionLite")]),
+            name: "InjectionNext", dependencies: ["InjectionNextC"],
+            swiftSettings: [.define("DEBUG_ONLY")]),
         .target(
-            name: "InjectionNextC"),
+            name: "InjectionNextC",
+            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]),
         .testTarget(
             name: "InjectionNextTests",
             dependencies: ["InjectionNext"]),
