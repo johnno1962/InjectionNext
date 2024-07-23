@@ -1,1 +1,0 @@
-../../InjectionLite/Sources/InjectionImpl/Metadata.swift
