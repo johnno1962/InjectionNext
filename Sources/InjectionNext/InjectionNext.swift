@@ -6,7 +6,7 @@
 //
 //  Client app side of injection using implementation of InjectionLite.
 //
-#if DEBUG
+#if DEBUG || !SWIFT_PACKAGE
 #if canImport(InjectionImpl)
 import InjectionImpl
 #endif
