@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23077.2" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23077.2"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -15,8 +15,8 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
+                <outlet property="codeSignBox" destination="iKZ-P7-T7T" id="KiT-vS-8mL"/>
                 <outlet property="deviceTesting" destination="SQv-Cq-gPC" id="wzU-n5-tvW"/>
-                <outlet property="identityField" destination="Yzf-xB-GlM" id="wSQ-R9-CC5"/>
                 <outlet property="lastErrorField" destination="yfA-aU-ldx" id="oxQ-Xy-ugr"/>
                 <outlet property="librariesField" destination="rw0-Sb-xW5" id="iLm-Qn-E1h"/>
                 <outlet property="statusMenu" destination="V8Q-mq-A2f" id="Epo-HD-J21"/>
@@ -733,60 +733,14 @@
         <window title="Codesigning Identity" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="p7X-fx-AEQ" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="1355" y="786" width="376" height="173"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1127"/>
+            <rect key="contentRect" x="1355" y="786" width="737" height="204"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="Qow-ez-PwQ">
-                <rect key="frame" x="0.0" y="0.0" width="376" height="173"/>
+                <rect key="frame" x="0.0" y="0.0" width="737" height="204"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <box fixedFrame="YES" borderType="line" title="Enter expanded codesigning identity from build logs:" translatesAutoresizingMaskIntoConstraints="NO" id="kIb-GT-XoA">
-                        <rect key="frame" x="17" y="94" width="342" height="59"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <view key="contentView" id="NsC-kE-14D">
-                            <rect key="frame" x="4" y="5" width="334" height="39"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <textField toolTip="Enter expanded codesigning identity from build logs." verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzf-xB-GlM">
-                                    <rect key="frame" x="8" y="8" width="249" height="21"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Idenity" drawsBackground="YES" id="OSD-Nr-QNY">
-                                        <font key="font" usesAppearanceFont="YES"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                    <connections>
-                                        <binding destination="Voe-Tx-rLC" name="value" keyPath="defaults.signingidentity" id="uzu-vv-Vp5"/>
-                                    </connections>
-                                </textField>
-                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jPt-Lp-Ai7">
-                                    <rect key="frame" x="259" y="1" width="75" height="32"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                    <buttonCell key="cell" type="push" title="Apply" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="KQ5-Pl-Kbr">
-                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="system"/>
-                                    </buttonCell>
-                                    <connections>
-                                        <action selector="orderOut:" target="p7X-fx-AEQ" id="o3p-79-TRh"/>
-                                    </connections>
-                                </button>
-                            </subviews>
-                        </view>
-                    </box>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SQv-Cq-gPC">
-                        <rect key="frame" x="18" y="73" width="338" height="18"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="check" title="Enable testing on device (paste into build phase)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WAY-D9-HRe">
-                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="testingEnable:" target="Voe-Tx-rLC" id="SgW-E7-bxy"/>
-                            <binding destination="Voe-Tx-rLC" name="value" keyPath="defaults.testing" id="bbI-8I-gnF"/>
-                        </connections>
-                    </button>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rw0-Sb-xW5">
-                        <rect key="frame" x="20" y="12" width="336" height="48"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rw0-Sb-xW5">
+                        <rect key="frame" x="20" y="79" width="697" height="21"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="-framework XCTest -lXCTestSwiftSupport" drawsBackground="YES" id="XCE-C6-jqh">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -796,15 +750,61 @@
                             <action selector="updateLibraries:" target="Voe-Tx-rLC" id="Rcu-9B-dga"/>
                         </connections>
                     </textField>
+                    <comboBox focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iKZ-P7-T7T">
+                        <rect key="frame" x="19" y="138" width="701" height="23"/>
+                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="A2I-vj-Z1G">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            <objectValues>
+                                <string>Item 1</string>
+                                <string>Item 2</string>
+                                <string>Item 3</string>
+                            </objectValues>
+                        </comboBoxCell>
+                    </comboBox>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="haQ-Mn-2en">
+                        <rect key="frame" x="18" y="168" width="169" height="16"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" title="Select codesigning identity" id="9V5-ch-7QQ">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SQv-Cq-gPC">
+                        <rect key="frame" x="18" y="107" width="321" height="18"/>
+                        <buttonCell key="cell" type="check" title="Enable testing on device (paste into build phase)" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WAY-D9-HRe">
+                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="testingEnable:" target="Voe-Tx-rLC" id="SgW-E7-bxy"/>
+                            <binding destination="Voe-Tx-rLC" name="value" keyPath="defaults.testing" id="bbI-8I-gnF"/>
+                        </connections>
+                    </button>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="iKZ-P7-T7T" firstAttribute="trailing" secondItem="rw0-Sb-xW5" secondAttribute="trailing" id="64L-tu-dDi"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="leading" secondItem="rw0-Sb-xW5" secondAttribute="leading" id="7gB-ht-Gdr"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="top" secondItem="iKZ-P7-T7T" secondAttribute="bottom" constant="16" id="8b6-0G-rpy"/>
+                    <constraint firstAttribute="trailing" secondItem="iKZ-P7-T7T" secondAttribute="trailing" constant="20" symbolic="YES" id="9ck-ls-xeQ"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="leading" secondItem="Qow-ez-PwQ" secondAttribute="leading" constant="20" symbolic="YES" id="BUG-lp-0OM"/>
+                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="haQ-Mn-2en" secondAttribute="trailing" constant="20" symbolic="YES" id="EOD-Ec-3UN"/>
+                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="SQv-Cq-gPC" secondAttribute="trailing" constant="20" symbolic="YES" id="N8h-Nb-4eu"/>
+                    <constraint firstItem="rw0-Sb-xW5" firstAttribute="top" secondItem="SQv-Cq-gPC" secondAttribute="bottom" constant="8" id="aML-jv-c40"/>
+                    <constraint firstItem="iKZ-P7-T7T" firstAttribute="top" secondItem="haQ-Mn-2en" secondAttribute="bottom" constant="8" symbolic="YES" id="dhp-0G-xqs"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="top" secondItem="Qow-ez-PwQ" secondAttribute="top" constant="80" id="dwJ-uf-CIP"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="leading" secondItem="haQ-Mn-2en" secondAttribute="leading" id="m2V-qn-8ny"/>
+                    <constraint firstItem="SQv-Cq-gPC" firstAttribute="leading" secondItem="iKZ-P7-T7T" secondAttribute="leading" id="tqK-L2-nmj"/>
+                </constraints>
             </view>
-            <point key="canvasLocation" x="-87" y="1048.5"/>
+            <point key="canvasLocation" x="-1244.5" y="757"/>
         </window>
         <window title="Last Compilation Error" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="HvJ-jZ-ITN" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="1355" y="786" width="688" height="268"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1127"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="kR1-2l-DFV">
                 <rect key="frame" x="0.0" y="0.0" width="688" height="268"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -814,7 +814,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" drawsBackground="NO" id="Jya-oY-Tsg">
                             <rect key="frame" x="0.0" y="0.0" width="655" height="251"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <textView wantsLayer="YES" editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="yfA-aU-ldx">
                                     <rect key="frame" x="0.0" y="0.0" width="655" height="251"/>
@@ -823,7 +823,6 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <size key="minSize" width="655" height="251"/>
                                     <size key="maxSize" width="675" height="10000000"/>
-                                    <color key="insertionPointColor" name="textInsertionPointColor" catalog="System" colorSpace="catalog"/>
                                 </textView>
                             </subviews>
                         </clipView>

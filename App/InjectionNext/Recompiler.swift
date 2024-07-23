@@ -250,7 +250,7 @@ struct Recompiler {
     mutating func codesign(dylib: String, platform: String) -> Data? {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
-            identity = appDelegate.identityField.stringValue
+            identity = appDelegate.codeSigningID
         }
         let codesign = """
             (export CODESIGN_ALLOCATE="\(Defaults.xcodePath+"/Contents/Developer"

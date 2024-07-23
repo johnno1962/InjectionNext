@@ -10,6 +10,8 @@
 //  Implementation Toolbar menu "UI".
 //
 import Cocoa
+import Popen
+import SwiftRegex
 
 var appDelegate: AppDelegate!
 
@@ -36,6 +38,14 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
     @objc let defaults = UserDefaults.standard
+
+    @IBOutlet weak var codeSignBox: NSComboBox!
+
+    /// Code signing ID as parsed from the code signing box. If the content of the box is not
+    /// parsable as SHA1 code signing ID, an empty string.
+    var codeSigningID: String { codeSignBox.stringValue.containedSHA1 ?? "" }
+
+    let userIDComboBoxDataSaver = UserIDComboBoxDataSaver()
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -65,6 +75,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setMenuIcon(.idle)
+        setupCodeSigningComboBox()
     }
 
     func setMenuIcon(_ state: InjectionState) {
@@ -107,7 +118,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         sender.state = sender.state == .off ? .on : .off
         var openPort = ""
         if sender.state == .on {
-            identityField.window?.makeKeyAndOrderFront(sender)
+            codeSignBox.window?.makeKeyAndOrderFront(sender)
             NSApplication.shared.activate(ignoringOtherApps: true)
             _ = startHostLocatingServerOnce
             openPort = "*"
@@ -150,5 +161,65 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             .runningXcode?.recompiler.lastError ?? "No error."
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    func setupCodeSigningComboBox() {
+        codeSignBox.removeAllItems()
+
+        codeSignBox.addItems(withObjectValues: userIDComboBoxDataSaver.validCodeSigningIDs)
+
+        if let savedID = userIDComboBoxDataSaver.savedID {
+            codeSignBox.stringValue = savedID
+        } else if let firstIdentity = userIDComboBoxDataSaver.validCodeSigningIDs.first {
+            codeSignBox.stringValue = firstIdentity
+        } else {
+            codeSignBox.stringValue = "No valid code signing IDs found"
+        }
+
+        codeSignBox.target = userIDComboBoxDataSaver
+        codeSignBox.action = #selector(UserIDComboBoxDataSaver.comboBoxValueDidChange(_:))
+    }
+}
+
+private extension String {
+    /// Returns the sha1 string contained in this string, or `nil` if no such string is contained.
+    var containedSHA1: String? { self[#"([0-9A-F]{40})"#] }
+}
+
+class UserIDComboBoxDataSaver {
+
+    /// List of valid IDs.
+    let validCodeSigningIDs: [String] = {
+        var identities: [String] = []
+
+        let security = Topen(exec: "/usr/bin/security",
+                             arguments: ["find-identity", "-v", "-p", "codesigning"])
+
+        while let line = security.readLine() {
+            let components = line.split(separator: ")", maxSplits: 1)
+            if components.count >= 2 {
+                let identity = components[1]
+                identities.append(String(identity))
+            }
+        }
+
+        return identities
+    }()
+
+    /// Last savedID, if valid. `nil` otherwise.
+    var savedID: String? {
+        guard let savedValue = Defaults.codesigningIdentity else { return nil }
+
+        return validCodeSigningIDs.first(where: { $0.containedSHA1 == savedValue.containedSHA1} )
+    }
+
+    @objc func comboBoxValueDidChange(_ sender: NSComboBox) {
+        if let newValueSHA1 = sender.stringValue.containedSHA1,
+           validCodeSigningIDs.contains(where: { $0.containedSHA1 == newValueSHA1 }) {
+            Defaults.codesigningIdentity = newValueSHA1
+        } else {
+            NSLog("Selected value does not contain a valid ID")
+            return
+        }
     }
 }
