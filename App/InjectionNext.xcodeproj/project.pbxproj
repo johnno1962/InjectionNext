@@ -52,6 +52,7 @@
 		BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84322C4FE849000F3124 /* trie_dlops.mm */; };
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
+		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
 		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
 		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
 /* End PBXBuildFile section */
@@ -138,6 +139,7 @@
 		BBDD84532C4FEB16000F3124 /* TupleRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TupleRegex.swift; path = ../../SwiftRegex5/SwiftRegex5.playground/Sources/TupleRegex.swift; sourceTree = "<group>"; };
 		BBDD84562C4FED60000F3124 /* build_bundles.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_bundles.sh; sourceTree = "<group>"; };
 		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
+		BBDD84592C4FF645000F3124 /* ClientBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ClientBoot.mm; path = ../../Sources/InjectionNextC/ClientBoot.mm; sourceTree = "<group>"; };
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
 		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
@@ -238,6 +240,8 @@
 		BBDD84172C4FE79E000F3124 /* IInjectionBundle */ = {
 			isa = PBXGroup;
 			children = (
+				BBDD84592C4FF645000F3124 /* ClientBoot.mm */,
+				BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */,
 				BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */,
 				BBDD84262C4FE827000F3124 /* Common.swift */,
 				BBDD842A2C4FE827000F3124 /* KeyPaths.swift */,
@@ -252,7 +256,6 @@
 				BBDD841D2C4FE802000F3124 /* Iterators.swift */,
 				BBDD84532C4FEB16000F3124 /* TupleRegex.swift */,
 				BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */,
-				BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */,
 				BBDD84382C4FE880000F3124 /* fishhook.c */,
 				BBDD84372C4FE880000F3124 /* fishhook.h */,
 				BBDD84362C4FE863000F3124 /* DLKitC.h */,
@@ -458,6 +461,7 @@
 				BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */,
 				BBDD84462C4FEA5C000F3124 /* Reloader.swift in Sources */,
 				BBDD84492C4FEA67000F3124 /* DLKit.swift in Sources */,
+				BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */,
 				BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */,
 				BBDD84432C4FEA52000F3124 /* Common.swift in Sources */,
 				BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */,
