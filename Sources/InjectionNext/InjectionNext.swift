@@ -7,10 +7,13 @@
 //  Client app side of injection using implementation of InjectionLite.
 //
 #if DEBUG || !SWIFT_PACKAGE
+import Foundation
 #if canImport(InjectionImpl)
 import InjectionImpl
 #endif
+#if canImport(InjectionNextC)
 @_exported import InjectionNextC
+#endif
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {

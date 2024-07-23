@@ -32,9 +32,39 @@
 		BBCA02591FB112F500E45F0F /* App.icns in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02581FB112F500E45F0F /* App.icns */; };
 		BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */; };
 		BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025F1FB122C300E45F0F /* InjectionOK.tif */; };
+		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
+		BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */; };
+		BBDD84432C4FEA52000F3124 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
+		BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD842A2C4FE827000F3124 /* KeyPaths.swift */; };
+		BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84292C4FE827000F3124 /* Metadata.swift */; };
+		BBDD84462C4FEA5C000F3124 /* Reloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84272C4FE827000F3124 /* Reloader.swift */; };
+		BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84282C4FE827000F3124 /* Sweeper.swift */; };
+		BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841F2C4FE802000F3124 /* Demangling.swift */; };
+		BBDD84492C4FEA67000F3124 /* DLKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841A2C4FE802000F3124 /* DLKit.swift */; };
+		BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841B2C4FE802000F3124 /* FileSymbols.swift */; };
+		BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */; };
+		BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841C2C4FE802000F3124 /* Interposing.swift */; };
+		BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841D2C4FE802000F3124 /* Iterators.swift */; };
+		BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */; };
+		BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84382C4FE880000F3124 /* fishhook.c */; };
+		BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84302C4FE849000F3124 /* DLKitC.c */; };
+		BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84312C4FE849000F3124 /* trie_dladdr.mm */; };
+		BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84322C4FE849000F3124 /* trie_dlops.mm */; };
+		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
+		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
 		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BB439B5D1FABA64300B4F50B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BBDD84122C4FE749000F3124;
+			remoteInfo = InjectionBundle;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		BB6224721FC5BA6F00AD7A3A /* CopyFiles */ = {
@@ -84,6 +114,30 @@
 		BBCA02581FB112F500E45F0F /* App.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = App.icns; sourceTree = "<group>"; };
 		BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionIdle.tif; sourceTree = "<group>"; };
 		BBCA025F1FB122C300E45F0F /* InjectionOK.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionOK.tif; sourceTree = "<group>"; };
+		BBDD84132C4FE749000F3124 /* macOSInjection.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSInjection.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InjectionNext.swift; path = ../../Sources/InjectionNext/InjectionNext.swift; sourceTree = "<group>"; };
+		BBDD841A2C4FE802000F3124 /* DLKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DLKit.swift; path = ../../DLKit/Sources/DLKit/DLKit.swift; sourceTree = "<group>"; };
+		BBDD841B2C4FE802000F3124 /* FileSymbols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSymbols.swift; path = ../../DLKit/Sources/DLKit/FileSymbols.swift; sourceTree = "<group>"; };
+		BBDD841C2C4FE802000F3124 /* Interposing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Interposing.swift; path = ../../DLKit/Sources/DLKit/Interposing.swift; sourceTree = "<group>"; };
+		BBDD841D2C4FE802000F3124 /* Iterators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Iterators.swift; path = ../../DLKit/Sources/DLKit/Iterators.swift; sourceTree = "<group>"; };
+		BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageSymbols.swift; path = ../../DLKit/Sources/DLKit/ImageSymbols.swift; sourceTree = "<group>"; };
+		BBDD841F2C4FE802000F3124 /* Demangling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Demangling.swift; path = ../../DLKit/Sources/DLKit/Demangling.swift; sourceTree = "<group>"; };
+		BBDD84262C4FE827000F3124 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Common.swift; path = ../../InjectionLite/Sources/InjectionImpl/Common.swift; sourceTree = "<group>"; };
+		BBDD84272C4FE827000F3124 /* Reloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Reloader.swift; path = ../../InjectionLite/Sources/InjectionImpl/Reloader.swift; sourceTree = "<group>"; };
+		BBDD84282C4FE827000F3124 /* Sweeper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Sweeper.swift; path = ../../InjectionLite/Sources/InjectionImpl/Sweeper.swift; sourceTree = "<group>"; };
+		BBDD84292C4FE827000F3124 /* Metadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Metadata.swift; path = ../../InjectionLite/Sources/InjectionImpl/Metadata.swift; sourceTree = "<group>"; };
+		BBDD842A2C4FE827000F3124 /* KeyPaths.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KeyPaths.swift; path = ../../InjectionLite/Sources/InjectionImpl/KeyPaths.swift; sourceTree = "<group>"; };
+		BBDD84302C4FE849000F3124 /* DLKitC.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DLKitC.c; path = ../../DLKit/Sources/DLKitC/DLKitC.c; sourceTree = "<group>"; };
+		BBDD84312C4FE849000F3124 /* trie_dladdr.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dladdr.mm; path = ../../DLKit/Sources/DLKitC/trie_dladdr.mm; sourceTree = "<group>"; };
+		BBDD84322C4FE849000F3124 /* trie_dlops.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dlops.mm; path = ../../DLKit/Sources/DLKitC/trie_dlops.mm; sourceTree = "<group>"; };
+		BBDD84362C4FE863000F3124 /* DLKitC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLKitC.h; path = ../../DLKit/Sources/DLKitC/include/DLKitC.h; sourceTree = "<group>"; };
+		BBDD84372C4FE880000F3124 /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fishhook.h; path = ../../fishhook/fishhook.h; sourceTree = "<group>"; };
+		BBDD84382C4FE880000F3124 /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fishhook.c; path = ../../fishhook/fishhook.c; sourceTree = "<group>"; };
+		BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionBoot.mm; path = ../../InjectionLite/Sources/InjectionImplC/InjectionBoot.mm; sourceTree = "<group>"; };
+		BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionImplC.h; path = ../../InjectionLite/Sources/InjectionImplC/include/InjectionImplC.h; sourceTree = "<group>"; };
+		BBDD84532C4FEB16000F3124 /* TupleRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TupleRegex.swift; path = ../../SwiftRegex5/SwiftRegex5.playground/Sources/TupleRegex.swift; sourceTree = "<group>"; };
+		BBDD84562C4FED60000F3124 /* build_bundles.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_bundles.sh; sourceTree = "<group>"; };
+		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
 		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
@@ -106,6 +160,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BBDD84102C4FE749000F3124 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -115,6 +176,7 @@
 				BB037DF41FAD80D0004B267C /* LICENSE */,
 				BB037DF31FAD808B004B267C /* README.md */,
 				BBCA01FF1FB0F10300E45F0F /* InjectionNext */,
+				BBDD84172C4FE79E000F3124 /* IInjectionBundle */,
 				BB439B661FABA64300B4F50B /* Products */,
 				BBB040621FB1798A007DDD0A /* Frameworks */,
 			);
@@ -126,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */,
+				BBDD84132C4FE749000F3124 /* macOSInjection.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,8 +229,38 @@
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
 				22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */,
+				BBDD84562C4FED60000F3124 /* build_bundles.sh */,
+				BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */,
 			);
 			path = InjectionNext;
+			sourceTree = "<group>";
+		};
+		BBDD84172C4FE79E000F3124 /* IInjectionBundle */ = {
+			isa = PBXGroup;
+			children = (
+				BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */,
+				BBDD84262C4FE827000F3124 /* Common.swift */,
+				BBDD842A2C4FE827000F3124 /* KeyPaths.swift */,
+				BBDD84292C4FE827000F3124 /* Metadata.swift */,
+				BBDD84272C4FE827000F3124 /* Reloader.swift */,
+				BBDD84282C4FE827000F3124 /* Sweeper.swift */,
+				BBDD841A2C4FE802000F3124 /* DLKit.swift */,
+				BBDD841F2C4FE802000F3124 /* Demangling.swift */,
+				BBDD841B2C4FE802000F3124 /* FileSymbols.swift */,
+				BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */,
+				BBDD841C2C4FE802000F3124 /* Interposing.swift */,
+				BBDD841D2C4FE802000F3124 /* Iterators.swift */,
+				BBDD84532C4FEB16000F3124 /* TupleRegex.swift */,
+				BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */,
+				BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */,
+				BBDD84382C4FE880000F3124 /* fishhook.c */,
+				BBDD84372C4FE880000F3124 /* fishhook.h */,
+				BBDD84362C4FE863000F3124 /* DLKitC.h */,
+				BBDD84302C4FE849000F3124 /* DLKitC.c */,
+				BBDD84312C4FE849000F3124 /* trie_dladdr.mm */,
+				BBDD84322C4FE849000F3124 /* trie_dlops.mm */,
+			);
+			path = IInjectionBundle;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,10 +276,12 @@
 				BBCA01FC1FB0F10300E45F0F /* Resources */,
 				BB6224721FC5BA6F00AD7A3A /* CopyFiles */,
 				BB6C87DB2520D0D3005AFCFC /* Embed Frameworks */,
+				BBDD84572C4FED87000F3124 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				BBDD843E2C4FE8C5000F3124 /* PBXTargetDependency */,
 			);
 			name = InjectionNext;
 			packageProductDependencies = (
@@ -199,6 +294,23 @@
 			productName = InjectionIII;
 			productReference = BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */;
 			productType = "com.apple.product-type.application";
+		};
+		BBDD84122C4FE749000F3124 /* InjectionBundle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBDD84162C4FE749000F3124 /* Build configuration list for PBXNativeTarget "InjectionBundle" */;
+			buildPhases = (
+				BBDD840F2C4FE749000F3124 /* Sources */,
+				BBDD84102C4FE749000F3124 /* Frameworks */,
+				BBDD84112C4FE749000F3124 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InjectionBundle;
+			productName = InjectionBundle;
+			productReference = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */;
+			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -219,6 +331,9 @@
 								enabled = 1;
 							};
 						};
+					};
+					BBDD84122C4FE749000F3124 = {
+						CreatedOnToolsVersion = 15.2;
 					};
 				};
 			};
@@ -242,6 +357,7 @@
 			projectRoot = "";
 			targets = (
 				BBCA01FD1FB0F10300E45F0F /* InjectionNext */,
+				BBDD84122C4FE749000F3124 /* InjectionBundle */,
 			);
 		};
 /* End PBXProject section */
@@ -251,6 +367,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */,
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
 				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
@@ -262,6 +379,13 @@
 				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
 				22F5171D2C0E657D00DF88FA /* copy_test_frameworks.sh in Resources */,
 				BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBDD84112C4FE749000F3124 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,6 +411,23 @@
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif [ \"$ACTION\" == \"install\" ]; then exit 0; fi\nbuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nbuildNumber=$(($buildNumber + 1))\nchmod +w \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
 		};
+		BBDD84572C4FED87000F3124 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nInjectionNext/build_bundles.sh\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -305,7 +446,41 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BBDD840F2C4FE749000F3124 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */,
+				BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */,
+				BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */,
+				BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */,
+				BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */,
+				BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */,
+				BBDD84462C4FEA5C000F3124 /* Reloader.swift in Sources */,
+				BBDD84492C4FEA67000F3124 /* DLKit.swift in Sources */,
+				BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */,
+				BBDD84432C4FEA52000F3124 /* Common.swift in Sources */,
+				BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */,
+				BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */,
+				BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */,
+				BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */,
+				BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */,
+				BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */,
+				BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */,
+				BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */,
+				BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BBDD843E2C4FE8C5000F3124 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BBDD84122C4FE749000F3124 /* InjectionBundle */;
+			targetProxy = BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		BBCA02051FB0F10300E45F0F /* MainMenu.xib */ = {
@@ -488,6 +663,77 @@
 			};
 			name = Release;
 		};
+		BBDD84142C4FE749000F3124 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
+				INFOPLIST_KEY_NSPrincipalClass = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_NAME = macOSInjection;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		BBDD84152C4FE749000F3124 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = c17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
+				INFOPLIST_KEY_NSPrincipalClass = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_NAME = macOSInjection;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -505,6 +751,15 @@
 			buildConfigurations = (
 				BBCA020D1FB0F10400E45F0F /* Debug */,
 				BBCA020E1FB0F10400E45F0F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BBDD84162C4FE749000F3124 /* Build configuration list for PBXNativeTarget "InjectionBundle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BBDD84142C4FE749000F3124 /* Debug */,
+				BBDD84152C4FE749000F3124 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
