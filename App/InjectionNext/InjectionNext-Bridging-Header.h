@@ -4,3 +4,7 @@
 
 #import "SimpleSocket.h"
 #import "InjectionClient.h"
+
+// InjectionBundle only
+#import "fishhook.h"
+#import "DLKitC.h"
