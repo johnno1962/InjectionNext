@@ -10,19 +10,22 @@ let package = Package(
         .library(
             name: "InjectionNext",
             targets: ["InjectionNext"]),
-    ],
-    dependencies: [
-        .package(url: "https://github.com/johnno1962/InjectionLite",
-                 .upToNextMajor(from: "2.0.7")),
+        // To avoid duplicate symbols if other
+        // packages use e.g. DLKit or fishhook
+        .library(
+            name: "InjectionNextDyanmic",
+            type: .dynamic,
+            targets: ["InjectionNext"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "InjectionNext", dependencies: ["InjectionNextC",
-                .product(name: "InjectionImpl", package: "InjectionLite")]),
+            name: "InjectionNext", dependencies: ["InjectionNextC"],
+            swiftSettings: [.define("DEBUG_ONLY")]),
         .target(
-            name: "InjectionNextC"),
+            name: "InjectionNextC",
+            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]),
         .testTarget(
             name: "InjectionNextTests",
             dependencies: ["InjectionNext"]),

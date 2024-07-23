@@ -1,0 +1,12 @@
+[submodule "fishhook"]
+	path = fishhook
+	url = https://github.com/johnno1962/fishhook
+[submodule "DLKit"]
+	path = DLKit
+	url = https://github.com/johnno1962/DLKit
+[submodule "InjectionLite"]
+	path = InjectionLite
+	url = https://github.com/johnno1962/InjectionLite
+[submodule "SwiftRegex5"]
+	path = SwiftRegex5
+	url = https://github.com/johnno1962/SwiftRegex5

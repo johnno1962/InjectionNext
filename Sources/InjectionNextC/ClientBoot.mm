@@ -5,7 +5,7 @@
 //  Created by John H on 31/05/2024.
 //
 
-#if DEBUG
+#if DEBUG || !SWIFT_PACKAGE
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
