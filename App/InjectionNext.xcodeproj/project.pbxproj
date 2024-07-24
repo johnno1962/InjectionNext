@@ -105,6 +105,7 @@
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
+		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		BBB64DE41FD571300020BE47 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		BBB64FEB1FD585D50020BE47 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -181,7 +182,7 @@
 				BB037DF41FAD80D0004B267C /* LICENSE */,
 				BB037DF31FAD808B004B267C /* README.md */,
 				BBCA01FF1FB0F10300E45F0F /* InjectionNext */,
-				BBDD84172C4FE79E000F3124 /* IInjectionBundle */,
+				BBDD84172C4FE79E000F3124 /* InjectionBundle */,
 				BB439B661FABA64300B4F50B /* Products */,
 				BBB040621FB1798A007DDD0A /* Frameworks */,
 			);
@@ -241,7 +242,7 @@
 			path = InjectionNext;
 			sourceTree = "<group>";
 		};
-		BBDD84172C4FE79E000F3124 /* IInjectionBundle */ = {
+		BBDD84172C4FE79E000F3124 /* InjectionBundle */ = {
 			isa = PBXGroup;
 			children = (
 				BBDD84592C4FF645000F3124 /* ClientBoot.mm */,
@@ -266,8 +267,9 @@
 				BBDD84302C4FE849000F3124 /* DLKitC.c */,
 				BBDD84312C4FE849000F3124 /* trie_dladdr.mm */,
 				BBDD84322C4FE849000F3124 /* trie_dlops.mm */,
+				BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */,
 			);
-			path = IInjectionBundle;
+			path = InjectionBundle;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -706,7 +708,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "InjectionBundle/InjectionBundle-Bridging-Header.h";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
@@ -739,7 +741,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "InjectionBundle/InjectionBundle-Bridging-Header.h";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;
