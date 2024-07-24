@@ -12,16 +12,18 @@
 #import "InjectionClient.h"
 #import "SimpleSocket.h"
 
-@implementation NSObject(InjectionNext)
+@interface InjectionNext : SimpleSocket
+@end
+
+@implementation InjectionNext(Connecting)
 
 static SimpleSocket *injectionClient;
 static dispatch_once_t onlyOneClient;
 
 /// Called on load of image containing this code
 + (void)load {
-    if (Class clientClass = objc_getClass("InjectionNext"))
-        [self performSelectorInBackground:@selector(tryConnect:)
-                               withObject:clientClass];
+    [self performSelectorInBackground:@selector(tryConnect:)
+                           withObject:self];
 }
 
 /// Attempt to connect to InjectionNext.app
