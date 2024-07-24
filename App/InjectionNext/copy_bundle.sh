@@ -35,5 +35,5 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY" &&
-    defaults write com.johnholdsworth.InjectionNext signingidentity "$EXPANDED_CODE_SIGN_IDENTITY"
+    defaults write com.johnholdsworth.InjectionNext codesigningIdentity "$EXPANDED_CODE_SIGN_IDENTITY"
 fi

@@ -41,7 +41,7 @@ class MonitorXcode {
         let tee = ""
         #endif
         if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
-            "'\(Recompiler.xcodePath)/Contents/MacOS/Xcode' 2>&1\(tee)") {
+            "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(tee)") {
             Self.runningXcode = self
             DispatchQueue.global().async {
                 while true {

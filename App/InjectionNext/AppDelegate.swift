@@ -62,7 +62,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             InjectionServer.error("Please quit Xcode and\nuse this app to launch it.")
         }
  
-        librariesField.stringValue = Recompiler.deviceLibraries
+        librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setMenuIcon(.idle)
     }
@@ -89,11 +89,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         let open = NSOpenPanel()
         open.prompt = "Select Xcode"
         open.directoryURL = URL(fileURLWithPath:
-            Recompiler.xcodePath).deletingLastPathComponent()
+            Defaults.xcodePath).deletingLastPathComponent()
         open.canChooseDirectories = false
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
-            Recompiler.xcodePath = path
+            Defaults.xcodePath = path
             sender.toolTip = path
         }
     }
@@ -134,7 +134,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }
 
     @IBAction func updateLibraries(_ sender: NSTextField) {
-        Recompiler.deviceLibraries = librariesField.stringValue
+        Defaults.deviceLibraries = librariesField.stringValue
     }
 
     @IBAction func unhideSymbols(_ sender: NSMenuItem) {

@@ -20,6 +20,8 @@
 		22F5171D2C0E657D00DF88FA /* copy_test_frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
 		BB4654812C257F110080EC40 /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4654802C257F110080EC40 /* Recompiler.swift */; };
+		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
+		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
 		BBB64DC51FD450AF0020BE47 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF31FAD808B004B267C /* README.md */; };
 		BBB64DC61FD450B40020BE47 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF41FAD80D0004B267C /* LICENSE */; };
@@ -102,6 +104,7 @@
 		BB4654802C257F110080EC40 /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recompiler.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
+		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		BBB64DE41FD571300020BE47 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		BBB64FEB1FD585D50020BE47 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -216,6 +219,7 @@
 				CEC17029253ED117002E823F /* Experimental.swift */,
 				BB4654802C257F110080EC40 /* Recompiler.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
+				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -371,6 +375,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */,
+				BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */,
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
 				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
@@ -438,6 +443,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
 				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,

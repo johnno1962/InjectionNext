@@ -25,28 +25,6 @@ struct Recompiler {
         var workingDir: String
     }
     
-    /// App deauflts for persistent state
-    static let xcodePathDefault = "XcodePath"
-    static let librariesDefault = "libraries"
-    static var xcodePath: String {
-        get {
-            appDelegate.defaults.string(forKey: xcodePathDefault) ??
-                "/Applications/Xcode.app"
-        }
-        set {
-            appDelegate.defaults.setValue(newValue, forKey: xcodePathDefault)
-        }
-    }
-    static var deviceLibraries: String {
-        get {
-            appDelegate.defaults.string(forKey: librariesDefault) ??
-                "-framework XCTest -lXCTestSwiftSupport"
-        }
-        set {
-            appDelegate.defaults.setValue(newValue, forKey: librariesDefault)
-        }
-    }
-    
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available and last error
@@ -172,11 +150,11 @@ struct Recompiler {
                                    encoding: .utf8)
     
         log("Recompiling: "+source)
-        let toolchain = Self.xcodePath +
+        let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
         let compiler = toolchain + "/usr/bin/" +
             (isSwift ? "swift-frontend" : "clang")
-        let platformUsr = Self.xcodePath + "/Contents/Developer/Platforms/" +
+        let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
             ".platform/Developer/usr/"
         let languageSpecific = (isSwift ?
@@ -208,7 +186,7 @@ struct Recompiler {
     
     /// Link and object file to create a dynamic library
     mutating func link(object: String, dylib: String, platform: String, arch: String) -> String? {
-        let xcodeDev = Self.xcodePath+"/Contents/Developer"
+        let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
         let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
 
         var osSpecific = ""
@@ -239,8 +217,8 @@ struct Recompiler {
         if DispatchQueue.main.sync(execute: {
             appDelegate.deviceTesting.state == .on }) {
             let otherOptions = DispatchQueue.main.sync(execute: {
-                appDelegate.librariesField.stringValue = Self.deviceLibraries
-                return Self.deviceLibraries })
+                appDelegate.librariesField.stringValue = Defaults.deviceLibraries
+                return Defaults.deviceLibraries })
             let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
             testingOptions = """
                 -F "\(platformDev)/Library/Frameworks" \
@@ -275,7 +253,7 @@ struct Recompiler {
             identity = appDelegate.identityField.stringValue
         }
         let codesign = """
-            (export CODESIGN_ALLOCATE="\(Self.xcodePath+"/Contents/Developer"
+            (export CODESIGN_ALLOCATE="\(Defaults.xcodePath+"/Contents/Developer"
              )/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate"; \
             if /usr/bin/file \"\(dylib)\" | /usr/bin/grep ' shared library ' >/dev/null; \
             then /usr/bin/codesign --force -s "\(identity)" \"\(dylib)\";\
