@@ -37,7 +37,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet var librariesField: NSTextField!
     // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
-    @objc let defaults = UserDefaults.standard
+    // Interface to app's persistent state.
+    @objc let defaults = Defaults.userDefaults
 
     @IBOutlet weak var codeSignBox: NSComboBox!
 
@@ -58,6 +59,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         statusItem.menu = statusMenu
         statusItem.isEnabled = true
         statusItem.title = appName
+        setMenuIcon(.idle)
 
         if let quit = statusMenu.item(at: statusMenu.items.count-1) {
             quit.title = "Quit "+appName
@@ -74,7 +76,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
  
         librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
-        setMenuIcon(.idle)
         setupCodeSigningComboBox()
     }
 
@@ -106,6 +107,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if open.runModal() == .OK, let path = open.url?.path {
             Defaults.xcodePath = path
             sender.toolTip = path
+            runXcode(sender)
         }
     }
     

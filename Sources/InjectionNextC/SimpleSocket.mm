@@ -286,20 +286,23 @@ typedef ssize_t (*io_func)(int, void *, size_t);
     close(clientSocket);
 }
 
-/// Hash used to differentiate HotReloading users on network.
-/// Derived from path to source file in project's DerivedData.
+/// Hash used to differentiate InjectionNext users broadcasting.
+/// Hash derived from path to user's home directory determined
+/// from path to this source file in project's DerivedData or for
+/// pre-built bundles, home directory taken from a value patched
+/// into the bundle's Info.plist as it is copied into client app.
 + (int)multicastHash {
-    #ifdef INJECTION_III_APP
-    const char *key = [[NSBundle bundleForClass:self]
-        .infoDictionary[@"UserHome"] UTF8String] ?:
-        NSHomeDirectory().UTF8String;
-    #else
-    NSString *file = [NSString stringWithUTF8String:__FILE__];
-    const char *key = [file
+    #if SWIFT_PACKAGE
+    NSString *file = @__FILE__;
+    INJECTION_KEY = [file
        stringByReplacingOccurrencesOfString: @"(/Users/[^/]+).*"
            withString: @"$1" options: NSRegularExpressionSearch
-               range: NSMakeRange(0, file.length)].UTF8String;
+               range: NSMakeRange(0, file.length)];
+    #else // Pre-built bundles (InjectionNext.app)
+    INJECTION_KEY = [NSBundle bundleForClass:self]
+        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
     #endif
+    const char *key = INJECTION_KEY.UTF8String;
     int hash = 0;
     for (size_t i=0, len = strlen(key); i<len; i++)
         hash = hash*5 ^ (i+3)%15*key[i];

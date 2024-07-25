@@ -26,6 +26,7 @@ if [ "$CONFIGURATION" == "Debug" ]; then
         rsync -a "$COPY/Frameworks/Testing.framework"/* "$TESTING/"
      elif [ -d "$TESTING" ]; then
         rsync -a "$TESTING"/* "$COPY/Frameworks/Testing.framework/"
+        codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks/Testing.framework";
      fi
      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks"/{XC*,*.dylib};
     else

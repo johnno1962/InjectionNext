@@ -10,36 +10,37 @@ import Foundation
 
 struct Defaults {
     /// App deauflts for persistent state
+    static let userDefaults = UserDefaults.standard
     static let xcodePathDefault = "XcodePath"
     static let librariesDefault = "libraries"
     static let codesigningDefault = "codesigningIdentity"
     static var xcodePath: String {
         get {
-            appDelegate.defaults.string(forKey: xcodePathDefault) ??
+            userDefaults.string(forKey: xcodePathDefault) ??
                 "/Applications/Xcode.app"
         }
         set {
-            appDelegate.defaults.setValue(newValue, 
-                                          forKey: xcodePathDefault)
+            userDefaults.setValue(newValue,
+                                  forKey: xcodePathDefault)
         }
     }
     static var deviceLibraries: String {
         get {
-            appDelegate.defaults.string(forKey: librariesDefault) ??
+            userDefaults.string(forKey: librariesDefault) ??
                 "-framework XCTest -lXCTestSwiftSupport"
         }
         set {
-            appDelegate.defaults.setValue(newValue,
-                                          forKey: librariesDefault)
+            userDefaults.setValue(newValue,
+                                  forKey: librariesDefault)
         }
     }
     static var codesigningIdentity: String? {
         get {
-            appDelegate.defaults.string(forKey: codesigningDefault)
+            userDefaults.string(forKey: codesigningDefault)
         }
         set {
-            appDelegate.defaults.setValue(newValue, 
-                                          forKey: codesigningDefault)
+            userDefaults.setValue(newValue,
+                                  forKey: codesigningDefault)
         }
     }
 }

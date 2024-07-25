@@ -792,7 +792,7 @@
 			repositoryURL = "https://github.com/johnno1962/SwiftRegex5";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.1.0;
+				minimumVersion = 6.1.2;
 			};
 		};
 		224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */ = {
@@ -808,7 +808,7 @@
 			repositoryURL = "https://github.com/johnno1962/DLKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.4.2;
+				minimumVersion = 3.4.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

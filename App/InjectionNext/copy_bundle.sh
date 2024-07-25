@@ -29,6 +29,14 @@ if [ "$CONFIGURATION" == "Debug" ]; then
      BUNDLE=${1:-iOSDevInjection}
      rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/{Frameworks,PrivateFrameworks}/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$COPY/Frameworks/" &&
      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks"/{XC*,*.dylib};
+     # Xcode 16's new way of bundling tests
+     TESTING="/tmp/Testing.$PLATFORM_NAME.framework"
+     if [ -d "$COPY/Frameworks/Testing.framework" ]; then
+        rsync -a "$COPY/Frameworks/Testing.framework"/* "$TESTING/"
+     elif [ -d "$TESTING" ]; then
+        rsync -a "$TESTING"/* "$COPY/Frameworks/Testing.framework/"
+        codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks/Testing.framework";
+     fi
     else
      BUNDLE=${1:-iOSInjection}
     fi
