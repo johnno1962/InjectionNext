@@ -25,7 +25,7 @@ class MonitorXcode {
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     // Trying to avoid fragmenting memory
     var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
-    // The service to reomcpile and inject a source file.
+    // The service to recompile and inject a source file.
     var recompiler = Recompiler()
 
     func debug(_ msg: String) {
@@ -50,6 +50,10 @@ class MonitorXcode {
                             appDelegate.setMenuIcon(.ready)
                             self.processSourceKitOutput(from: xcodeStdout)
                             appDelegate.setMenuIcon(.idle)
+                        }
+                        Self.runningXcode = nil
+                        if !xcodeStdout.terminatedOK() {
+                            appDelegate.runXcode(self)
                         }
                         break // break on clean exit and EOF.
                     } catch {

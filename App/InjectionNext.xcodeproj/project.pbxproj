@@ -235,8 +235,8 @@
 				BBCA02581FB112F500E45F0F /* App.icns */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
-				22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */,
 				BBDD84562C4FED60000F3124 /* build_bundles.sh */,
+				22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */,
 				BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */,
 			);
 			path = InjectionNext;
