@@ -44,6 +44,13 @@ typedef union {
 
 @implementation SimpleSocket
 
+#if !SWIFT_PACKAGE
++ (void)initialize { // Pre-built bundles (+InjectionNext.app)
+    INJECTION_KEY = [NSBundle bundleForClass:self]
+        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
+}
+#endif
+
 + (int)error:(NSString *)message {
     NSLog([@"%@/" stringByAppendingString:message],
           self, strerror(errno));
@@ -298,9 +305,6 @@ typedef ssize_t (*io_func)(int, void *, size_t);
        stringByReplacingOccurrencesOfString: @"(/Users/[^/]+).*"
            withString: @"$1" options: NSRegularExpressionSearch
                range: NSMakeRange(0, file.length)];
-    #else // Pre-built bundles (InjectionNext.app)
-    INJECTION_KEY = [NSBundle bundleForClass:self]
-        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
     #endif
     const char *key = INJECTION_KEY.UTF8String;
     int hash = 0;
