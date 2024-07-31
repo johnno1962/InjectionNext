@@ -76,7 +76,6 @@ class InjectionServer: SimpleSocket {
     override func runInBackground() {
         do {
             try Fortify.protect {
-                Self.currentClient = self
                 appDelegate.setMenuIcon(.ok)
                 processResponses()
                 appDelegate.setMenuIcon(MonitorXcode
@@ -122,6 +121,9 @@ class InjectionServer: SimpleSocket {
                 if let tmpPath = readString() {
                     print("Tmp path: "+tmpPath)
                     self.tmpPath = tmpPath
+                    if !tmpPath.contains("/Xcode/UserData/Previews/") {
+                        Self.currentClient = self
+                    }
                 } else {
                     error("**** Bad tmp ****")
                 }
