@@ -15,19 +15,20 @@
 @interface InjectionNext : SimpleSocket
 @end
 
-@implementation InjectionNext(Connecting)
+@implementation NSObject(InjectionNext)
 
 static SimpleSocket *injectionClient;
 static dispatch_once_t onlyOneClient;
 
 /// Called on load of image containing this code
 + (void)load {
-    [self performSelectorInBackground:@selector(tryConnect:)
-                           withObject:self];
+    if (![NSTemporaryDirectory() containsString:@"/UserData/Previews/"])
+        [self performSelectorInBackground:@selector(connectToInjection:)
+                               withObject:[InjectionNext self]];
 }
 
 /// Attempt to connect to InjectionNext.app
-+ (void)tryConnect:(Class)clientClass {
++ (void)connectToInjection:(Class)clientClass {
     const char *hostip = getenv("INJECTION_HOST") ?: "127.0.0.1";
     
     // Do we need to use broadcasts to find devlepers Mac on the network
