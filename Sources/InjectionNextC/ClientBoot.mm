@@ -13,6 +13,7 @@
 #import "SimpleSocket.h"
 
 @interface InjectionNext : SimpleSocket
++ (BOOL)InjectionBoot_inPreview;
 @end
 
 @implementation NSObject(InjectionNext)
@@ -22,7 +23,7 @@ static dispatch_once_t onlyOneClient;
 
 /// Called on load of image containing this code
 + (void)load {
-    if (![NSTemporaryDirectory() containsString:@"/UserData/Previews/"])
+    if (![InjectionNext InjectionBoot_inPreview])
         [self performSelectorInBackground:@selector(connectToInjection:)
                                withObject:[InjectionNext self]];
 }
