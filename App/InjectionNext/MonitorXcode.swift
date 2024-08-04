@@ -150,7 +150,8 @@ class MonitorXcode {
                     } else if /*(args.last == "-I" || args.last == "-F" ||
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
-                        arg.contains(indexBuild) && !arg.hasSuffix(".yaml") {
+                        arg.contains(indexBuild) &&
+                            !arg.contains("/Intermediates.noindex/") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
