@@ -119,6 +119,14 @@ class MonitorXcode {
                 var swiftFiles = "", args = [String](),
                     fileCount = 0, workingDir = "/tmp"
                 while var arg = readQuotedString() {
+                    let llvmIncs = "/llvm-macosx-arm64/lib"
+                    if arg.hasPrefix("-I"), arg.contains(llvmIncs) {
+                        arg = arg.replacingOccurrences(of: llvmIncs,
+                            with: "/../buildbot_osx"+llvmIncs)
+                    }
+                    if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
+                        Unhider.packageFrameworks = arg
+                    }
                     if arg.hasSuffix(".swift") {
                         swiftFiles += arg+"\n"
                         fileCount += 1
@@ -142,19 +150,11 @@ class MonitorXcode {
                     } else if /*(args.last == "-I" || args.last == "-F" ||
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
-                        arg.contains(indexBuild) &&
-                            !arg.contains("/Intermediates.noindex/") {
+                        arg.contains(indexBuild) && !arg.hasSuffix(".yaml") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
                     } else if arg != "-Xfrontend" {
-                        if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
-                            Unhider.packageFrameworks = arg
-                        } else if arg.hasPrefix("-I") {
-                            let llvmIncs = "/llvm-macosx-arm64/lib"
-                            arg = arg.replacingOccurrences(of: llvmIncs,
-                                with: "/../buildbot_osx"+llvmIncs)
-                        }
                         args.append(arg)
                     }
                 }
