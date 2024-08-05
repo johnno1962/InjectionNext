@@ -102,7 +102,7 @@ open class Unhider {
         for entry in object.entries.filter({
             let symbol = $0.symbol
             return $0.entry.pointee.n_sect != NO_SECT && // Is this a definition?
-            symbol.hasPrefix("$s") && symbol[#"A\d*_$"#] && // Default argument?
+            symbol.hasPrefix("$s") && symbol[#"(A\d*_|M[cgn])$"#] && // Default arg?
             // Have we not seen this symbol before or previously seen it in this file
             (unhidden[symbol] == nil || unhidden[symbol] == path) }) {
             unhidden[entry.symbol] = path
