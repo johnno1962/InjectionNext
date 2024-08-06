@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "InjectionClient.h"
 #import "InjectionImplC.h"
+#import "InjectionClient.h"
 #import "SimpleSocket.h"
 
 @interface InjectionNext : SimpleSocket

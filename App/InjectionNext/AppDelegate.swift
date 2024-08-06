@@ -38,7 +38,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
     // Restart XCode if crashed.
-    @IBOutlet weak var restartDeviceButton: NSMenuItem!
+    @IBOutlet weak var restartDeviceItem: NSMenuItem!
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
@@ -80,7 +80,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
-        restartDeviceButton.state = Defaults.xcodeRestart == true ? .on : .off
+        restartDeviceItem.state = Defaults.xcodeRestart == true ? .on : .off
     }
 
     func setMenuIcon(_ state: InjectionState) {
@@ -121,9 +121,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }()
     
     @IBAction func deviceEnable(_ sender: NSMenuItem) {
-        sender.state = sender.state == .off ? .on : .off
         var openPort = ""
-        if sender.state == .on {
+        if sender.state.toggle() == .on {
             codeSignBox.window?.makeKeyAndOrderFront(sender)
             NSApplication.shared.activate(ignoringOtherApps: true)
             _ = startHostLocatingServerOnce
@@ -156,8 +155,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
 
     @IBAction func updateXcodeRestart(_ sender: NSMenuItem) {
-        restartDeviceButton.state.toggle()
-        Defaults.xcodeRestart = restartDeviceButton.state == .on
+        Defaults.xcodeRestart = sender.state.toggle() == .on
     }
     
     @IBAction func unhideSymbols(_ sender: NSMenuItem) {
@@ -237,7 +235,8 @@ class UserIDComboBoxDataSaver {
 }
 
 private extension NSControl.StateValue {
-    mutating func toggle() {
+    @discardableResult
+    mutating func toggle() -> Self {
         switch self {
         case .on:
             self = .off
@@ -248,5 +247,6 @@ private extension NSControl.StateValue {
         default:
             break
         }
+        return self
     }
 }
