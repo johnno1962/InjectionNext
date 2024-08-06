@@ -31,12 +31,15 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet var statusItem: NSStatusItem!
     // Codesigning identity
     @IBOutlet var identityField: NSTextField!
-    // Enable injection on deivces
+    // Enable injection on devices
     @IBOutlet var deviceTesting: NSButton!
     // Testing libraries to link with
     @IBOutlet var librariesField: NSTextField!
     // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
+    // Restart XCode if crashed.
+    @IBOutlet weak var restartDeviceButton: NSMenuItem!
+
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
 
@@ -77,6 +80,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
+        restartDeviceButton.state = Defaults.xcodeRestart == true ? .on : .off
     }
 
     func setMenuIcon(_ state: InjectionState) {
@@ -150,6 +154,12 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         Defaults.deviceLibraries = librariesField.stringValue
     }
 
+
+    @IBAction func updateXcodeRestart(_ sender: NSMenuItem) {
+        restartDeviceButton.state.toggle()
+        Defaults.xcodeRestart = restartDeviceButton.state == .on
+    }
+    
     @IBAction func unhideSymbols(_ sender: NSMenuItem) {
         Unhider.startUnhide()
     }
@@ -222,6 +232,21 @@ class UserIDComboBoxDataSaver {
         } else {
             NSLog("Selected value does not contain a valid ID")
             return
+        }
+    }
+}
+
+private extension NSControl.StateValue {
+    mutating func toggle() {
+        switch self {
+        case .on:
+            self = .off
+        case .off:
+            self = .on
+        case .mixed:
+            self = .mixed
+        default:
+            break
         }
     }
 }

@@ -52,7 +52,7 @@ class MonitorXcode {
                             appDelegate.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        if !xcodeStdout.terminatedOK() {
+                        if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
                             appDelegate.runXcode(self)
                         }
                         break // break on clean exit and EOF.
