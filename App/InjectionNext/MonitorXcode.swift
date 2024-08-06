@@ -127,6 +127,7 @@ class MonitorXcode {
                     if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                         Unhider.packageFrameworks = arg
                     }
+
                     if arg.hasSuffix(".swift") {
                         swiftFiles += arg+"\n"
                         fileCount += 1

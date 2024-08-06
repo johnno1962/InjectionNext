@@ -10,10 +10,10 @@
 #import <objc/runtime.h>
 
 #import "InjectionClient.h"
+#import "InjectionImplC.h"
 #import "SimpleSocket.h"
 
 @interface InjectionNext : SimpleSocket
-+ (BOOL)InjectionBoot_inPreview;
 @end
 
 @implementation NSObject(InjectionNext)
