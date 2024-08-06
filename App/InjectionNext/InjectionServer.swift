@@ -67,8 +67,12 @@ class InjectionServer: SimpleSocket {
     // Simple validation to weed out invalid connections
     func validateConnection() -> CInt? {
         let clientVersion = readInt()
-        guard clientVersion == INJECTION_VERSION &&
-            readString()?.hasPrefix(NSHomeDirectory()) == true else { return nil }
+        guard clientVersion == INJECTION_VERSION,
+              let injectionKey = readString() else { return nil }
+        guard injectionKey.hasPrefix(NSHomeDirectory()) else {
+            error("Invalid INJECTION_KEY: "+injectionKey)
+            return nil
+        }
         return clientVersion
     }
 
