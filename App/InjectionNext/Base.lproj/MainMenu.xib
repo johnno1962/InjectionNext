@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22690"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -19,6 +19,7 @@
                 <outlet property="deviceTesting" destination="SQv-Cq-gPC" id="wzU-n5-tvW"/>
                 <outlet property="lastErrorField" destination="yfA-aU-ldx" id="oxQ-Xy-ugr"/>
                 <outlet property="librariesField" destination="rw0-Sb-xW5" id="iLm-Qn-E1h"/>
+                <outlet property="restartDeviceButton" destination="6cM-gd-Yoh" id="vaG-Ug-i8f"/>
                 <outlet property="statusMenu" destination="V8Q-mq-A2f" id="Epo-HD-J21"/>
             </connections>
         </customObject>
@@ -663,6 +664,12 @@
                         <action selector="selectXcode:" target="Voe-Tx-rLC" id="rCK-bY-XeP"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Restart XCode on crash" id="6cM-gd-Yoh">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="updateXcodeRestart:" target="Voe-Tx-rLC" id="KgB-zd-aHd"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Enable Devices" toolTip="Enable injecting on a device" id="s0A-3D-ThA">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Evable Devices"/>
@@ -727,7 +734,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="1355" y="786" width="737" height="204"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1127"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="Qow-ez-PwQ">
                 <rect key="frame" x="0.0" y="0.0" width="737" height="204"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -787,7 +794,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="1355" y="786" width="688" height="268"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1127"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="kR1-2l-DFV">
                 <rect key="frame" x="0.0" y="0.0" width="688" height="268"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -806,7 +813,6 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <size key="minSize" width="655" height="251"/>
                                     <size key="maxSize" width="675" height="10000000"/>
-                                    <color key="insertionPointColor" name="textInsertionPointColor" catalog="System" colorSpace="catalog"/>
                                 </textView>
                             </subviews>
                         </clipView>
