@@ -27,19 +27,21 @@ if [ "$CONFIGURATION" == "Debug" ]; then
      BUNDLE=${1:-xrOSDevInjection}
     elif [ "$PLATFORM_NAME" == "iphoneos" ]; then
      BUNDLE=${1:-iOSDevInjection}
-     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/{Frameworks,PrivateFrameworks}/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$COPY/Frameworks/" &&
-     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks"/{XC*,*.dylib};
-     # Xcode 16's new way of bundling tests
-     TESTING="/tmp/Testing.$PLATFORM_NAME.framework"
-     if [ -d "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework" ]; then
-        rsync -a "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework"/* "$TESTING/"
-     elif [ -d "$TESTING" ]; then
-        rsync -a "$TESTING"/* "$COPY/Frameworks/Testing.framework/"
-        codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY/Frameworks/Testing.framework";
-     fi
     else
      BUNDLE=${1:-iOSInjection}
     fi
+
+    rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/{Frameworks,PrivateFrameworks}/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
+    codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,*.dylib};
+    # Xcode 16's new way of bundling tests
+    TESTING="/tmp/Testing.$PLATFORM_NAME.framework"
+    if [ -d "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework" ]; then
+      rsync -a "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework"/* "$TESTING/"
+    elif [ -d "$TESTING" ]; then
+      rsync -a "$TESTING"/* "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework/"
+      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework";
+    fi
+
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY" &&
