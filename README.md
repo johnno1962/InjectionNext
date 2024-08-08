@@ -43,10 +43,36 @@ change to orange. After that, by parsing the messages from the "supervised"
 launch of Xcode it is possible to know when files are saved and exactly how
 to recompile them for injection. Injection on a device uses the same 
 configurtion but is opt-in through the menu item "Enable Deivces"
-(as it needs to open a network port). You also need to enter the 
+(as it needs to open a network port). You also need to select the 
 project's "expanded codesigning identity" from the codesigning
-phase of your build logs into the window that pops up.
+phase of your build logs in the window that pops up.
 
+If you'd rather not be adding a SPM dependancy to your project, the app's
+resources contains pre-built bundles which you can copy into your app during
+the build by using a "Run Script/Build Phase" such as the following:
+
+```
+export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
+if [ -f "$RESOURCES/copy_bundle.sh" ]; then
+    "$RESOURCES/copy_bundle.sh"
+fi
+```
+
+These bundles should load automatically if you've integerated the
+[Inject](https://github.com/krzysztofzablocki/Inject) or
+[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
+Otherwise, you can add the following code to run on startup of your app:
+
+```
+    #if DEBUG
+    if let path = Bundle.main.path(forResource:
+            "iOSInjection", ofType: "bundle") ??
+        Bundle.main.path(forResource:
+            "macOSInjection", ofType: "bundle") {
+        Bundle(path: path)!.load()
+    }
+    #endif
+```
 To inject tests on a device: When enabling the "Enable Deivces" menu item
 select "Enable testing on device" which will add the parameters shown
 to the link of each dynamic library. As you do this a command will be
