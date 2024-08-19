@@ -73,6 +73,10 @@ Otherwise, you can add the following code to run on startup of your app:
     }
     #endif
 ```
+The binary bundles also integrate the [Quick](https://github.com/Quick/Quick) 
+and [Nimble](https://github.com/Quick/Nimble) testing frameworks under their
+respective Apache licences.
+
 To inject tests on a device: When enabling the "Enable Deivces" menu item
 select "Enable testing on device" which will add the parameters shown
 to the link of each dynamic library. As you do this a command will be
