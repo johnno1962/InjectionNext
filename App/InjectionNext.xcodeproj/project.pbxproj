@@ -36,7 +36,6 @@
 		BBCA02591FB112F500E45F0F /* App.icns in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02581FB112F500E45F0F /* App.icns */; };
 		BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */; };
 		BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025F1FB122C300E45F0F /* InjectionOK.tif */; };
-		BBCCC3B62C73B6A800E71F81 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBCCC3B52C73B6A800E71F81 /* Quick */; };
 		BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBBEC42D1FC56522004188B3 /* XCTest.framework */; };
 		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
 		BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */; };
@@ -61,6 +60,7 @@
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
 		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
 		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
+		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -176,9 +176,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */,
+				BBEB87122C74FD930044578A /* Quick in Frameworks */,
 				BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */,
 				BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */,
-				BBCCC3B62C73B6A800E71F81 /* Quick in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,8 +370,8 @@
 				224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */,
 				2217BE7F2C0A65C20032A832 /* XCRemoteSwiftPackageReference "Fortify" */,
 				22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */,
-				BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */,
 				BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */,
+				BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */,
 			);
 			productRefGroup = BB439B661FABA64300B4F50B /* Products */;
 			projectDirPath = "";
@@ -843,6 +843,14 @@
 				kind = branch;
 			};
 		};
+		BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnno1962/Quick";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -880,6 +888,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		BBEB87112C74FD930044578A /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
