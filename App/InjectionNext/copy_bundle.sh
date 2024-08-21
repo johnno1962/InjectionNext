@@ -41,6 +41,13 @@ if [ "$CONFIGURATION" == "Debug" ]; then
       rsync -a "$TESTING"/* "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework/"
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework";
     fi
+    PLUGINS="/tmp/Plugins.$PRODUCT_NAME.$PLATFORM_NAME"
+    if [ -d "$CODESIGNING_FOLDER_PATH/Plugins" ]; then
+      rsync -a "$CODESIGNING_FOLDER_PATH/Plugins"/* "$PLUGINS/"
+    elif [ -d "$PLUGINS" ]; then
+      rsync -a "$PLUGINS"/* "$CODESIGNING_FOLDER_PATH/Plugins/"
+      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Plugins/*.xctest";
+    fi
 
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
