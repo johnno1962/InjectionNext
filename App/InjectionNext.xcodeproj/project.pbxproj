@@ -17,7 +17,6 @@
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
-		22F5171D2C0E657D00DF88FA /* copy_test_frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
@@ -101,7 +100,6 @@
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
 		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unhider.swift; sourceTree = "<group>"; };
-		22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_test_frameworks.sh; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -246,7 +244,6 @@
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
 				BBDD84562C4FED60000F3124 /* build_bundles.sh */,
-				22F5171C2C0E657D00DF88FA /* copy_test_frameworks.sh */,
 				BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */,
 			);
 			path = InjectionNext;
@@ -399,7 +396,6 @@
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
 				222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */,
 				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
-				22F5171D2C0E657D00DF88FA /* copy_test_frameworks.sh in Resources */,
 				BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
