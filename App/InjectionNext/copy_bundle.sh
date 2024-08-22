@@ -33,17 +33,17 @@ if [ "$CONFIGURATION" == "Debug" ]; then
 
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/{Frameworks,PrivateFrameworks}/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,*.dylib};
-    # Xcode 16's new way of bundling tests
-    TESTING="/tmp/Testing.$PLATFORM_NAME.framework"
-    if [ -d "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework" ]; then
-      rsync -a "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework"/* "$TESTING/"
-    elif [ -d "$TESTING" ]; then
+    # Xcode 16 support
+    TESTING="$PLATFORM_DEVELOPER_LIBRARY_DIR/Frameworks/Testing.Framework"
+    if [ -d "$TESTING" ]; then
       rsync -a "$TESTING"/* "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework/"
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework";
     fi
     PLUGINS="/tmp/Plugins.$PRODUCT_NAME.$PLATFORM_NAME"
     if [ -d "$CODESIGNING_FOLDER_PATH/Plugins" ]; then
+     (sleep 5;
       rsync -a "$CODESIGNING_FOLDER_PATH/Plugins"/* "$PLUGINS/"
+     ) 1>/dev/null 2>&1 & # copy needs to be delayed slightly
     elif [ -d "$PLUGINS" ]; then
       rsync -a "$PLUGINS"/* "$CODESIGNING_FOLDER_PATH/Plugins/"
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Plugins/*.xctest";
