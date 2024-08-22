@@ -41,9 +41,9 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     fi
     PLUGINS="/tmp/Plugins.$PRODUCT_NAME.$PLATFORM_NAME"
     if [ -d "$CODESIGNING_FOLDER_PATH/Plugins" ]; then
-     (sleep 5;
-      rsync -a "$CODESIGNING_FOLDER_PATH/Plugins"/* "$PLUGINS/"
-     ) 1>/dev/null 2>&1 & # copy needs to be delayed slightly
+     (while
+      rsync -va "$CODESIGNING_FOLDER_PATH/Plugins"/* "$PLUGINS/" |
+      grep /; do sleep 10; done) 1>/dev/null 2>&1 & # copy until done
     elif [ -d "$PLUGINS" ]; then
       rsync -a "$PLUGINS"/* "$CODESIGNING_FOLDER_PATH/Plugins/"
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Plugins/*.xctest";

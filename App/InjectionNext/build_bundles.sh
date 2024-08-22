@@ -22,7 +22,7 @@ function build_bundle () {
         echo "Missing RPATH $SWIFT_DYLIBS_PATH $XCTEST_FRAMEWORK_PATH"
         exit 1
     fi
-    "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="arm64" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="$SWIFT_DYLIBS_PATH $XCTEST_FRAMEWORK_PATH $CONCURRENCY_DYLIBS @loader_path/Frameworks" PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
+    "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="arm64" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="@loader_path/Frameworks $SWIFT_DYLIBS_PATH $CONCURRENCY_DYLIBS" PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
 
     rsync -au $SYMROOT/$BUNDLE_CONFIG-$SDK/*.bundle "$CODESIGNING_FOLDER_PATH/Contents/Resources"
 }
@@ -32,4 +32,5 @@ build_bundle iOSDev iPhoneOS iphoneos &&
 build_bundle tvOS AppleTVSimulator appletvsimulator &&
 build_bundle tvOSDev AppleTVOS appletvos &&
 build_bundle xrOS XRSimulator xrsimulator &&
-build_bundle xrOSDev XROS xros
+build_bundle xrOSDev XROS xros &&
+exit 0
