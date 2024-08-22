@@ -843,7 +843,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnno1962/Quick";
 			requirement = {
-				branch = main;
+				branch = uncached;
 				kind = branch;
 			};
 		};
