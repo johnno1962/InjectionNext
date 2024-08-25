@@ -432,8 +432,11 @@ struct multicast_socket_packet {
         int idx = if_nametoindex(ifa->ifa_name);
         setsockopt(multicastSocket, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof idx);
         addr.sin_addr.s_addr = laddr | ~nmask;
-        printf("Broadcasting to %s.%d:%s to locate InjectionNext host...\n",
+        printf("Broadcasting to %s#%d:%s to locate InjectionNext host...\n",
                ifa->ifa_name, idx, inet_ntoa(addr.sin_addr));
+        if (sendto(multicastSocket, &msgbuf, sizeof msgbuf, 0,
+                   (struct sockaddr *)&addr, sizeof addr) < 0)
+            [self error:@"Could not send broadcast ping: %s"];
         if (sendto(multicastSocket, &msgbuf, sizeof msgbuf, 0,
                    (struct sockaddr *)&addr, sizeof addr) < 0)
             [self error:@"Could not send broadcast ping: %s"];
