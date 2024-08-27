@@ -92,8 +92,7 @@ open class InjectionNext: SimpleSocket {
             }
             switch command {
             case .invalid:
-                error("Connection did not validate.")
-                return
+                return error("Connection did not validate.")
             case .log:
                 if let msg = readString() {
                     print(msg)
@@ -102,16 +101,23 @@ open class InjectionNext: SimpleSocket {
                 if let xcodePath = readString() {
                     Reloader.xcodeDev = xcodePath+"/Contents/Developer"
                 }
+            case .sendFile:
+                guard let path = readString() else {
+                    return error("Unable to read path")
+                }
+                if path.hasSuffix("/") {
+                    mkdir(path, 0o755)
+                    continue
+                }
+                recvFile(path)
             case .load:
                 guard let dylib = readString() else {
-                    error("Unable to read path")
-                    return
+                    return error("Unable to read path")
                 }
                 injectAndSweep(dylib)
             case .inject:
                 guard let dylibName = readString(), let data = readData() else {
-                    error("Unable to read dylib")
-                    return
+                    return error("Unable to read dylib")
                 }
                 let dylib = NSTemporaryDirectory() + dylibName
                 try! data.write(to: URL(fileURLWithPath: dylib))
@@ -119,8 +125,7 @@ open class InjectionNext: SimpleSocket {
             case .EOF:
                 return
             default:
-                error("**** @unknown case ****")
-                return
+                return error("**** @unknown case \(commandInt) ****")
             }
         }
     }

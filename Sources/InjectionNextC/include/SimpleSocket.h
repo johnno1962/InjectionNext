@@ -47,5 +47,7 @@
 - (BOOL)writeData:(NSData *_Nonnull)data;
 - (BOOL)writeString:(NSString *_Nonnull)string;
 - (BOOL)writeCommand:(int)command withString:(NSString *_Nullable)string;
+- (BOOL)sendFile:(NSString *_Nonnull)path;
+- (BOOL)recvFile:(NSString *_Nonnull)path;
 
 @end

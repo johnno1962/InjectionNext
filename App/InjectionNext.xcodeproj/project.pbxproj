@@ -24,6 +24,7 @@
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
+		BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
 		BBB64DC51FD450AF0020BE47 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF31FAD808B004B267C /* README.md */; };
 		BBB64DC61FD450B40020BE47 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF41FAD80D0004B267C /* LICENSE */; };
 		BBB64DE51FD571310020BE47 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB64DE41FD571300020BE47 /* libz.tbd */; };
@@ -461,6 +462,7 @@
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB4654812C257F110080EC40 /* Recompiler.swift in Sources */,
 				224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */,
+				BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */,
 				22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

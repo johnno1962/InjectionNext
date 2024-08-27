@@ -21,6 +21,7 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <sys/stat.h>
 
 #if 0
 #define SLog NSLog
@@ -287,6 +288,34 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 - (BOOL)writeCommand:(int)command withString:(NSString *)string {
     return [self writeInt:command] &&
         (!string || [self writeString:string]);
+}
+
+- (BOOL)sendFile:(NSString *)path {
+    FILE *input = fopen(path.UTF8String, "r");
+    struct stat st;
+    if (!input || fstat(fileno(input), &st)) return FALSE;
+    [self writeInt:(int)st.st_size];
+    off_t pos = 0, chunk;
+    char buffer[MAX_PACKET];
+    while ((chunk = MIN(st.st_size-pos, sizeof buffer)) > 0 &&
+           (chunk = fread(buffer, 1, chunk, input)) > 0 &&
+           [self writeBytes:buffer length:chunk cmd:_cmd])
+        pos += chunk;
+    fclose(input);
+    return pos == st.st_size;
+}
+
+- (BOOL)recvFile:(NSString *)path {
+    FILE *output = fopen(path.UTF8String, "w");
+    if (!output) return FALSE;
+    off_t sz = [self readInt], pos = 0, chunk;
+    char buffer[MAX_PACKET];
+    while ((chunk = MIN(sz-pos, sizeof buffer)) > 0 &&
+           [self readBytes:buffer length:chunk cmd:_cmd] &&
+           (chunk = fwrite(buffer, 1, chunk, output)) > 0)
+        pos += chunk;
+    fclose(output);
+    return pos == sz;
 }
 
 - (void)dealloc {
