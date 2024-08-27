@@ -73,7 +73,7 @@ Otherwise, you can add the following code to run on startup of your app:
     }
     #endif
 ```
-The binary bundles also integrate the [Nimble](https://github.com/Quick/Nimble)
+The binary bundles also integrates [Nimble](https://github.com/Quick/Nimble)
 and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
 testing framework to inhibit spec caching under their respective Apache licences.
 

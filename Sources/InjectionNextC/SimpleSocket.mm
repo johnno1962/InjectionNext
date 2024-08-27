@@ -290,10 +290,21 @@ typedef ssize_t (*io_func)(int, void *, size_t);
         (!string || [self writeString:string]);
 }
 
+- (BOOL)failed:(SEL)sel file:(id)file {
+    NSLog(@"-[%@ %s \"%@\"]: Could not fopen(), %s",
+          self, sel_getName(sel), file, strerror(errno));
+    return FALSE;
+}
+
 - (BOOL)sendFile:(NSString *)path {
-    FILE *input = fopen(path.UTF8String, "r");
     struct stat st;
-    if (!input || fstat(fileno(input), &st)) return FALSE;
+    FILE *input = fopen(path.UTF8String, "r");
+    if (!input || fstat(fileno(input), &st))
+        return [self writeInt:INT_MAX] &&
+            [self writeString:[NSString stringWithFormat:
+             @"-[%@ %s \"%@\"]: Could not open to send, %s",
+             self, sel_getName(_cmd), path, strerror(errno)]] &&
+            [self failed:_cmd file:path];
     [self writeInt:(int)st.st_size];
     off_t pos = 0, chunk;
     char buffer[MAX_PACKET];
@@ -307,8 +318,10 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 
 - (BOOL)recvFile:(NSString *)path {
     FILE *output = fopen(path.UTF8String, "w");
-    if (!output) return FALSE;
+    if (!output) return [self failed:_cmd file:path];
     off_t sz = [self readInt], pos = 0, chunk;
+    if (sz == INT_MAX)
+        return [self failed:_cmd file:[self readString]];
     char buffer[MAX_PACKET];
     while ((chunk = MIN(sz-pos, sizeof buffer)) > 0 &&
            [self readBytes:buffer length:chunk cmd:_cmd] &&
