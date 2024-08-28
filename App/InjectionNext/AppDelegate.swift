@@ -134,7 +134,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     
     @IBAction func testingEnable(_ sender: NSButton) {
         if sender.state == .on, let script = Bundle.main
-            .url(forResource: "copy_test_frameworks", withExtension: "sh") {
+            .url(forResource: "copy_bundle", withExtension: "sh") {
             let buildPhase = """
                 RESOURCES="\(script.deletingLastPathComponent().path)"
                 if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
