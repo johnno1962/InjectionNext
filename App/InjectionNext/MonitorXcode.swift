@@ -160,8 +160,9 @@ class MonitorXcode {
                         args.append(arg)
                     }
                 }
-                guard args.count > 0, let source = 
-                        readQuotedString() ?? readQuotedString() else {
+                guard !args.isEmpty, let source =
+                        readQuotedString() ?? readQuotedString(),
+                      !source.contains("\\n") else {
                     continue
                 }
                 lastSource = source

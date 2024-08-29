@@ -13,6 +13,9 @@ import Fortify
 import Popen
 import DLKit
 
+/// bring in injectingXCTest()
+struct Reloader {}
+
 struct Recompiler {
 
     /// Information required to call the compiler for a file.
@@ -96,6 +99,9 @@ struct Recompiler {
                     guard let client = InjectionServer.currentClient else {
                         appDelegate.setMenuIcon(.ready)
                         return
+                    }
+                    if Reloader.injectingXCTest(in: dylib) {
+                        _ = client.copyPlugIns
                     }
                     if useFilesystem {
                         client.writeCommand(InjectionCommand

@@ -17,7 +17,8 @@ enabled which provides all the information you need to be able to recompile
 files and then the runtime implementation of injection included in the
 [InjectionLite](https://github.com/johnno1962/InjectionLite) package looks after the rest.
 
-The basic MO is to build the app in the `App` directory, quit Xcode and run the
+The basic MO is to build the app in the `App` directory, or 
+download one of the binary releases in this repo, quit Xcode and run the
 resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
 `Launch Xcode` from the status bar. You then add this repo as a Swift package 
 dependency of your project and that should be all that is required for injection 
@@ -42,7 +43,7 @@ When your app runs it should connect to the `InjectionNext.app` and it's icon
 change to orange. After that, by parsing the messages from the "supervised"
 launch of Xcode it is possible to know when files are saved and exactly how
 to recompile them for injection. Injection on a device uses the same 
-configurtion but is opt-in through the menu item "Enable Deivces"
+configuration but is opt-in through the menu item "Enable Devices"
 (as it needs to open a network port). You also need to select the 
 project's "expanded codesigning identity" from the codesigning
 phase of your build logs in the window that pops up.
@@ -57,7 +58,6 @@ if [ -f "$RESOURCES/copy_bundle.sh" ]; then
     "$RESOURCES/copy_bundle.sh"
 fi
 ```
-
 These bundles should load automatically if you've integerated the
 [Inject](https://github.com/krzysztofzablocki/Inject) or
 [HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
@@ -73,12 +73,16 @@ Otherwise, you can add the following code to run on startup of your app:
     }
     #endif
 ```
-To inject tests on a device: When enabling the "Enable Deivces" menu item
-select "Enable testing on device" which will add the parameters shown
-to the link of each dynamic library. As you do this a command will be
-inserted into the clipboard which you should add to your project as a 
-"Run Script" "Build Phase" to copy the required libraries into the
-app bundle. Whenever you start to get code signing errors restart Xcode.
+The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
+and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
+testing framework to inhibit spec caching under their respective Apache licences.
+
+To inject tests on a device: use these bundles and, when enabling the
+"Enable Devices" menu item select "Enable testing on device" which 
+will add the parameters shown to the link of each dynamic library. 
+As you do this, a command will be inserted into the clipboard which 
+you should add to your project as a "Run Script" "Build Phase" to 
+copy the required libraries into the app bundle.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).

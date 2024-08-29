@@ -21,6 +21,7 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <sys/stat.h>
 
 #if 0
 #define SLog NSLog
@@ -289,6 +290,47 @@ typedef ssize_t (*io_func)(int, void *, size_t);
         (!string || [self writeString:string]);
 }
 
+- (BOOL)failed:(SEL)sel file:(id)file {
+    NSLog(@"-[%@ %s \"%@\"]: Could not fopen(), %s",
+          self, sel_getName(sel), file, strerror(errno));
+    return FALSE;
+}
+
+- (BOOL)sendFile:(NSString *)path {
+    struct stat st;
+    FILE *input = fopen(path.UTF8String, "r");
+    if (!input || fstat(fileno(input), &st))
+        return [self writeInt:INT_MAX] &&
+            [self writeString:[NSString stringWithFormat:
+             @"-[%@ %s \"%@\"]: Could not open to send, %s",
+             self, sel_getName(_cmd), path, strerror(errno)]] &&
+            [self failed:_cmd file:path];
+    [self writeInt:(int)st.st_size];
+    off_t pos = 0, chunk;
+    char buffer[MAX_PACKET];
+    while ((chunk = MIN(st.st_size-pos, sizeof buffer)) > 0 &&
+           (chunk = fread(buffer, 1, chunk, input)) > 0 &&
+           [self writeBytes:buffer length:chunk cmd:_cmd])
+        pos += chunk;
+    fclose(input);
+    return pos == st.st_size;
+}
+
+- (BOOL)recvFile:(NSString *)path {
+    FILE *output = fopen(path.UTF8String, "w");
+    if (!output) return [self failed:_cmd file:path];
+    off_t sz = [self readInt], pos = 0, chunk;
+    if (sz == INT_MAX)
+        return [self failed:_cmd file:[self readString]];
+    char buffer[MAX_PACKET];
+    while ((chunk = MIN(sz-pos, sizeof buffer)) > 0 &&
+           [self readBytes:buffer length:chunk cmd:_cmd] &&
+           (chunk = fwrite(buffer, 1, chunk, output)) > 0)
+        pos += chunk;
+    fclose(output);
+    return pos == sz;
+}
+
 - (void)dealloc {
     close(clientSocket);
 }
@@ -432,8 +474,11 @@ struct multicast_socket_packet {
         int idx = if_nametoindex(ifa->ifa_name);
         setsockopt(multicastSocket, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof idx);
         addr.sin_addr.s_addr = laddr | ~nmask;
-        printf("Broadcasting to %s.%d:%s to locate InjectionNext host...\n",
+        printf("Broadcasting to %s#%d:%s to locate InjectionNext host...\n",
                ifa->ifa_name, idx, inet_ntoa(addr.sin_addr));
+        if (sendto(multicastSocket, &msgbuf, sizeof msgbuf, 0,
+                   (struct sockaddr *)&addr, sizeof addr) < 0)
+            [self error:@"Could not send broadcast ping: %s"];
         if (sendto(multicastSocket, &msgbuf, sizeof msgbuf, 0,
                    (struct sockaddr *)&addr, sizeof addr) < 0)
             [self error:@"Could not send broadcast ping: %s"];

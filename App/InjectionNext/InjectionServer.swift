@@ -14,6 +14,7 @@
 //
 import Cocoa
 import Fortify
+import Popen
 
 class InjectionServer: SimpleSocket {
     
@@ -63,6 +64,22 @@ class InjectionServer: SimpleSocket {
     open func error(_ msg: String) {
         log("⚠️ "+msg)
     }
+
+    lazy var copyPlugIns: () = {
+        guard let plugins = Glob(pattern: "/tmp/InjectionNext.PlugIns/*.xctest") else { return }
+        for plugin in plugins {
+            writeCommand(InjectionCommand.log.rawValue, with: APP_PREFIX+"Sending "+plugin)
+            let url = URL(fileURLWithPath: plugin)
+            let dest = tmpPath+"/"+url.lastPathComponent
+            writeCommand(InjectionCommand.sendFile.rawValue, with: dest+"/")
+            writeCommand(InjectionCommand.sendFile.rawValue, with: dest+"/_CodeSignature/")
+            for file in [url.deletingPathExtension().lastPathComponent,
+                         "Info.plist", "/_CodeSignature/CodeResources"] {
+                writeCommand(InjectionCommand.sendFile.rawValue, with: dest+"/"+file)
+                sendFile(url.appendingPathComponent(file).path)
+            }
+        }
+    }()
 
     // Simple validation to weed out invalid connections
     func validateConnection() -> CInt? {
@@ -142,7 +159,7 @@ class InjectionServer: SimpleSocket {
                 log("**** exit ****")
                 return
             @unknown default:
-                error("**** @unknown case ****")
+                error("**** @unknown case \(responseInt) ****")
                 return
             }
         }
