@@ -46,7 +46,9 @@ to recompile them for injection. Injection on a device uses the same
 configuration but is opt-in through the menu item "Enable Devices"
 (as it needs to open a network port). You also need to select the 
 project's "expanded codesigning identity" from the codesigning
-phase of your build logs in the window that pops up.
+phase of your build logs in the window that pops up. Sometimes a 
+device will not connect to the app first time after unlocking it.
+If at first it doesn't succeed, try again.
 
 If you'd rather not be adding a SPM dependancy to your project, the app's
 resources contains pre-built bundles which you can copy into your app during
