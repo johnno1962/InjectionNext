@@ -66,7 +66,17 @@ class InjectionServer: SimpleSocket {
     }
 
     lazy var copyPlugIns: () = {
-        guard let plugins = Glob(pattern: "/tmp/InjectionNext.PlugIns/*.xctest") else { return }
+        let pattern = "/tmp/InjectionNext.PlugIns/*.xctest"
+        if platform == "iPhoneOS" && isLocalClient {
+            if let errors = Popen.system("""
+                rm -rf "\(tmpPath)"/*.xctest; \
+                rsync -a \(pattern) "\(tmpPath)"
+                """, errors: true) {
+                error("Copy *.xctest failed: "+errors)
+            }
+            return
+        }
+        guard let plugins = Glob(pattern: pattern) else { return }
         for plugin in plugins {
             writeCommand(InjectionCommand.log.rawValue, with: APP_PREFIX+"Sending "+plugin)
             let url = URL(fileURLWithPath: plugin)
