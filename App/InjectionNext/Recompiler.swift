@@ -227,11 +227,12 @@ struct Recompiler {
                 return Defaults.deviceLibraries })
             let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
             testingOptions = """
+                -F /tmp/InjectionNext.Products \
                 -F "\(platformDev)/Library/Frameworks" \
                 -L "\(platformDev)/usr/lib" \(otherOptions)
                 """
         }
-        
+
         let linkCommand = """
             "\(toolchain)/usr/bin/clang" -arch "\(arch)" \
                 -Xlinker -dylib -isysroot "__PLATFORM__" \

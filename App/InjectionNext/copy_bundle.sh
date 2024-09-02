@@ -36,6 +36,17 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib};
     
+    # Copy frameworks only used in test target
+    PRODUCTS_DIR="$(dirname "$CODESIGNING_FOLDER_PATH")"
+    rm -f /tmp/InjectionNext.Products
+    ln -s "$PRODUCTS_DIR" /tmp/InjectionNext.Products
+    (cd "$PRODUCTS_DIR" && for fwork in *.framework; do
+        if [ ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
+            rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
+            codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork"
+        fi
+    done)
+    
     # Xcode 16's new SwiftTesting framework
     TESTING="$PLATFORM_DEVELOPER_LIBRARY_DIR/Frameworks/Testing.Framework"
     if [ -d "$TESTING" ]; then
@@ -52,8 +63,10 @@ if [ "$CONFIGURATION" == "Debug" ]; then
       rsync -va "$CODESIGNING_FOLDER_PATH/PlugIns"/* "$PLUGINS/" |
       grep -v /sec | grep /; do sleep 15; done) 1>/dev/null 2>&1 &
     else
-     # Xcode 16 deletes PlugIns directory, link to copy
-     ln -s $PLUGINS $LAST_PLUGINS
+      # Xcode 16 deletes PlugIns directory. copy or create link
+      rsync -a "$PLUGINS"/* "$CODESIGNING_FOLDER_PATH/PlugIns/" &&
+      codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/PlugIns/*.xctest" ||
+      ln -s $PLUGINS $LAST_PLUGINS
     fi
 
     # copy prebuilt bundle into app package and codesign
