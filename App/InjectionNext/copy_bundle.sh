@@ -41,7 +41,8 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     rm -f /tmp/InjectionNext.Products
     ln -s "$PRODUCTS_DIR" /tmp/InjectionNext.Products
     (cd "$PRODUCTS_DIR" && for fwork in *.framework; do
-        if [ ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
+        if [ -f "$fwork/Info.plist" -a \
+            ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
             rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
             codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork"
         fi
