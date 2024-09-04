@@ -12,6 +12,8 @@
 if [ "$CONFIGURATION" == "Debug" ]; then
     # determine which prebuilt bundle to copy
     RESOURCES=${RESOURCES:-"$(dirname "$0")"}
+    # If there are frameworks used only by tests
+    TESTING_FRAMEWORKS="$2"
     COPY="$CODESIGNING_FOLDER_PATH/iOSInjection.bundle"
     PLIST="$COPY/Info.plist"
     if [ "$PLATFORM_NAME" == "macosx" ]; then
@@ -40,7 +42,7 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     PRODUCTS_DIR="$(dirname "$CODESIGNING_FOLDER_PATH")"
     rm -f /tmp/InjectionNext.Products
     ln -s "$PRODUCTS_DIR" /tmp/InjectionNext.Products
-    (cd "$PRODUCTS_DIR" && for fwork in *.framework; do
+    (cd "$PRODUCTS_DIR" && for fwork in $TESTING_FRAMEWORKS; do
         if [ -f "$fwork/Info.plist" -a \
             ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
             rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
