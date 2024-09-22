@@ -12,10 +12,10 @@ let package = Package(
             targets: ["InjectionNext"]),
         // To avoid duplicate symbols if other
         // packages use e.g. DLKit or fishhook
-        .library(
-            name: "InjectionNextDyanmic",
-            type: .dynamic,
-            targets: ["InjectionNext"]),
+//        .library(
+//            name: "InjectionNextDyanmic",
+//            type: .dynamic,
+//            targets: ["InjectionNext"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

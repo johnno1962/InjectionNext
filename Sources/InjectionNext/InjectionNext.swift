@@ -37,6 +37,8 @@ open class InjectionNext: SimpleSocket {
         var platform = "AppleTV"
         #elseif os(visionOS)
         var platform = "XR"
+        #elseif os(watchOS)
+        var platform = "Watch"
         #else
         var platform = "iPhone"
         #endif

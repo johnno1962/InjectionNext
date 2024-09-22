@@ -210,7 +210,8 @@ struct Recompiler {
                 .replacingOccurrences(of: #"^.*( -target \S+).*$"#,
                                       with: "$1", options: .regularExpression)*/
             osSpecific = "-mmacosx-version-min=10.11"+target
-        case "XRSimulator": fallthrough case "XROS":
+        case "WatchSimulator": fallthrough case "WatchOS":
+        fallthrough case "XRSimulator": fallthrough case "XROS":
             osSpecific = ""
         default:
             error("Invalid platform \(platform)")
