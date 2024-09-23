@@ -1,1 +1,1 @@
-../../../DLKit/Sources/DLKitC/trie_dlops.mm
+../../../SubPackages/DLKit/Sources/DLKitC/trie_dlops.mm

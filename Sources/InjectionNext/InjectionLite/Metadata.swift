@@ -1,1 +1,1 @@
-../../../InjectionLite/Sources/InjectionImpl/Metadata.swift
+../../../SubPackages/InjectionLite/Sources/InjectionImpl/Metadata.swift

@@ -1,1 +1,1 @@
-../../../InjectionLite/Sources/InjectionImpl/Common.swift
+../../../SubPackages/InjectionLite/Sources/InjectionImpl/Common.swift

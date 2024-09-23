@@ -1,1 +1,1 @@
-../../../InjectionLite/Sources/InjectionImpl/KeyPaths.swift
+../../../SubPackages/InjectionLite/Sources/InjectionImpl/KeyPaths.swift
