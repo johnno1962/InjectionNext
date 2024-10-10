@@ -55,4 +55,10 @@ struct Defaults {
                                   forKey: xcodeRestartDefault)
         }
     }
+    static let projectPathDefault = "projectPath"
+    static var projectPath: String? {
+        get {
+            userDefaults.string(forKey: projectPathDefault)
+        }
+    }
 }

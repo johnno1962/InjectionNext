@@ -81,6 +81,10 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart == true ? .on : .off
+        
+        if let project = Defaults.projectPath {
+            _ = MonitorXcode(args: " '\(project)'")
+        }
     }
 
     func setMenuIcon(_ state: InjectionState) {

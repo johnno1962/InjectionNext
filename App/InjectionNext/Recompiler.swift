@@ -122,8 +122,8 @@ struct Recompiler {
                         .map({ String(cString: $0.name) }).sorted() {
 //                        print(symbols)
                         if let exported = client.exports[source],
-                           exported != symbols {
-                            error("Symbols altered, this may not be supported." +
+                           exported.count != symbols.count {
+                            log("ℹ️ Symbols altered, this may not be supported." +
                                   " \(symbols.count) c.f. \(exported.count)")
                             print(exported.difference(from: symbols))
                         }

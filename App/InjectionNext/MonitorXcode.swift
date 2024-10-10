@@ -34,14 +34,13 @@ class MonitorXcode {
         #endif
     }
     
-    init() {
+    init(args: String = "") {
+        var args = args
         #if DEBUG
-        let tee = " | tee \(recompiler.tmpbase).log"
-        #else
-        let tee = ""
+        args += " | tee \(recompiler.tmpbase).log"
         #endif
         if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
-            "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(tee)") {
+            "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)") {
             Self.runningXcode = self
             DispatchQueue.global().async {
                 while true {

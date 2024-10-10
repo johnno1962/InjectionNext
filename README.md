@@ -52,7 +52,8 @@ If at first it doesn't succeed, try again.
 
 If you'd rather not be adding a SPM dependancy to your project, the app's
 resources contains pre-built bundles which you can copy into your app during
-the build by using a "Run Script/Build Phase" such as the following:
+the build by using a "Run Script/Build Phase" (while disabling the "user 
+script sandboxing" build setting) such as the following:
 
 ```
 export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
@@ -88,6 +89,14 @@ copy the required libraries into the app bundle.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
+
+You can run InjectionNext from the command line and have it open
+your project in Xcode automatically using the -projectPath option.
+
+    open -a InjectionNext --args -projectPath /path/to/project
+
+Set a user default with the same name if you want to always open 
+this project inside the selected Xcode on launching the app.
 
 The colors of the menu bar icon bar correspond to:
 
