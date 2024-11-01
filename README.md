@@ -7,11 +7,11 @@ allows you to update the implementation (i.e. body) of functions in your
 app without having to relaunch it. This can save a developer a significant
 amount of time tweaking code or iterating over a design.
 
-This repo is a refesh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
+This repo is a refresh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
 app that uses a different technique to determine how to rebuild source files
 that should be faster and more reliable for very large projects. Gone is the 
 involved parsing of Xcode build logs (if you can locate them) and messy 
-eascaping of special characters in filenames. A new app is used to launch Xcode 
+escaping of special characters in filenames. A new app is used to launch Xcode 
 with a [SourceKit debugging flag](https://www.jpsim.com/uncovering-sourcekit/) 
 enabled which provides all the information you need to be able to recompile
 files and then the runtime implementation of injection included in the
@@ -50,7 +50,7 @@ phase of your build logs in the window that pops up. Sometimes a
 device will not connect to the app first time after unlocking it.
 If at first it doesn't succeed, try again.
 
-If you'd rather not be adding a SPM dependancy to your project, the app's
+If you'd rather not be adding a SPM dependency to your project, the app's
 resources contains pre-built bundles which you can copy into your app during
 the build by using a "Run Script/Build Phase" (while disabling the "user 
 script sandboxing" build setting) such as the following:

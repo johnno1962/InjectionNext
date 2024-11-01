@@ -90,7 +90,7 @@ struct Recompiler {
                             platform, arch: connected?.arch ?? compilerArch),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     appDelegate.setMenuIcon(.error)
-                    return error("Injection failed.")
+                    return error("Injection failed. Was your app connected?")
                 }
 
                 print("Prepared dylib: "+dylib)
