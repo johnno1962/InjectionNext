@@ -50,6 +50,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     var codeSigningID: String { codeSignBox.stringValue.containedSHA1 ?? "" }
 
     let userIDComboBoxDataSaver = UserIDComboBoxDataSaver()
+    var watchers = [InjectionHybrid]()
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -74,7 +75,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         
         if NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
-            InjectionServer.error("Please quit Xcode and\nuse this app to launch it.")
+            InjectionServer.error("""
+                Please quit Xcode and
+                use this app to launch it
+                (unless you are using Cursor).
+                """)
         }
  
         librariesField.stringValue = Defaults.deviceLibraries
@@ -84,6 +89,19 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
+        }
+    }
+    
+    @IBAction func watchProject(_ sender: Any) {
+        let open = NSOpenPanel()
+        open.prompt = "Select Project Directory"
+        open.canChooseDirectories = true
+        open.canChooseFiles = false
+        // open.showsHiddenFiles = TRUE;
+        if open.runModal() == .OK, let url = open.url {
+            setenv("INJECTION_DIRECTORIES",
+                   NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
+            watchers.append(InjectionHybrid())
         }
     }
 

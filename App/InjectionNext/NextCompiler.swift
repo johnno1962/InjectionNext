@@ -14,9 +14,19 @@ import Popen
 import DLKit
 
 /// bring in injectingXCTest()
-struct Reloader {}
+struct Reloader {
+    static var injectionNumber = 100
+}
 
-struct Recompiler {
+@discardableResult
+func log(_ msg: String) -> Bool {
+    let msg = APP_PREFIX+msg
+    print(msg)
+    InjectionServer.currentClient?.sendCommand(.log, with: msg)
+    return true
+}
+
+class NextCompiler {
 
     /// Information required to call the compiler for a file.
     struct Compilation {
@@ -39,13 +49,6 @@ struct Recompiler {
     /// Default counter for Compilertron
     var compileNumber = 0
 
-    @discardableResult
-    func log(_ msg: String) -> Bool {
-        let msg = APP_PREFIX+msg
-        print(msg)
-        InjectionServer.currentClient?.sendCommand(.log, with: msg)
-        return true
-    }
     func error(_ msg: String) {
         let msg = "⚠️ "+msg
         NSLog(msg)
@@ -56,7 +59,7 @@ struct Recompiler {
     }
     
     /// Main entry point called by MonitorXcode
-    mutating func inject(source: String) {
+    func inject(source: String) {
         do {
             try Fortify.protect {
                 let connected = InjectionServer.currentClient
@@ -138,7 +141,7 @@ struct Recompiler {
     
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
-    mutating func recompile(source: String, platform: String) ->  String? {
+    func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
             error("Retrying: \(source) not ready.")
             pendingSource = source
@@ -191,7 +194,7 @@ struct Recompiler {
     }
     
     /// Link and object file to create a dynamic library
-    mutating func link(object: String, dylib: String, platform: String, arch: String) -> String? {
+    func link(object: String, dylib: String, platform: String, arch: String) -> String? {
         let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
         let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
 
@@ -255,7 +258,7 @@ struct Recompiler {
     }
     
     /// Codesign a dynamic library
-    mutating func codesign(dylib: String, platform: String) -> Data? {
+    func codesign(dylib: String, platform: String) -> Data? {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
             identity = appDelegate.codeSigningID

@@ -26,7 +26,7 @@ class MonitorXcode {
     // Trying to avoid fragmenting memory
     var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
     // The service to recompile and inject a source file.
-    var recompiler = Recompiler()
+    var recompiler = NextCompiler()
 
     func debug(_ msg: String) {
         #if DEBUG
@@ -180,7 +180,7 @@ class MonitorXcode {
                     lastFilelist = swiftFiles
                 }
                 print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
-                let update = Recompiler.Compilation(
+                let update = NextCompiler.Compilation(
                     arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
                 // The folling line should be on the compileQueue
                 // but it seems to provoke a Swift compiler bug.

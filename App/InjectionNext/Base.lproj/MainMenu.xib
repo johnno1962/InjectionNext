@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23503" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23503"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -670,6 +670,12 @@
                         <action selector="updateXcodeRestart:" target="Voe-Tx-rLC" id="KgB-zd-aHd"/>
                     </connections>
                 </menuItem>
+                <menuItem title="...or Watch Project" id="fAp-yw-BqE">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="watchProject:" target="Voe-Tx-rLC" id="8cH-nD-fji"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Enable Devices" toolTip="Enable injecting on a device" id="s0A-3D-ThA">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Evable Devices"/>
@@ -812,7 +818,6 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <size key="minSize" width="655" height="251"/>
                                     <size key="maxSize" width="675" height="10000000"/>
-                                    <color key="insertionPointColor" name="textInsertionPointColor" catalog="System" colorSpace="catalog"/>
                                 </textView>
                             </subviews>
                         </clipView>

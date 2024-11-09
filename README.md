@@ -87,6 +87,14 @@ As you do this, a command will be inserted into the clipboard which
 you should add to your project as a "Run Script" "Build Phase" to 
 copy the required libraries into the app bundle.
 
+### Cursor mode.
+
+If you would like to use InjectionNext with the Cursor code editor,
+you can have it fall back to InjectionIII-mode log parsing using
+the "...or Watch Project" menu item to select the project root
+you will be working under. In this case you shouldn't launch 
+Xcode using the app.
+
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
 
