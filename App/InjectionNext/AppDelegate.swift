@@ -101,6 +101,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if open.runModal() == .OK, let url = open.url {
             setenv("INJECTION_DIRECTORIES",
                    NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
+            Reloader.injectionQueue = .main
             watchers.append(InjectionHybrid())
         }
     }

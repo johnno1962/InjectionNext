@@ -14,9 +14,7 @@ import Popen
 import DLKit
 
 /// bring in injectingXCTest()
-struct Reloader {
-    static var injectionNumber = 100
-}
+struct Reloader {}
 
 @discardableResult
 func log(_ msg: String) -> Bool {
