@@ -50,7 +50,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     var codeSigningID: String { codeSignBox.stringValue.containedSHA1 ?? "" }
 
     let userIDComboBoxDataSaver = UserIDComboBoxDataSaver()
-    var watchers = [InjectionHybrid]()
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -92,20 +91,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         }
     }
     
-    @IBAction func watchProject(_ sender: Any) {
-        let open = NSOpenPanel()
-        open.prompt = "Select Project Directory"
-        open.canChooseDirectories = true
-        open.canChooseFiles = false
-        // open.showsHiddenFiles = TRUE;
-        if open.runModal() == .OK, let url = open.url {
-            setenv("INJECTION_DIRECTORIES",
-                   NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
-            Reloader.injectionQueue = .main
-            watchers.append(InjectionHybrid())
-        }
-    }
-
     func setMenuIcon(_ state: InjectionState) {
         DispatchQueue.main.async {
             let tiffName = "Injection"+state.rawValue
