@@ -13,7 +13,7 @@ import Cocoa
 extension AppDelegate {
     static var watchers = [InjectionHybrid]()
 
-    @IBAction func watchProject(_ sender: Any) {
+    @IBAction func watchProject(_ sender: NSMenuItem) {
         let open = NSOpenPanel()
         open.prompt = "Select Project Directory"
         open.canChooseDirectories = true
@@ -24,6 +24,7 @@ extension AppDelegate {
                    NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
             Reloader.injectionQueue = .main
             Self.watchers.append(InjectionHybrid())
+            sender.state = .on
         }
     }
 }

@@ -17,8 +17,8 @@ import DLKit
 struct Reloader {}
 
 @discardableResult
-func log(_ msg: String) -> Bool {
-    let msg = APP_PREFIX+msg
+public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
+    let msg = prefix+what.map {"\($0)"}.joined(separator: separator)
     print(msg)
     InjectionServer.currentClient?.sendCommand(.log, with: msg)
     return true
