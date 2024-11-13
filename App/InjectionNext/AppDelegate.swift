@@ -64,6 +64,10 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         statusItem.title = appName
         setMenuIcon(.idle)
 
+        signal(SIGPIPE, { _ in
+            print(APP_PREFIX+"⚠️ SIGPIPE" +
+                  Thread.callStackSymbols.joined(separator: "\n")) })
+
         if let quit = statusMenu.item(at: statusMenu.items.count-1) {
             quit.title = "Quit "+appName
             if let build = Bundle.main

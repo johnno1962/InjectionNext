@@ -42,6 +42,8 @@ class NextCompiler {
     var pendingSource: String?, lastError: String?
     /// Information for compiling a file per source file.
     var compilations = [String: Compilation]()
+    /// Last Injected
+    var lastInjected = [String: TimeInterval]()
     /// Previous dynamic libraries prepared by source file
     var prepared = [String: String]()
     /// Default counter for Compilertron
@@ -58,6 +60,8 @@ class NextCompiler {
     
     /// Main entry point called by MonitorXcode
     func inject(source: String) {
+        lastInjected[source] = Date().timeIntervalSince1970
+
         do {
             try Fortify.protect {
                 let connected = InjectionServer.currentClient
@@ -141,7 +145,7 @@ class NextCompiler {
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
-            error("Retrying: \(source) not ready.")
+            error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }

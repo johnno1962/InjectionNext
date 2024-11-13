@@ -90,7 +90,7 @@ copy the required libraries into the app bundle.
 ### Cursor mode.
 
 If you would like to use InjectionNext with the Cursor code editor,
-you can have it fall back to InjectionIII-mode log parsing using
+you can have it fall back to InjectionIII-style log parsing using
 the "...or Watch Project" menu item to select the project root
 you will be working under. In this case you shouldn't launch 
 Xcode from inside the InjectionNext.app but you'll need to have 
