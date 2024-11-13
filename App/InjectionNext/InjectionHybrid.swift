@@ -42,10 +42,10 @@ class InjectionHybrid: InjectionBase {
             return
         }
         MonitorXcode.compileQueue.async {
-            if let running = MonitorXcode.runningXcode {
-                running.recompiler.inject(source: source)
-            } else {
-                self.mixRecompiler.inject(source: source)
+            guard let running = MonitorXcode.runningXcode,
+                  running.recompiler.inject(source: source) else {
+                _ = self.mixRecompiler.inject(source: source)
+                return
             }
         }
     }

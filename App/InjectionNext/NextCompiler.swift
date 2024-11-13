@@ -49,21 +49,20 @@ class NextCompiler {
     /// Default counter for Compilertron
     var compileNumber = 0
 
-    func error(_ msg: String) {
+    func error(_ msg: String) -> Bool {
         let msg = "⚠️ "+msg
         NSLog(msg)
         log(msg)
+        return false
     }
-    func error(_ err: Error) {
+    func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
     
     /// Main entry point called by MonitorXcode
-    func inject(source: String) {
-        lastInjected[source] = Date().timeIntervalSince1970
-
+    func inject(source: String) -> Bool {
         do {
-            try Fortify.protect {
+            return try Fortify.protect { () -> Bool in
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
                 appDelegate.setMenuIcon(.busy)
@@ -116,28 +115,33 @@ class NextCompiler {
                             .inject.rawValue, with: dylibName)
                         client.write(data)
                     }
-                    // Seek to highlight potentially unsupported injections.
-                    if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-                        .filter({ entry in
-                            lazy var symbol: String = String(cString: entry.name)
-                            return strncmp(entry.name, "_$s", 3) == 0 &&
-                            strstr(entry.name, "fU") == nil && // closures
-                            !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
-                            !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
-                        .map({ String(cString: $0.name) }).sorted() {
-//                        print(symbols)
-                        if let exported = client.exports[source],
-                           exported.count != symbols.count {
-                            log("ℹ️ Symbols altered, this may not be supported." +
-                                  " \(symbols.count) c.f. \(exported.count)")
-                            print(exported.difference(from: symbols))
-                        }
-                        client.exports[source] = symbols
-                    }
+                    unsupported(source: source, dylib: dylib, client: client)
                 }
+                return true
             }
         } catch {
-            self.error(error)
+            return self.error(error)
+        }
+    }
+    
+    /// Seek to highlight potentially unsupported injections.
+    func unsupported(source: String, dylib: String, client: InjectionServer) {
+        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
+            .filter({ entry in
+                lazy var symbol: String = String(cString: entry.name)
+                return strncmp(entry.name, "_$s", 3) == 0 &&
+                strstr(entry.name, "fU") == nil && // closures
+                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
+                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
+            .map({ String(cString: $0.name) }).sorted() {
+//            print(symbols)
+            if let exported = client.exports[source],
+               exported.count != symbols.count {
+                log("ℹ️ Symbols altered, this may not be supported." +
+                      " \(symbols.count) c.f. \(exported.count)")
+                print(exported.difference(from: symbols))
+            }
+            client.exports[source] = symbols
         }
     }
     
@@ -145,11 +149,12 @@ class NextCompiler {
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
-            error("Postponing: \(source) Have you viewed it in Xcode?")
+            _ = error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }
         
+        lastInjected[source] = Date().timeIntervalSince1970
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
         let object = tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")
@@ -187,7 +192,7 @@ class NextCompiler {
            errors.contains(" error: ") {
             print(([compiler] + stored.arguments +
                    languageSpecific).joined(separator: " "))
-            error("Recompile failed for: \(source)\n"+errors)
+            _ = error("Recompile failed for: \(source)\n"+errors)
             lastError = errors
             return nil
         }
@@ -219,7 +224,7 @@ class NextCompiler {
         fallthrough case "XRSimulator": fallthrough case "XROS":
             osSpecific = ""
         default:
-            error("Invalid platform \(platform)")
+            _ = error("Invalid platform \(platform)")
             // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
         }
 
@@ -251,7 +256,7 @@ class NextCompiler {
             """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
 
         if let errors = Popen.system(linkCommand, errors: true) {
-            error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             lastError = errors
             return nil
         }
@@ -273,7 +278,7 @@ class NextCompiler {
             else exit 1; fi)
             """
         if let errors = Popen.system(codesign, errors: true) {
-            error("Codesign failed \(codesign) errors:\n"+errors)
+            _ = error("Codesign failed \(codesign) errors:\n"+errors)
             lastError = errors
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
