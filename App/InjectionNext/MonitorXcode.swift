@@ -189,7 +189,7 @@ class MonitorXcode {
                     if source == self.recompiler.pendingSource {
                         print("Delayed injection of "+source)
                         self.recompiler.pendingSource = nil
-                        self.recompiler.inject(source: source)
+                        _ = self.recompiler.inject(source: source)
                     }
                 }
             } else if line ==
@@ -197,7 +197,7 @@ class MonitorXcode {
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
                 Self.compileQueue.async {
-                    self.recompiler.inject(source: source)
+                    _ = self.recompiler.inject(source: source)
                 }
             }
         }

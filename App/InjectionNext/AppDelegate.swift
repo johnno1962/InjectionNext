@@ -66,7 +66,12 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
         signal(SIGPIPE, { which in
             print(APP_PREFIX+"⚠️ SIGPIPE #\(which)\n" +
-                  Thread.callStackSymbols.joined(separator: "\n")) })
+                  Thread.callStackSymbols.map { var frame = $0
+                        frame[#"(?:\S+\s+){3}(\S+)"#, 1] = {
+                            (groups: [String], stop) in
+                            return groups[1].swiftDemangle ?? groups[1] }
+                        return frame
+                    }.joined(separator: "\n")) })
 
         if let quit = statusMenu.item(at: statusMenu.items.count-1) {
             quit.title = "Quit "+appName
