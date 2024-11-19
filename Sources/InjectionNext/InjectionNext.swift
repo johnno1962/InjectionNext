@@ -101,6 +101,7 @@ open class InjectionNext: SimpleSocket {
                 }
             case .xcodePath:
                 if let xcodePath = readString() {
+                    log("Xcode path: "+xcodePath)
                     Reloader.xcodeDev = xcodePath+"/Contents/Developer"
                 }
             case .sendFile:

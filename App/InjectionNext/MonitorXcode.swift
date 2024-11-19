@@ -155,7 +155,8 @@ class MonitorXcode {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
-                    } else if arg != "-Xfrontend" {
+                    } else if arg != "-Xfrontend" &&
+                            !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
                 }

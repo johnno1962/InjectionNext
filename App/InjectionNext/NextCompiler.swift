@@ -135,11 +135,11 @@ class NextCompiler {
                 !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
             .map({ String(cString: $0.name) }).sorted() {
 //            print(symbols)
-            if let exported = client.exports[source],
-               exported.count != symbols.count {
+            if let previous = client.exports[source],
+               previous.count != symbols.count {
                 log("ℹ️ Symbols altered, this may not be supported." +
-                      " \(symbols.count) c.f. \(exported.count)")
-                print(exported.difference(from: symbols))
+                      " \(symbols.count) c.f. \(previous.count)")
+                print(symbols.difference(from: previous))
             }
             client.exports[source] = symbols
         }
@@ -266,6 +266,7 @@ class NextCompiler {
     
     /// Codesign a dynamic library
     func codesign(dylib: String, platform: String) -> Data? {
+        if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
             identity = appDelegate.codeSigningID
@@ -280,6 +281,7 @@ class NextCompiler {
         if let errors = Popen.system(codesign, errors: true) {
             _ = error("Codesign failed \(codesign) errors:\n"+errors)
             lastError = errors
+        }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
     }
