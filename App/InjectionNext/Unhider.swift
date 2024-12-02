@@ -27,10 +27,6 @@ open class Unhider {
     /// Used to determine the path to the project's DerivedData
     static var packageFrameworks: String?
 
-    open class func log(_ msg: String) {
-        InjectionServer.currentClient?.log(msg)
-    }
-    
     /// Entry point for user initiated or perhaps one day automatic unhiding.
     open class func startUnhide() {
         guard var derivedData = packageFrameworks.flatMap({

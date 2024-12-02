@@ -125,12 +125,15 @@ class InjectionServer: SimpleSocket {
             return
         }
         
-        guard MonitorXcode.runningXcode != nil else {
-            error("Xcode not launched via app. Injection will not be possible.")
+        guard MonitorXcode.runningXcode != nil ||
+            !AppDelegate.watchers.isEmpty else {
+            error("Xcode not launched via app. Injection will not be possible unless you file watch a project and Xcode logs are available.")
             return
         }
         
         sendCommand(.xcodePath, with: Defaults.xcodePath)
+        
+        AppDelegate.watchers.last?.watcher?.restart()
         
         while true {
             let responseInt = readInt()

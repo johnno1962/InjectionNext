@@ -16,7 +16,15 @@ import DLKit
 /// bring in injectingXCTest()
 struct Reloader {}
 
-struct Recompiler {
+@discardableResult
+public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
+    let msg = prefix+what.map {"\($0)"}.joined(separator: separator)
+    print(msg)
+    InjectionServer.currentClient?.sendCommand(.log, with: msg)
+    return true
+}
+
+class NextCompiler {
 
     /// Information required to call the compiler for a file.
     struct Compilation {
@@ -34,31 +42,27 @@ struct Recompiler {
     var pendingSource: String?, lastError: String?
     /// Information for compiling a file per source file.
     var compilations = [String: Compilation]()
+    /// Last Injected
+    var lastInjected = [String: TimeInterval]()
     /// Previous dynamic libraries prepared by source file
     var prepared = [String: String]()
     /// Default counter for Compilertron
     var compileNumber = 0
 
-    @discardableResult
-    func log(_ msg: String) -> Bool {
-        let msg = APP_PREFIX+msg
-        print(msg)
-        InjectionServer.currentClient?.sendCommand(.log, with: msg)
-        return true
-    }
-    func error(_ msg: String) {
+    func error(_ msg: String) -> Bool {
         let msg = "⚠️ "+msg
         NSLog(msg)
         log(msg)
+        return false
     }
-    func error(_ err: Error) {
+    func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
     
     /// Main entry point called by MonitorXcode
-    mutating func inject(source: String) {
+    func inject(source: String) -> Bool {
         do {
-            try Fortify.protect {
+            return try Fortify.protect { () -> Bool in
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
                 appDelegate.setMenuIcon(.busy)
@@ -111,40 +115,46 @@ struct Recompiler {
                             .inject.rawValue, with: dylibName)
                         client.write(data)
                     }
-                    // Seek to highlight potentially unsupported injections.
-                    if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-                        .filter({ entry in
-                            lazy var symbol: String = String(cString: entry.name)
-                            return strncmp(entry.name, "_$s", 3) == 0 &&
-                            strstr(entry.name, "fU") == nil && // closures
-                            !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
-                            !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
-                        .map({ String(cString: $0.name) }).sorted() {
-//                        print(symbols)
-                        if let exported = client.exports[source],
-                           exported.count != symbols.count {
-                            log("ℹ️ Symbols altered, this may not be supported." +
-                                  " \(symbols.count) c.f. \(exported.count)")
-                            print(exported.difference(from: symbols))
-                        }
-                        client.exports[source] = symbols
-                    }
+                    unsupported(source: source, dylib: dylib, client: client)
                 }
+                return true
             }
         } catch {
-            self.error(error)
+            return self.error(error)
+        }
+    }
+    
+    /// Seek to highlight potentially unsupported injections.
+    func unsupported(source: String, dylib: String, client: InjectionServer) {
+        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
+            .filter({ entry in
+                lazy var symbol: String = String(cString: entry.name)
+                return strncmp(entry.name, "_$s", 3) == 0 &&
+                strstr(entry.name, "fU") == nil && // closures
+                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
+                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
+            .map({ String(cString: $0.name) }).sorted() {
+//            print(symbols)
+            if let previous = client.exports[source],
+               previous.count != symbols.count {
+                log("ℹ️ Symbols altered, this may not be supported." +
+                      " \(symbols.count) c.f. \(previous.count)")
+                print(symbols.difference(from: previous))
+            }
+            client.exports[source] = symbols
         }
     }
     
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
-    mutating func recompile(source: String, platform: String) ->  String? {
+    func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
-            error("Retrying: \(source) not ready.")
+            _ = error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }
         
+        lastInjected[source] = Date().timeIntervalSince1970
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
         let object = tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")
@@ -182,7 +192,7 @@ struct Recompiler {
            errors.contains(" error: ") {
             print(([compiler] + stored.arguments +
                    languageSpecific).joined(separator: " "))
-            error("Recompile failed for: \(source)\n"+errors)
+            _ = error("Recompile failed for: \(source)\n"+errors)
             lastError = errors
             return nil
         }
@@ -191,7 +201,7 @@ struct Recompiler {
     }
     
     /// Link and object file to create a dynamic library
-    mutating func link(object: String, dylib: String, platform: String, arch: String) -> String? {
+    func link(object: String, dylib: String, platform: String, arch: String) -> String? {
         let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
         let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
 
@@ -214,7 +224,7 @@ struct Recompiler {
         fallthrough case "XRSimulator": fallthrough case "XROS":
             osSpecific = ""
         default:
-            error("Invalid platform \(platform)")
+            _ = error("Invalid platform \(platform)")
             // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
         }
 
@@ -246,7 +256,7 @@ struct Recompiler {
             """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
 
         if let errors = Popen.system(linkCommand, errors: true) {
-            error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             lastError = errors
             return nil
         }
@@ -255,7 +265,8 @@ struct Recompiler {
     }
     
     /// Codesign a dynamic library
-    mutating func codesign(dylib: String, platform: String) -> Data? {
+    func codesign(dylib: String, platform: String) -> Data? {
+        if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
             identity = appDelegate.codeSigningID
@@ -268,8 +279,9 @@ struct Recompiler {
             else exit 1; fi)
             """
         if let errors = Popen.system(codesign, errors: true) {
-            error("Codesign failed \(codesign) errors:\n"+errors)
+            _ = error("Codesign failed \(codesign) errors:\n"+errors)
             lastError = errors
+        }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
     }

@@ -26,7 +26,7 @@ class MonitorXcode {
     // Trying to avoid fragmenting memory
     var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
     // The service to recompile and inject a source file.
-    var recompiler = Recompiler()
+    var recompiler = NextCompiler()
 
     func debug(_ msg: String) {
         #if DEBUG
@@ -57,7 +57,7 @@ class MonitorXcode {
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error
-                        self.recompiler.error(error)
+                        _ = self.recompiler.error(error)
                     }
                 }
             }
@@ -155,7 +155,8 @@ class MonitorXcode {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
-                    } else if arg != "-Xfrontend" {
+                    } else if arg != "-Xfrontend" &&
+                            !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
                 }
@@ -180,7 +181,7 @@ class MonitorXcode {
                     lastFilelist = swiftFiles
                 }
                 print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
-                let update = Recompiler.Compilation(
+                let update = NextCompiler.Compilation(
                     arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
                 // The folling line should be on the compileQueue
                 // but it seems to provoke a Swift compiler bug.
@@ -189,7 +190,7 @@ class MonitorXcode {
                     if source == self.recompiler.pendingSource {
                         print("Delayed injection of "+source)
                         self.recompiler.pendingSource = nil
-                        self.recompiler.inject(source: source)
+                        _ = self.recompiler.inject(source: source)
                     }
                 }
             } else if line ==
@@ -197,7 +198,7 @@ class MonitorXcode {
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
                 Self.compileQueue.async {
-                    self.recompiler.inject(source: source)
+                    _ = self.recompiler.inject(source: source)
                 }
             }
         }

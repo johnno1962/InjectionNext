@@ -20,7 +20,12 @@
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
-		BB4654812C257F110080EC40 /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4654802C257F110080EC40 /* Recompiler.swift */; };
+		BB4654812C257F110080EC40 /* NextCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4654802C257F110080EC40 /* NextCompiler.swift */; };
+		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
+		BB5155E02CDED8C600704C7A /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155DF2CDED8C600704C7A /* Recompiler.swift */; };
+		BB5155E32CDED9D000704C7A /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E22CDED9CF00704C7A /* InjectionBase.swift */; };
+		BB5155E42CDED9D000704C7A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E12CDED9CF00704C7A /* FileWatcher.swift */; };
+		BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E52CDEDAD500704C7A /* LogParser.swift */; };
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
@@ -104,7 +109,12 @@
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		BB4654802C257F110080EC40 /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recompiler.swift; sourceTree = "<group>"; };
+		BB4654802C257F110080EC40 /* NextCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextCompiler.swift; sourceTree = "<group>"; };
+		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
+		BB5155DF2CDED8C600704C7A /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
+		BB5155E12CDED9CF00704C7A /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileWatcher.swift; path = ../InjectionLite/Sources/InjectionLite/FileWatcher.swift; sourceTree = SOURCE_ROOT; };
+		BB5155E22CDED9CF00704C7A /* InjectionBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InjectionBase.swift; path = ../InjectionLite/Sources/InjectionLite/InjectionBase.swift; sourceTree = SOURCE_ROOT; };
+		BB5155E52CDEDAD500704C7A /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogParser.swift; path = ../InjectionLite/Sources/InjectionLite/LogParser.swift; sourceTree = SOURCE_ROOT; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
@@ -227,9 +237,14 @@
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
-				BB4654802C257F110080EC40 /* Recompiler.swift */,
+				BB4654802C257F110080EC40 /* NextCompiler.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
+				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
+				BB5155E22CDED9CF00704C7A /* InjectionBase.swift */,
+				BB5155E12CDED9CF00704C7A /* FileWatcher.swift */,
+				BB5155DF2CDED8C600704C7A /* Recompiler.swift */,
+				BB5155E52CDEDAD500704C7A /* LogParser.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -455,12 +470,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
+				BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
 				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
-				BB4654812C257F110080EC40 /* Recompiler.swift in Sources */,
+				BB5155E02CDED8C600704C7A /* Recompiler.swift in Sources */,
+				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
+				BB4654812C257F110080EC40 /* NextCompiler.swift in Sources */,
+				BB5155E32CDED9D000704C7A /* InjectionBase.swift in Sources */,
+				BB5155E42CDED9D000704C7A /* FileWatcher.swift in Sources */,
 				224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */,
 				BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */,
 				22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */,
@@ -653,7 +673,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -676,7 +696,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -798,7 +818,7 @@
 			repositoryURL = "https://github.com/johnno1962/Fortify";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.9;
+				minimumVersion = 2.1.10;
 			};
 		};
 		224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */ = {
