@@ -10,6 +10,12 @@
 #
 
 if [ "$CONFIGURATION" == "Debug" ]; then
+    if [ ! -w "$CODESIGNING_FOLDER_PATH" ]; then
+        echo '*** copy_bundle.sh unable to write to file system. ***'
+            'Change build setting "User Script Sandboxing" to NO'
+        exit 1;
+    fi
+
     # determine which prebuilt bundle to copy
     RESOURCES=${RESOURCES:-"$(dirname "$0")"}
     # If there are frameworks used only by tests
