@@ -125,6 +125,19 @@ class MonitorXcode {
                     }
                     if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                         Unhider.packageFrameworks = arg
+                        let frameworksURL = URL(fileURLWithPath: arg)
+                        let productsDir = frameworksURL.deletingLastPathComponent()
+                            .deletingLastPathComponent().deletingLastPathComponent()
+                            .deletingLastPathComponent().deletingLastPathComponent()
+                            .appendingPathComponent("Build/Products")
+                        let platform = InjectionServer
+                            .currentClient?.platform ?? "iPhoneSimulator"
+                        if let configs = Glob(pattern: productsDir.path +
+                                               "/*-" + platform.lowercased()) {
+                            for other in configs {
+                                args += [other, "-F"]
+                            }
+                        }
                     }
 
                     if arg.hasSuffix(".swift") {

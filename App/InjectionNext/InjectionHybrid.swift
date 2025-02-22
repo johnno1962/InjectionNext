@@ -22,9 +22,13 @@ extension AppDelegate {
         if open.runModal() == .OK, let url = open.url {
             setenv("INJECTION_DIRECTORIES",
                    NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
+            Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
             Self.watchers.append(InjectionHybrid())
             sender.state = .on
+        } else {
+            Self.watchers.removeAll()
+            sender.state = .off
         }
     }
 }
@@ -37,8 +41,9 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        guard Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
-            .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
+        guard !AppDelegate.watchers.isEmpty,
+              Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
+                .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
         MonitorXcode.compileQueue.async {

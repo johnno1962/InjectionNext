@@ -153,7 +153,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if sender.state == .on, let script = Bundle.main
             .url(forResource: "copy_bundle", withExtension: "sh") {
             let buildPhase = """
-                RESOURCES="\(script.deletingLastPathComponent().path)"
+                export RESOURCES="\(script.deletingLastPathComponent().path)"
                 if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
                     "$RESOURCES/\(script.lastPathComponent)"
                 fi
