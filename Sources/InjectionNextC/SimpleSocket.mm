@@ -101,8 +101,8 @@ static int serverSocket;
                     [self error:@"Could not set SO_NOSIGPIPE: %s"];
                 @autoreleasepool {
                     struct sockaddr_in *v4Addr = &clientAddr.ip4;
-                    NSLog(@"Connection from %s:%d\n",
-                          inet_ntoa(v4Addr->sin_addr), ntohs(v4Addr->sin_port));
+                    printf("%s: Connection from %s:%d\n", object_getClassName(self),
+                           inet_ntoa(v4Addr->sin_addr), ntohs(v4Addr->sin_port));
                     SimpleSocket *client = [[self alloc] initSocket:clientSocket];
                     client.isLocalClient =
                         v4Addr->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
@@ -265,6 +265,12 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 - (BOOL)writeInt:(int)length {
     SLog(@"#%d %d ->", clientSocket, length);
     return [self writeBytes:&length length:sizeof length cmd:_cmd];
+}
+
+- (BOOL)writeCStr:(const char *)string {
+    uint32_t len = (uint32_t)strlen(string);
+    SLog(@"#%d %d '%s' ->", clientSocket, (int)len, string);
+    return [self writeInt:len] && [self writeBytes:string length:len cmd:_cmd];
 }
 
 - (BOOL)writePointer:(void *)ptr {

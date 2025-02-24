@@ -28,12 +28,11 @@ class MonitorXcode {
     // The service to recompile and inject a source file.
     var recompiler = NextCompiler()
 
-    func debug(_ msg: String) {
+    func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
-        //print(msg)
+//        print(what, separator: separator)
         #endif
     }
-    
     init(args: String = "") {
         var args = args
         #if DEBUG
@@ -85,7 +84,8 @@ class MonitorXcode {
                         if out.hasPrefix("/") &&
                             !FileManager.default.fileExists(atPath: out),
                            let data = out.data(using: .macOSRoman),
-                           let recovered = String(data: data, encoding: .utf8) {
+                           let recovered = String(data: data, encoding: .utf8),
+                           FileManager.default.fileExists(atPath: recovered) {
                             out = recovered
                         }
                         if strstr(start+1, escaped) != nil {
@@ -115,8 +115,9 @@ class MonitorXcode {
                  line == "  key.request: source.request.relatedidents,") &&
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
-                var swiftFiles = "", args = [String](),
-                    fileCount = 0, workingDir = "/tmp"
+                var swiftFiles = "", args = [String](), fileCount = 0,
+                    workingDir = "/tmp", configDirs = Set<String>()
+
                 while var arg = readQuotedString() {
                     let llvmIncs = "/llvm-macosx-arm64/lib"
                     if arg.hasPrefix("-I"), arg.contains(llvmIncs) {
@@ -125,6 +126,22 @@ class MonitorXcode {
                     }
                     if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                         Unhider.packageFrameworks = arg
+
+                        let frameworksURL = URL(fileURLWithPath: arg)
+                        let derivedData = frameworksURL.deletingLastPathComponent()
+                            .deletingLastPathComponent().deletingLastPathComponent()
+                            .deletingLastPathComponent().deletingLastPathComponent()
+                        let productsDir =
+                            derivedData.appendingPathComponent("Build/Products")
+                        let platform = InjectionServer
+                            .currentClient?.platform ?? "iPhoneSimulator"
+                        if let configs = Glob(pattern: productsDir.path +
+                                               "/*-" + platform.lowercased()) {
+                            for other in configs
+                                where configDirs.insert(other).inserted {
+                                args += [other, "-F"]
+                            }
+                        }
                     }
 
                     if arg.hasSuffix(".swift") {
@@ -151,6 +168,7 @@ class MonitorXcode {
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
+                            !arg.hasSuffix("/PackageFrameworks") &&
                             !arg.contains("/Intermediates.noindex/") {
                         // expands out default argument generators
                         args += [arg.replacingOccurrences(
@@ -160,12 +178,14 @@ class MonitorXcode {
                         args.append(arg)
                     }
                 }
+
                 guard !args.isEmpty, let source =
                         readQuotedString() ?? readQuotedString(),
                       !source.contains("\\n") else {
                     continue
                 }
                 lastSource = source
+
                 if let previous = recompiler
                     .compilations[source]?.arguments ?? lastArguments,
                     args == previous {
@@ -180,9 +200,11 @@ class MonitorXcode {
                 } else {
                     lastFilelist = swiftFiles
                 }
+
                 print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
-                let update = NextCompiler.Compilation(
-                    arguments: args, swiftFiles: swiftFiles, workingDir: workingDir)
+                let update = NextCompiler.Compilation(arguments: args,
+                    swiftFiles: swiftFiles, workingDir: workingDir)
+ 
                 // The folling line should be on the compileQueue
                 // but it seems to provoke a Swift compiler bug.
                 self.recompiler.compilations[source] = update

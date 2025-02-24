@@ -22,29 +22,40 @@ extension AppDelegate {
         if open.runModal() == .OK, let url = open.url {
             setenv("INJECTION_DIRECTORIES",
                    NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
+            Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
             Self.watchers.append(InjectionHybrid())
-            sender.state = .on
+        } else {
+            Self.watchers.removeAll()
         }
+        sender.state = Self.watchers.isEmpty ? .off : .on
     }
 }
 
 class InjectionHybrid: InjectionBase {
     /// InjectionNext compiler that uses InjectionLite log parser
-    let mixRecompiler = HybridCompiler()
+    var mixRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        guard Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
-            .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
+        if CommandServer.Frontend.original != nil {
+            mixRecompiler = CommandServer.platformRecompiler
+        }
+        guard !AppDelegate.watchers.isEmpty,
+              Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
+                .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
         MonitorXcode.compileQueue.async {
             guard let running = MonitorXcode.runningXcode,
                   running.recompiler.inject(source: source) else {
-                _ = self.mixRecompiler.inject(source: source)
+                if !self.mixRecompiler.inject(source: source) {
+                    self.mixRecompiler.pendingSource = source
+                } else {
+                    CommandServer.writeCache()
+                }
                 return
             }
         }

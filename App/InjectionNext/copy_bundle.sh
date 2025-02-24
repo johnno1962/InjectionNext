@@ -42,7 +42,8 @@ if [ "$CONFIGURATION" == "Debug" ]; then
 
     # copy frameworks used for testing into app's bundle/Frameworks
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
-    codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib};
+    codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib} ||
+    echo "*** You should be able to ignore the above errors ***"
     
     # Copy frameworks only used in test target
     PRODUCTS_DIR="$(dirname "$CODESIGNING_FOLDER_PATH")"
