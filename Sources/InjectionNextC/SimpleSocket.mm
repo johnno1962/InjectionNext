@@ -101,8 +101,8 @@ static int serverSocket;
                     [self error:@"Could not set SO_NOSIGPIPE: %s"];
                 @autoreleasepool {
                     struct sockaddr_in *v4Addr = &clientAddr.ip4;
-                    NSLog(@"Connection from %s:%d\n",
-                          inet_ntoa(v4Addr->sin_addr), ntohs(v4Addr->sin_port));
+                    printf("%s: Connection from %s:%d\n", object_getClassName(self),
+                           inet_ntoa(v4Addr->sin_addr), ntohs(v4Addr->sin_port));
                     SimpleSocket *client = [[self alloc] initSocket:clientSocket];
                     client.isLocalClient =
                         v4Addr->sin_addr.s_addr == htonl(INADDR_LOOPBACK);

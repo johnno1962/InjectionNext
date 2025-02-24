@@ -967,7 +967,7 @@
 			repositoryURL = "https://github.com/johnno1962/SwiftRegex5";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.1.2;
+				minimumVersion = 6.1.3;
 			};
 		};
 		224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */ = {

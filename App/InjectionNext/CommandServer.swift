@@ -76,7 +76,9 @@ class CommandServer: InjectionServer {
         }
         let recompiler = NextCompiler()
         do {
-            if let stream = Popen(cmd: "gunzip <\(cacheURL.path).gz")?.readAll(),
+            let compressed = cacheURL.path+".gz"
+            if Fstat(path: compressed)?.st_size ?? 0 != 0,
+               let stream = Popen(cmd: "gunzip <"+compressed)?.readAll(),
                let cached = stream.data(using: .utf8) {
                 let decoder = JSONDecoder()
                 recompiler.compilations = try decoder
@@ -127,7 +129,9 @@ extension InjectionServer {
             case "-o":
                 _ = readString()
             default:
-                if arg[#"(-(pch-output-dir|supplementary-output-file-map|emit-(reference-)?dependencies|serialize-diagnostics|index-(store|unit-output))-path|(-validate-clang-modules-once )?-clang-build-session-file|-Xcc -ivfsstatcache -Xcc)"#] {
+                if arg.hasSuffix(".swift") {
+                    swiftFiles += arg+"\n"
+                } else if arg[#"(-(pch-output-dir|supplementary-output-file-map|emit-(reference-)?dependencies|serialize-diagnostics|index-(store|unit-output))-path|(-validate-clang-modules-once )?-clang-build-session-file|-Xcc -ivfsstatcache -Xcc)"#] {
                     _ = readString()
                 } else if !arg["-validate-clang-modules-once"] {
                     args.append(arg)
@@ -151,9 +155,8 @@ extension InjectionServer {
                     .compilations[source]?.swiftFiles ?? Self.lastFilelist,
                    swiftFiles == previous {
                     swiftFiles = previous
-                } else {
-                    Self.lastFilelist = swiftFiles
                 }
+                Self.lastFilelist = swiftFiles
                 
                 print("Updating \(args.count) args for source " +
                       URL(fileURLWithPath: source).lastPathComponent)
