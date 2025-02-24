@@ -27,7 +27,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
 class NextCompiler {
 
     /// Information required to call the compiler for a file.
-    struct Compilation {
+    struct Compilation: Codable {
         /// Sundry arguments to the compiler
         let arguments: [String]
         /// Swift files in the target ready to be written as a -filelist
@@ -168,8 +168,8 @@ class NextCompiler {
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
-        let compiler = toolchain + "/usr/bin/" +
-            (isSwift ? "swift-frontend" : "clang")
+        let compiler = (isSwift ? InjectionServer.Frontend.original : nil) ??
+            toolchain + "/usr/bin/" + (isSwift ? "swift-frontend" : "clang")
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
             ".platform/Developer/usr/"

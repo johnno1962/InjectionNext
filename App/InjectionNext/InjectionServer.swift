@@ -94,7 +94,8 @@ class InjectionServer: SimpleSocket {
     // Simple validation to weed out invalid connections
     func validateConnection() -> CInt? {
         let clientVersion = readInt()
-        guard clientVersion == INJECTION_VERSION,
+        guard clientVersion == INJECTION_VERSION ||
+                clientVersion == COMMANDS_VERSION,
               let injectionKey = readString() else { return nil }
         guard injectionKey.hasPrefix(NSHomeDirectory()) else {
             error("Invalid INJECTION_KEY: "+injectionKey)
@@ -119,9 +120,18 @@ class InjectionServer: SimpleSocket {
     }
 
     func processResponses() {
-        guard let _ = validateConnection() else {
+        guard let vers = validateConnection() else {
             sendCommand(.invalid, with: nil)
             error("Connection did not validate.")
+            return
+        }
+        
+        if vers == COMMANDS_VERSION {
+            do {
+                try processFeedCommand()
+            } catch {
+                log("Command feed fail: \(error)")
+            }
             return
         }
         

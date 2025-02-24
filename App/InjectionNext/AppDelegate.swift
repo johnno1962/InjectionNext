@@ -39,6 +39,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet var lastErrorField: NSTextView!
     // Restart XCode if crashed.
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
+    @IBOutlet weak var patchCompilerItem: NSMenuItem!
+    typealias Frontend = InjectionServer.Frontend
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
@@ -94,6 +96,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart == true ? .on : .off
+        
+        updatePatchUnpatch()
         
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
@@ -189,7 +193,36 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
+    
+    @IBAction func patchCompiler(_ sender: NSMenuItem) {
+        let fm = FileManager.default
+        do {
+            if sender.title == Frontend.State.unpatched.rawValue {
+                if !fm.fileExists(atPath: Frontend.patched),
+                   let feeder = Bundle.main
+                    .url(forResource: "swift-frontend", withExtension: nil) {
+                    try fm.moveItem(at: Frontend.unpatchedURL,
+                                    to: Frontend.patchedURL)
+                    try fm.createSymbolicLink(at: Frontend
+                        .unpatchedURL, withDestinationURL: feeder)
+                }
+            } else if fm.fileExists(atPath: Frontend.patched) {
+                try fm.removeItem(atPath: Frontend.unpatched)
+                try fm.moveItem(at: Frontend.patchedURL,
+                                to: Frontend.unpatchedURL)
+            }
+        } catch {
+            InjectionServer.error("Patching error: \(error)")
+        }
+        updatePatchUnpatch()
+    }
 
+    func updatePatchUnpatch() {
+        patchCompilerItem.title = (FileManager.default
+            .fileExists(atPath: Frontend.patched) ?
+               Frontend.State.patched : .unpatched).rawValue
+    }
+    
     func setupCodeSigningComboBox() {
         codeSignBox.removeAllItems()
 

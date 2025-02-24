@@ -267,6 +267,12 @@ typedef ssize_t (*io_func)(int, void *, size_t);
     return [self writeBytes:&length length:sizeof length cmd:_cmd];
 }
 
+- (BOOL)writeCStr:(const char *)string {
+    uint32_t len = (uint32_t)strlen(string);
+    SLog(@"#%d %d '%s' ->", clientSocket, (int)len, string);
+    return [self writeInt:len] && [self writeBytes:string length:len cmd:_cmd];
+}
+
 - (BOOL)writePointer:(void *)ptr {
     SLog(@"#%d %p ->", clientSocket, ptr);
     return [self writeBytes:&ptr length:sizeof ptr cmd:_cmd];

@@ -43,6 +43,7 @@
 - (BOOL)readBytes:(void * _Nonnull)buffer length:(size_t)length cmd:(SEL _Nonnull)cmd;
 
 - (BOOL)writeInt:(int)length;
+- (BOOL)writeCStr:(const char *_Nonnull)string;
 - (BOOL)writePointer:(void * _Nullable)pointer;
 - (BOOL)writeData:(NSData *_Nonnull)data;
 - (BOOL)writeString:(NSString *_Nonnull)string;

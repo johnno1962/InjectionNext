@@ -35,12 +35,15 @@ extension AppDelegate {
 
 class InjectionHybrid: InjectionBase {
     /// InjectionNext compiler that uses InjectionLite log parser
-    let mixRecompiler = HybridCompiler()
+    var mixRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
+        if InjectionServer.Frontend.original != nil {
+            mixRecompiler = InjectionServer.recompiler
+        }
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
                 .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
@@ -49,7 +52,9 @@ class InjectionHybrid: InjectionBase {
         MonitorXcode.compileQueue.async {
             guard let running = MonitorXcode.runningXcode,
                   running.recompiler.inject(source: source) else {
-                _ = self.mixRecompiler.inject(source: source)
+                if !self.mixRecompiler.inject(source: source) {
+                    InjectionServer.pendingSource = source
+                }
                 return
             }
         }
