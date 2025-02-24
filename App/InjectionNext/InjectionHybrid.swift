@@ -25,11 +25,10 @@ extension AppDelegate {
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
             Self.watchers.append(InjectionHybrid())
-            sender.state = .on
         } else {
             Self.watchers.removeAll()
-            sender.state = .off
         }
+        sender.state = Self.watchers.isEmpty ? .off : .on
     }
 }
 
@@ -41,8 +40,8 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        if InjectionServer.Frontend.original != nil {
-            mixRecompiler = InjectionServer.recompiler
+        if CommandServer.Frontend.original != nil {
+            mixRecompiler = CommandServer.platformRecompiler
         }
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
@@ -53,7 +52,9 @@ class InjectionHybrid: InjectionBase {
             guard let running = MonitorXcode.runningXcode,
                   running.recompiler.inject(source: source) else {
                 if !self.mixRecompiler.inject(source: source) {
-                    InjectionServer.pendingSource = source
+                    self.mixRecompiler.pendingSource = source
+                } else {
+                    CommandServer.writeCache()
                 }
                 return
             }
