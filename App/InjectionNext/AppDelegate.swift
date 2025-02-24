@@ -205,6 +205,13 @@ class AppDelegate : NSObject, NSApplicationDelegate {
                                     to: Frontend.patchedURL)
                     try fm.createSymbolicLink(at: Frontend
                         .unpatchedURL, withDestinationURL: feeder)
+                    InjectionServer.error("""
+                        The Swift compiler of your current toolchain \
+                        \(Frontend.unpatched) has been replaced by \
+                        a symbolic link to a script to capture all \
+                        compilation commands. Use menu item "Unpatch \
+                        Compiler" to revert this change.
+                        """)
                 }
             } else if fm.fileExists(atPath: Frontend.patched) {
                 try fm.removeItem(atPath: Frontend.unpatched)

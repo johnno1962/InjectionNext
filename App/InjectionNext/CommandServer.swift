@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Popen
 
 class CommandServer: InjectionServer {
     struct Frontend {
@@ -16,7 +17,7 @@ class CommandServer: InjectionServer {
         }
         
         static var unpatched: String = Defaults.xcodePath +
-        "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend"
+            "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend"
         static var unpatchedURL: URL = URL(fileURLWithPath: unpatched)
         static var patched: String = unpatched + ".save"
         static var patchedURL: URL = URL(fileURLWithPath: patched)
@@ -35,7 +36,8 @@ class CommandServer: InjectionServer {
         }
         let recompiler = NextCompiler()
         do {
-            if let cached = try? Data(contentsOf: cacheURL) {
+            if let stream = Popen(cmd: "gunzip <\(cacheURL.path).gz")?.readAll(),
+               let cached = stream.data(using: .utf8) {
                 let decoder = JSONDecoder()
                 recompiler.compilations = try decoder
                     .decode([String: NextCompiler.Compilation].self, from: cached)
@@ -52,7 +54,11 @@ class CommandServer: InjectionServer {
         do {
             let data = try encoder.encode(platformRecompiler.compilations)
             try data.write(to: cacheURL, options: .atomic)
-            print("Cached \(platformRecompiler.compilations.count) commands")
+            if let error = Popen.system("gzip -f "+cacheURL.path, errors: true) {
+                InjectionServer.error("Unable to zip commands cache: \(error)")
+            } else {
+                print("Cached \(platformRecompiler.compilations.count) commands")
+            }
         } catch {
             InjectionServer.error("Unable to write commands cache: \(error)")
         }
