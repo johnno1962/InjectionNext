@@ -10,6 +10,8 @@ import Cocoa
 import Popen
 
 extension AppDelegate {
+    typealias Frontend = CommandServer.Frontend
+
     @IBAction func patchCompiler(_ sender: NSMenuItem) {
         let fm = FileManager.default
         do {
@@ -43,8 +45,8 @@ extension AppDelegate {
     func updatePatchUnpatch() -> Bool {
         let isPatched = FileManager.default
             .fileExists(atPath: Frontend.patched)
-        patchCompilerItem.title = ( isPatched ?
-               Frontend.State.patched : .unpatched).rawValue
+        patchCompilerItem.title = (isPatched ?
+            Frontend.State.patched : .unpatched).rawValue
         return isPatched
     }
 }
@@ -86,7 +88,9 @@ class CommandServer: InjectionServer {
                 print("Loaded \(recompiler.compilations.count) cached commands")
             }
         } catch {
-            InjectionServer.error("Unable to read commands cache: \(error)")
+            let chmod = Frontend.unpatchedURL.deletingLastPathComponent().path
+            InjectionServer.error("Unable to read commands cache: \(error). " +
+                                  "Is the directory \(chmod) writable?")
         }
         recompilers[currenPlatform] = recompiler
         return recompiler
@@ -105,35 +109,33 @@ class CommandServer: InjectionServer {
             InjectionServer.error("Unable to write commands cache: \(error)")
         }
     }
-}
 
-extension InjectionServer {
     static var lastFilelist: String?, lastArguments: [String]?
 
-    func processFeedCommand() throws {
+    static func processFeedCommand(feed: SimpleSocket) throws {
         var swiftFiles = "", args = [String](),
             sourceFiles = [String](), workingDir = "/tmp"
-        let originFrontend = readString()
-        while let arg = readString(), arg != COMMANDS_END {
+        let originFrontend = feed.readString()
+        while let arg = feed.readString(), arg != COMMANDS_END {
             switch arg {
             case "-frontend":
                 continue
             case "-filelist":
-                guard let filelist = readString() else { return }
+                guard let filelist = feed.readString() else { return }
                 let files = try String(contentsOfFile: filelist,
                                        encoding: .utf8)
                 swiftFiles += files
             case "-primary-file":
-                guard let source = readString() else { return }
+                guard let source = feed.readString() else { return }
                 sourceFiles.append(source)
             case "-o":
-                _ = readString()
+                _ = feed.readString()
             default:
                 if arg.hasSuffix(".swift") {
                     swiftFiles += arg+"\n"
                 } else if arg[#"(-(pch-output-dir|supplementary-output-file-map|emit-(reference-)?dependencies|serialize-diagnostics|index-(store|unit-output))-path|(-validate-clang-modules-once )?-clang-build-session-file|-Xcc -ivfsstatcache -Xcc)"#] {
-                    _ = readString()
-                } else if !arg["-validate-clang-modules-once"] {
+                    _ = feed.readString()
+                } else if !arg["-validate-clang-modules-once|-frontend-parseable-output"] {
                     args.append(arg)
                 }
             }
