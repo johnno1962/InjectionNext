@@ -40,7 +40,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     // Restart XCode if crashed.
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
     @IBOutlet weak var patchCompilerItem: NSMenuItem!
-    typealias Frontend = CommandServer.Frontend
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults

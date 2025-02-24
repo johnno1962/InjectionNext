@@ -25,7 +25,7 @@ extension AppDelegate {
     @IBAction func prepareProject(_ sender: NSMenuItem) {
         var changes = 0, edited = 0
         for source in (MonitorXcode.runningXcode?.lastFilelist ??
-                       InjectionServer.lastFilelist)?
+                       CommandServer.lastFilelist)?
             .components(separatedBy: "\n").dropLast() ?? [] {
             CommandServer.platformRecompiler
                 .lastInjected[source] = Date().timeIntervalSince1970

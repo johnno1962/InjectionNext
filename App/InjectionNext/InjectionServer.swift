@@ -120,15 +120,15 @@ class InjectionServer: SimpleSocket {
     }
 
     func processResponses() {
-        guard let vers = validateConnection() else {
+        guard let magic = validateConnection() else {
             sendCommand(.invalid, with: nil)
             error("Connection did not validate.")
             return
         }
         
-        if vers == COMMANDS_VERSION {
+        if magic == COMMANDS_VERSION {
             do {
-                try processFeedCommand()
+                try CommandServer.processFeedCommand(feed: self)
             } catch {
                 log("Command feed fail: \(error)")
             }
@@ -136,8 +136,12 @@ class InjectionServer: SimpleSocket {
         }
         
         guard MonitorXcode.runningXcode != nil ||
-            !AppDelegate.watchers.isEmpty else {
-            error("Xcode not launched via app. Injection will not be possible unless you file watch a project and Xcode logs are available.")
+                !AppDelegate.watchers.isEmpty ||
+                CommandServer.Frontend.original != nil else {
+            error("""
+                Xcode not launched via app. Injection will not be possible \ 
+                unless you file watch a project and Xcode logs are available.
+                """)
             return
         }
         
@@ -179,7 +183,7 @@ class InjectionServer: SimpleSocket {
                 log("Injection failed to load. If this was due to a default " +
                     "argument. Select the app's menu item \"Unhide Symbols\".")
             case .exit:
-                log("**** exit ****")
+                log("**** client disconnected ****")
                 return
             @unknown default:
                 error("**** @unknown case \(responseInt) ****")

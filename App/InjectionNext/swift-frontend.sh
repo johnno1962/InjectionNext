@@ -7,5 +7,5 @@
 #  Copyright © 2025 John Holdsworth. All rights reserved.
 
 FRONTEND="$(dirname $0)"/swift-frontend.save
+"$FRONTEND" "$@" &&
 (/Applications/InjectionNext.app/Contents/Resources/feedcommands "$FRONTEND" "$@" >>/tmp/feedcommands.log 2>&1 &)
-exec "$FRONTEND" "$@"
