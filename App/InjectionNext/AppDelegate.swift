@@ -83,12 +83,12 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             }
         }
         
-        if NSRunningApplication.runningApplications(
+        if !updatePatchUnpatch() && NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
             InjectionServer.error("""
                 Please quit Xcode and
                 use this app to launch it
-                (unless you are using Cursor).
+                (unless you are using a file watcher).
                 """)
         }
  
@@ -96,8 +96,6 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart == true ? .on : .off
-        
-        updatePatchUnpatch()
         
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
@@ -193,43 +191,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
-    
-    @IBAction func patchCompiler(_ sender: NSMenuItem) {
-        let fm = FileManager.default
-        do {
-            if sender.title == Frontend.State.unpatched.rawValue {
-                if !fm.fileExists(atPath: Frontend.patched),
-                   let feeder = Bundle.main
-                    .url(forResource: "swift-frontend", withExtension: nil) {
-                    try fm.moveItem(at: Frontend.unpatchedURL,
-                                    to: Frontend.patchedURL)
-                    try fm.createSymbolicLink(at: Frontend
-                        .unpatchedURL, withDestinationURL: feeder)
-                    InjectionServer.error("""
-                        The Swift compiler of your current toolchain \
-                        \(Frontend.unpatched) has been replaced by \
-                        a symbolic link to a script to capture all \
-                        compilation commands. Use menu item "Unpatch \
-                        Compiler" to revert this change.
-                        """)
-                }
-            } else if fm.fileExists(atPath: Frontend.patched) {
-                try fm.removeItem(atPath: Frontend.unpatched)
-                try fm.moveItem(at: Frontend.patchedURL,
-                                to: Frontend.unpatchedURL)
-            }
-        } catch {
-            InjectionServer.error("Patching error: \(error)")
-        }
-        updatePatchUnpatch()
-    }
 
-    func updatePatchUnpatch() {
-        patchCompilerItem.title = (FileManager.default
-            .fileExists(atPath: Frontend.patched) ?
-               Frontend.State.patched : .unpatched).rawValue
-    }
-    
     func setupCodeSigningComboBox() {
         codeSignBox.removeAllItems()
 

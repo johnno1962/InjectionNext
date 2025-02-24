@@ -6,8 +6,48 @@
 //  Copyright © 2025 John Holdsworth. All rights reserved.
 //
 
-import Foundation
+import Cocoa
 import Popen
+
+extension AppDelegate {
+    @IBAction func patchCompiler(_ sender: NSMenuItem) {
+        let fm = FileManager.default
+        do {
+            if sender.title == Frontend.State.unpatched.rawValue {
+                if !fm.fileExists(atPath: Frontend.patched),
+                   let feeder = Bundle.main
+                    .url(forResource: "swift-frontend", withExtension: nil) {
+                    try fm.moveItem(at: Frontend.unpatchedURL,
+                                    to: Frontend.patchedURL)
+                    try fm.createSymbolicLink(at: Frontend
+                        .unpatchedURL, withDestinationURL: feeder)
+                    InjectionServer.error("""
+                        The Swift compiler of your current toolchain \
+                        \(Frontend.unpatched) has been replaced by \
+                        a symbolic link to a script to capture all \
+                        compilation commands. Use menu item "Unpatch \
+                        Compiler" to revert this change.
+                        """)
+                }
+            } else if fm.fileExists(atPath: Frontend.patched) {
+                try fm.removeItem(atPath: Frontend.unpatched)
+                try fm.moveItem(at: Frontend.patchedURL,
+                                to: Frontend.unpatchedURL)
+            }
+        } catch {
+            InjectionServer.error("Patching error: \(error)")
+        }
+        _ = updatePatchUnpatch()
+    }
+
+    func updatePatchUnpatch() -> Bool {
+        let isPatched = FileManager.default
+            .fileExists(atPath: Frontend.patched)
+        patchCompilerItem.title = ( isPatched ?
+               Frontend.State.patched : .unpatched).rawValue
+        return isPatched
+    }
+}
 
 class CommandServer: InjectionServer {
     struct Frontend {
