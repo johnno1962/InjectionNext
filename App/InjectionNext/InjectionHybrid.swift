@@ -40,8 +40,9 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        if CommandServer.Frontend.original != nil {
+        if CommandServer.Frontend.lastFrontend != nil {
             mixRecompiler = CommandServer.platformRecompiler
+            CommandServer.Frontend.lastInjected = source
         }
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?

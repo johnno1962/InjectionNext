@@ -16,7 +16,8 @@ extension AppDelegate {
     
     /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
-        if let lastSource = MonitorXcode.runningXcode?.lastSource {
+        if let lastSource = MonitorXcode.runningXcode?.lastSource ??
+            CommandServer.Frontend.lastInjected {
             prepare(source: lastSource)
         }
     }

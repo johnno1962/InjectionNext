@@ -108,6 +108,21 @@ class InjectionServer: SimpleSocket {
     override func runInBackground() {
         do {
             try Fortify.protect {
+                guard let magic = validateConnection() else {
+                    sendCommand(.invalid, with: nil)
+                    error("Connection did not validate.")
+                    return
+                }
+                
+                if magic == COMMANDS_VERSION {
+                    do {
+                        try CommandServer.processFeedCommand(feed: self)
+                    } catch {
+                        log("Command feed fail: \(error)")
+                    }
+                    return
+                }
+                
                 appDelegate.setMenuIcon(.ok)
                 processResponses()
                 appDelegate.setMenuIcon(MonitorXcode
@@ -120,24 +135,9 @@ class InjectionServer: SimpleSocket {
     }
 
     func processResponses() {
-        guard let magic = validateConnection() else {
-            sendCommand(.invalid, with: nil)
-            error("Connection did not validate.")
-            return
-        }
-        
-        if magic == COMMANDS_VERSION {
-            do {
-                try CommandServer.processFeedCommand(feed: self)
-            } catch {
-                log("Command feed fail: \(error)")
-            }
-            return
-        }
-        
         guard MonitorXcode.runningXcode != nil ||
                 !AppDelegate.watchers.isEmpty ||
-                CommandServer.Frontend.original != nil else {
+                CommandServer.Frontend.lastFrontend != nil else {
             error("""
                 Xcode not launched via app. Injection will not be possible \ 
                 unless you file watch a project and Xcode logs are available.

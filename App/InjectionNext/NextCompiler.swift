@@ -168,7 +168,7 @@ class NextCompiler {
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
-        let compiler = (isSwift ? CommandServer.Frontend.original : nil) ??
+        let compiler = (isSwift ? CommandServer.Frontend.lastFrontend : nil) ??
             toolchain + "/usr/bin/" + (isSwift ? "swift-frontend" : "clang")
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +

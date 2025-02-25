@@ -43,7 +43,7 @@ extension AppDelegate {
                 try fm.moveItem(at: Frontend.patchedURL,
                                 to: Frontend.unpatchedURL)
                 for binary in linksToMove {
-                    let link = Frontend.binURL.appendingPathComponent("swift")
+                    let link = Frontend.binURL.appendingPathComponent(binary)
                     try fm.removeItem(at: link)
                     symlink("swift-frontend", link.path)
                 }
@@ -81,11 +81,11 @@ class CommandServer: InjectionServer {
         static var unpatchedURL: URL = binURL.appendingPathComponent("swift-frontend")
         static var patched: String = unpatchedURL.path + ".save"
         static var patchedURL: URL = URL(fileURLWithPath: patched)
-        static var original: String?
+        static var lastFrontend: String?, lastInjected: String?
     }
     
     static var currenPlatform: String =
-    InjectionServer.currentClient?.platform ?? "iPhoneSimulator"
+        InjectionServer.currentClient?.platform ?? "iPhoneSimulator"
     static var cacheURL: URL {
         return URL(fileURLWithPath: "/tmp/\(currenPlatform)_commands.json")
     }
@@ -131,11 +131,9 @@ class CommandServer: InjectionServer {
     static func processFeedCommand(feed: SimpleSocket) throws {
         var swiftFiles = "", args = [String](),
             sourceFiles = [String](), workingDir = "/tmp"
-        let originFrontend = feed.readString()
+        let frontendPath = feed.readString()
         while let arg = feed.readString(), arg != COMMANDS_END {
             switch arg {
-            case "-frontend":
-                continue
             case "-filelist":
                 guard let filelist = feed.readString() else { return }
                 let files = try String(contentsOfFile: filelist,
@@ -144,6 +142,8 @@ class CommandServer: InjectionServer {
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 sourceFiles.append(source)
+            case "-emit-module":
+                return
             case "-o":
                 _ = feed.readString()
             default:
@@ -158,7 +158,7 @@ class CommandServer: InjectionServer {
         }
         
         MonitorXcode.compileQueue.async {
-            CommandServer.Frontend.original = originFrontend
+            CommandServer.Frontend.lastFrontend = frontendPath
             let recompiler = CommandServer.platformRecompiler
 
             for source in sourceFiles {
