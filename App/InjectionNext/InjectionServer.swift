@@ -123,6 +123,9 @@ class InjectionServer: SimpleSocket {
                     return
                 }
                 
+                DispatchQueue.main.async {
+                    InjectionHybrid.pendingInjections.removeAll()
+                }
                 appDelegate.setMenuIcon(.ok)
                 processResponses()
                 appDelegate.setMenuIcon(MonitorXcode

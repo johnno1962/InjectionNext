@@ -33,6 +33,7 @@ extension AppDelegate {
 }
 
 class InjectionHybrid: InjectionBase {
+    static var pendingInjections = [String]()
     /// InjectionNext compiler that uses InjectionLite log parser
     var mixRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
@@ -49,16 +50,27 @@ class InjectionHybrid: InjectionBase {
                 .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
-        MonitorXcode.compileQueue.async {
-            guard let running = MonitorXcode.runningXcode,
-                  running.recompiler.inject(source: source) else {
-                if !self.mixRecompiler.inject(source: source) {
-                    self.mixRecompiler.pendingSource = source
-                } else {
-                    CommandServer.writeCache()
-                }
-                return
+        Self.pendingInjections.append(source)
+        MonitorXcode.compileQueue.async(execute: injectNext)
+    }
+    
+    func injectNext() {
+        guard let source = DispatchQueue.main.sync(execute: { () -> String? in
+            guard let source = Self.pendingInjections.first else { return nil }
+            Self.pendingInjections.removeFirst()
+            if !Self.pendingInjections.isEmpty {
+                MonitorXcode.compileQueue.async(execute: injectNext)
             }
+            return source
+        }) else { return }
+        guard let running = MonitorXcode.runningXcode,
+              running.recompiler.inject(source: source) else {
+            if !self.mixRecompiler.inject(source: source) {
+                self.mixRecompiler.pendingSource = source
+            } else {
+                CommandServer.writeCache()
+            }
+            return
         }
     }
 }

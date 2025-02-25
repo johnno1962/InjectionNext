@@ -181,8 +181,10 @@ class CommandServer: InjectionServer {
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: workingDir)
                 
-                // The folling line should be on the compileQueue
-                // but it seems to provoke a Swift compiler bug.
+                if InjectionServer.currentClient != nil &&
+                    recompiler.compilations.index(forKey: source) != nil {
+                    continue
+                }
                 recompiler.compilations[source] = update
                 if source == CommandServer.platformRecompiler.pendingSource {
                     recompiler.pendingSource = nil
