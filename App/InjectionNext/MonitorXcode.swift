@@ -30,7 +30,7 @@ class MonitorXcode {
 
     func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
-//        print(what, separator: separator)
+        print(what, separator: separator)
         #endif
     }
     init(args: String = "") {
@@ -107,7 +107,7 @@ class MonitorXcode {
         
         let indexBuild = "/Index.noindex/Build/"
         while let line = xcodeStdout.readLine() {
-            debug(">>"+line+"<<")
+//            debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
                 (line == "  key.request: source.request.editor.open," ||
                  line == "  key.request: source.request.diagnostics," ||
@@ -126,7 +126,7 @@ class MonitorXcode {
                     }
                     if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
                         Unhider.packageFrameworks = arg
-
+                        #if DEFAULTS_PACKAGE_PROBLEM || false
                         let frameworksURL = URL(fileURLWithPath: arg)
                         let derivedData = frameworksURL.deletingLastPathComponent()
                             .deletingLastPathComponent().deletingLastPathComponent()
@@ -142,6 +142,7 @@ class MonitorXcode {
                                 args += [other, "-F"]
                             }
                         }
+                        #endif
                     }
 
                     if arg.hasSuffix(".swift") {
@@ -169,10 +170,18 @@ class MonitorXcode {
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
                             !arg.hasSuffix("/PackageFrameworks") &&
-                            !arg.contains("/Intermediates.noindex/") {
+                            !arg.contains("/Intermediates.noindex/"),
+                        let option = args.last {
                         // expands out default argument generators
-                        args += [arg.replacingOccurrences(
-                            of: indexBuild, with: "/Build/")]
+                        let change = [arg.replacingOccurrences(
+                            of: indexBuild, with: "/Build/")] +
+                            // alternate fix of Defaults problem
+                            // hopefully without causing unhides
+                            (arg.hasPrefix("-") ? [arg] :
+                                option.hasPrefix("-") ? [option, arg] :
+                                [])
+                        debug(change)
+                        args += change
                     } else if arg != "-Xfrontend" &&
                             !arg.hasPrefix("-driver-") {
                         args.append(arg)

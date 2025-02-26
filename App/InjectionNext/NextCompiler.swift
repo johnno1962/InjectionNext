@@ -168,11 +168,12 @@ class NextCompiler {
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
-        let compiler = (isSwift ? CommandServer.Frontend.lastFrontend : nil) ??
+        let compiler = (isSwift ? CommandServer.Frontend.loggedFrontend : nil) ??
             toolchain + "/usr/bin/" + (isSwift ? "swift-frontend" : "clang")
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
             ".platform/Developer/usr/"
+        let baseOptionsToAdd = ["-o", object, "-DDEBUG=1", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
              "-external-plugin-path",
@@ -183,7 +184,7 @@ class NextCompiler {
              platformUsr+"bin/swift-plugin-server",
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
-            ["-c", source]) + ["-o", object, "-DINJECTING"]
+            ["-c", source]) + baseOptionsToAdd
         
         // Call compiler process
         if let errors = Popen.task(exec: compiler,

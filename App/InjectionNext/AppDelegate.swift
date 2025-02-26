@@ -128,6 +128,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
             Defaults.xcodePath = path
+            _ = updatePatchUnpatch()
             sender.toolTip = path
             runXcode(sender)
         }

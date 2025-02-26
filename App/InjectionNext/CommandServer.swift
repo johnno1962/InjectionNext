@@ -49,7 +49,9 @@ extension AppDelegate {
                 }
             }
         } catch {
-            InjectionServer.error("Patching error: \(error)")
+            let chmod = Frontend.unpatchedURL.deletingLastPathComponent()
+            InjectionServer.error("Patching error: \(error). " +
+                                  "Is the directory \(chmod.path) writable?")
         }
         _ = updatePatchUnpatch()
     }
@@ -72,7 +74,7 @@ extension JSONDecoder {
 class CommandServer: InjectionServer {
     struct Frontend {
         enum State: String {
-            case unpatched = "Patch Compiler"
+            case unpatched = "Intercept Compiler"
             case patched = "Unpatch Compiler"
         }
         
@@ -81,9 +83,9 @@ class CommandServer: InjectionServer {
         static var unpatchedURL: URL = binURL.appendingPathComponent("swift-frontend")
         static var patched: String = unpatchedURL.path + ".save"
         static var patchedURL: URL = URL(fileURLWithPath: patched)
-        static var lastFrontend: String?, lastInjected: String?
+        static var loggedFrontend: String?, lastInjected: String?
     }
-    
+
     static var currenPlatform: String =
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator"
     static var cacheURL: URL {
@@ -104,9 +106,7 @@ class CommandServer: InjectionServer {
                 print("Loaded \(recompiler.compilations.count) cached commands")
             }
         } catch {
-            let chmod = Frontend.unpatchedURL.deletingLastPathComponent().path
-            InjectionServer.error("Unable to read commands cache: \(error). " +
-                                  "Is the directory \(chmod) writable?")
+            InjectionServer.error("Unable to read commands cache: \(error).")
         }
         recompilers[currenPlatform] = recompiler
         return recompiler
@@ -128,7 +128,7 @@ class CommandServer: InjectionServer {
 
     static var lastFilelist: String?, lastArguments: [String]?
 
-    static func processFeedCommand(feed: SimpleSocket) throws {
+    static func processFrontendCommandFrom(feed: SimpleSocket) throws {
         var swiftFiles = "", args = [String](),
             sourceFiles = [String](), workingDir = "/tmp"
         let frontendPath = feed.readString()
@@ -142,6 +142,9 @@ class CommandServer: InjectionServer {
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 sourceFiles.append(source)
+                if !swiftFiles.contains(source) {
+                    swiftFiles += source+"\n"
+                }
             case "-emit-module":
                 return
             case "-o":
@@ -156,9 +159,9 @@ class CommandServer: InjectionServer {
                 }
             }
         }
-        
+
         MonitorXcode.compileQueue.async {
-            CommandServer.Frontend.lastFrontend = frontendPath
+            CommandServer.Frontend.loggedFrontend = frontendPath
             let recompiler = CommandServer.platformRecompiler
 
             for source in sourceFiles {
@@ -175,16 +178,17 @@ class CommandServer: InjectionServer {
                     swiftFiles = previous
                 }
                 Self.lastFilelist = swiftFiles
-                
+
+                if InjectionServer.currentClient != nil &&
+                    recompiler.compilations.index(forKey: source) != nil {
+                    continue
+                }
+
                 print("Updating \(args.count) args for source " +
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: workingDir)
                 
-                if InjectionServer.currentClient != nil &&
-                    recompiler.compilations.index(forKey: source) != nil {
-                    continue
-                }
                 recompiler.compilations[source] = update
                 if source == CommandServer.platformRecompiler.pendingSource {
                     recompiler.pendingSource = nil

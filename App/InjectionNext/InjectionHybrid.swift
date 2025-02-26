@@ -41,7 +41,7 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        if CommandServer.Frontend.lastFrontend != nil {
+        if CommandServer.Frontend.loggedFrontend != nil {
             mixRecompiler = CommandServer.platformRecompiler
             CommandServer.Frontend.lastInjected = source
         }
