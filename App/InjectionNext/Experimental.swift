@@ -7,7 +7,7 @@
 //
 //  $Id: //depot/HotReloading/Sources/injectiond/Experimental.swift#35 $
 //
-//  Some regular expressions to automatically prepare SwiftU sources.
+//  Some regular expressions to automatically prepare SwiftUI sources.
 //
 import Cocoa
 import SwiftRegex
@@ -17,7 +17,7 @@ extension AppDelegate {
     /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
         if let lastSource = MonitorXcode.runningXcode?.lastSource ??
-            CommandServer.Frontend.lastInjected {
+            FrontendServer.lastInjected {
             prepare(source: lastSource)
         }
     }
@@ -26,9 +26,9 @@ extension AppDelegate {
     @IBAction func prepareProject(_ sender: NSMenuItem) {
         var changes = 0, edited = 0
         for source in (MonitorXcode.runningXcode?.lastFilelist ??
-                       CommandServer.lastFilelist)?
+                       FrontendServer.lastFilelist)?
             .components(separatedBy: "\n").dropLast() ?? [] {
-            CommandServer.platformRecompiler
+            FrontendServer.frontendRecompiler()
                 .lastInjected[source] = Date().timeIntervalSince1970
             prepare(source: source, changes: &changes)
             edited += 1

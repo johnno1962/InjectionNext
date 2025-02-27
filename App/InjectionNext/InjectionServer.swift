@@ -116,7 +116,7 @@ class InjectionServer: SimpleSocket {
                 
                 if magic == COMMANDS_VERSION {
                     do {
-                        try CommandServer.processFrontendCommandFrom(feed: self)
+                        try FrontendServer.processFrontendCommandFrom(feed: self)
                     } catch {
                         log("Command feed fail: \(error)")
                     }
@@ -140,7 +140,7 @@ class InjectionServer: SimpleSocket {
     func processResponses() {
         guard MonitorXcode.runningXcode != nil ||
                 !AppDelegate.watchers.isEmpty ||
-                CommandServer.Frontend.loggedFrontend != nil else {
+                FrontendServer.loggedFrontend != nil else {
             error("""
                 Xcode not launched via app. Injection will not be possible \ 
                 unless you file watch a project and Xcode logs are available.

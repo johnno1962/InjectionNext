@@ -29,7 +29,6 @@ int main(int argc, const char * argv[]) {
             [app writeString:NSHomeDirectory()];
             for (int i=1; i<argc; i++)
                 [app writeCStr:argv[i]];
-            [app writeCStr:COMMANDS_END];
         }
     }
     return 0;

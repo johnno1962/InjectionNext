@@ -168,7 +168,7 @@ class NextCompiler {
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
-        let compiler = (isSwift ? CommandServer.Frontend.loggedFrontend : nil) ??
+        let compiler = (isSwift ? FrontendServer.loggedFrontend : nil) ??
             toolchain + "/usr/bin/" + (isSwift ? "swift-frontend" : "clang")
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
@@ -270,7 +270,7 @@ class NextCompiler {
         if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
-            identity = appDelegate.codeSigningID
+            identity = DispatchQueue.main.sync { appDelegate.codeSigningID }
         }
         let codesign = """
             (export CODESIGN_ALLOCATE="\(Defaults.xcodePath+"/Contents/Developer"

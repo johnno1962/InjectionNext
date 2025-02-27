@@ -30,6 +30,7 @@
 #endif
 
 #define MAX_PACKET 16384
+#define EOS ~0
 
 NSString *INJECTION_KEY = @__FILE__;
 
@@ -216,8 +217,9 @@ typedef ssize_t (*io_func)(int, void *, size_t);
         (char *)buffer+ptr, MIN(length-ptr, MAX_PACKET))) > 0)
         ptr += bytes;
     if (ptr < length) {
-        NSLog(@"[%@ %s:%p length:%lu] error: %lu %s",
-              self, sel_getName(cmd), buffer, length, ptr, strerror(errno));
+        if (errno)
+            NSLog(@"[%@ %s:%p length:%lu] error: %lu %s",
+                  self, sel_getName(cmd), buffer, length, ptr, strerror(errno));
         return FALSE;
     }
     return TRUE;
@@ -228,15 +230,15 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 }
 
 - (int)readInt {
-    int32_t anint = ~0;
+    int32_t anint = EOS;
     if (![self readBytes:&anint length:sizeof anint cmd:_cmd])
-        return ~0;
+        return EOS;
     SLog(@"#%d <- %d", clientSocket, anint);
     return anint;
 }
 
 - (void *)readPointer {
-    void *aptr = (void *)~0;
+    void *aptr = (void *)EOS;
     if (![self readBytes:&aptr length:sizeof aptr cmd:_cmd])
         return aptr;
     SLog(@"#%d <- %p", clientSocket, aptr);
@@ -245,6 +247,7 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 
 - (NSData *)readData {
     size_t length = [self readInt];
+    if (length == EOS) return nil;
     void *bytes = malloc(length);
     if (!bytes || ![self readBytes:bytes length:length cmd:_cmd])
         return nil;
@@ -252,7 +255,9 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 }
 
 - (NSString *)readString {
-    NSString *str = [[NSString alloc] initWithData:[self readData]
+    NSData *data = [self readData];
+    if (!data) return nil;
+    NSString *str = [[NSString alloc] initWithData:data
                                           encoding:NSUTF8StringEncoding];
     SLog(@"#%d <- %d '%@'", clientSocket, (int)str.length, str);
     return str;

@@ -30,7 +30,7 @@
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
 		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
-		BBA082362D6BC33500FFFB2F /* CommandServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA082352D6BC32D00FFFB2F /* CommandServer.swift */; };
+		BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */; };
 		BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
 		BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
@@ -140,7 +140,7 @@
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
-		BBA082352D6BC32D00FFFB2F /* CommandServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandServer.swift; sourceTree = "<group>"; };
+		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
 		BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "swift-frontend.sh"; sourceTree = "<group>"; };
 		BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		BBB64DE41FD571300020BE47 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
@@ -271,7 +271,7 @@
 				BB16653925E9A5F0001407AE /* main.m */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
-				BBA082352D6BC32D00FFFB2F /* CommandServer.swift */,
+				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
@@ -548,7 +548,7 @@
 				BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
 				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
-				BBA082362D6BC33500FFFB2F /* CommandServer.swift in Sources */,
+				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
