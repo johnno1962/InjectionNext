@@ -175,6 +175,11 @@ class FrontendServer: InjectionServer {
             FrontendServer.loggedFrontend = frontendPath
 
             for source in sourceFiles {
+                if InjectionServer.currentClient != nil &&
+                    recompiler.compilations.index(forKey: source) != nil {
+                    continue
+                }
+
                 if let previous = recompiler
                     .compilations[source]?.arguments ?? Self.lastArguments,
                    args == previous {
@@ -188,11 +193,6 @@ class FrontendServer: InjectionServer {
                     swiftFiles = previous
                 }
                 Self.lastFilelist = swiftFiles
-
-                if InjectionServer.currentClient != nil &&
-                    recompiler.compilations.index(forKey: source) != nil {
-                    continue
-                }
 
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)

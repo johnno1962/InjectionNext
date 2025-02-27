@@ -665,21 +665,20 @@
                         <action selector="selectXcode:" target="Voe-Tx-rLC" id="rCK-bY-XeP"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Auto Restart Xcode" id="6cM-gd-Yoh">
+                <menuItem title="Auto Restart Xcode" toolTip="Restart Xcode on crash" id="6cM-gd-Yoh">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="updateXcodeRestart:" target="Voe-Tx-rLC" id="KgB-zd-aHd"/>
                     </connections>
                 </menuItem>
-                <menuItem title="...or Watch Project" id="fAp-yw-BqE">
+                <menuItem title="...or Watch Project" toolTip="Start file watcher for project." id="fAp-yw-BqE">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="watchProject:" target="Voe-Tx-rLC" id="8cH-nD-fji"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Patch Compiler" toolTip="Select Path to desired Xcode" id="cw9-XM-GH8">
+                <menuItem title="Intercept Compiler" toolTip="Enable(Disable) interception of swift-frontend commands by replacing it with a script." id="cw9-XM-GH8">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Select Xcode"/>
                     <connections>
                         <action selector="patchCompiler:" target="Voe-Tx-rLC" id="tSN-cc-ZSG"/>
                     </connections>
@@ -713,16 +712,16 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Unhide Symbols" toolTip="Make a pass over object files unhiding defualt argument generators" id="FEE-8j-48e">
+                <menuItem title="Unhide Symbols" toolTip="Make a pass over object files &quot;unhiding&quot; defualt argument generators" id="FEE-8j-48e">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Unhide symbols"/>
                     <connections>
                         <action selector="unhideSymbols:" target="Voe-Tx-rLC" id="6qL-3s-BHb"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Show Last Error" toolTip="Make a pass over object files unhiding defualt argument generators" id="KKx-re-pmY">
+                <menuItem title="Show Last Error" toolTip="Show the last reported error." id="KKx-re-pmY">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Unhide symbols"/>
+                    <accessibility description="Show Last Error"/>
                     <connections>
                         <action selector="showlastError:" target="Voe-Tx-rLC" id="B1J-ZX-nPf"/>
                     </connections>

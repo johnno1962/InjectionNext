@@ -17,8 +17,8 @@ enabled which provides all the information you need to be able to recompile
 files and then the runtime implementation of injection included in the
 [InjectionLite](https://github.com/johnno1962/InjectionLite) package looks after the rest.
 
-The basic MO is to build the app in the `App` directory, or 
-download one of the binary releases in this repo, quit Xcode and run the
+The basic MO is to build the app in the `App` directory, or download one of 
+the binary releases in this repo, move it /Applications, quit Xcode and run the
 resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
 `Launch Xcode` from the status bar. You then add this repo as a Swift package 
 dependency of your project and that should be all that is required for injection 
@@ -61,7 +61,7 @@ if [ -f "$RESOURCES/copy_bundle.sh" ]; then
     "$RESOURCES/copy_bundle.sh"
 fi
 ```
-These bundles should load automatically if you've integerated the
+These bundles should load automatically if you've integrated the
 [Inject](https://github.com/krzysztofzablocki/Inject) or
 [HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
 Otherwise, you can add the following code to run on startup of your app:
@@ -83,11 +83,11 @@ testing framework to inhibit spec caching under their respective Apache licences
 To inject tests on a device: use these bundles and, when enabling the
 "Enable Devices" menu item select "Enable testing on device" which 
 will add the parameters shown to the link of each dynamic library. 
-As you do this, a command will be inserted into the clipboard which 
-you should add to your project as a "Run Script" "Build Phase" to 
-copy the required libraries into the app bundle.
+As you do this, the above command will be inserted into the clipboard 
+which you should add to your project as a "Run Script" "Build Phase" 
+to copy the required libraries into the app bundle.
 
-### Cursor mode.
+### Cursor/VSCode mode.
 
 If you would like to use InjectionNext with the Cursor code editor,
 you can have it fall back to InjectionIII-style log parsing using
@@ -97,6 +97,21 @@ Xcode from inside the InjectionNext.app but you'll need to have
 built your app in Xcode at some point in the past for the logs
 to be available. You should build using the same version as that 
 selected by `xcode-select`.
+
+### Compiler "proxy" mode.
+
+It is also possible to intercept swift compilation commands as a proof of
+concept in case at some point in the future these are no longer captured in 
+the Xcode logs (as was the case with Xcode 16.3 beta1). In this case, select 
+"Intercept compiler" to patch the current toolchain slightly to capture all
+compilations using a script and send them to the InjectionNext.app. Once this 
+patch has been applied you don't need to launch Xcode from the app and you can 
+inject by starting a file watcher using the "...or Watch Project" menu item.
+
+The original mode of operation launching Xcode inside the app takes preference 
+otherwise, if you have selected a file watcher and are intercepting the compiler
+commands that is next in line followed by the log parsing fallback which 
+essentially works as InjectionIII did when the logs are available.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
@@ -109,7 +124,7 @@ your project in Xcode automatically using the -projectPath option.
 Set a user default with the same name if you want to always open 
 this project inside the selected Xcode on launching the app.
 
-The colors of the menu bar icon bar correspond to:
+The colours of the menu bar icon bar correspond to:
 
 * Blue when you first run the InjectionNext app.
 * Purple when you have launched Xcode using the app.
@@ -119,6 +134,6 @@ The colors of the menu bar icon bar correspond to:
 
 Please note: you can only inject changes to code inside a function body
 and you can not add/remove or rename properties with storage or add or 
-reorder methods on a non final class or change function arguments.
+reorder methods in a non final class or change function signatures.
 
 The fabulous app icon is thanks to Katya of [pixel-mixer.com](http://pixel-mixer.com/).

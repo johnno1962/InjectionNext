@@ -33,6 +33,7 @@ class MonitorXcode {
         print(what, separator: separator)
         #endif
     }
+
     init(args: String = "") {
         var args = args
         #if DEBUG
