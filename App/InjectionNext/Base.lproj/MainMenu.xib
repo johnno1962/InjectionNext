@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23503" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23503"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -19,6 +19,7 @@
                 <outlet property="deviceTesting" destination="SQv-Cq-gPC" id="wzU-n5-tvW"/>
                 <outlet property="lastErrorField" destination="yfA-aU-ldx" id="oxQ-Xy-ugr"/>
                 <outlet property="librariesField" destination="rw0-Sb-xW5" id="iLm-Qn-E1h"/>
+                <outlet property="patchCompilerItem" destination="cw9-XM-GH8" id="uKH-nc-2sg"/>
                 <outlet property="restartDeviceItem" destination="6cM-gd-Yoh" id="vaG-Ug-i8f"/>
                 <outlet property="statusMenu" destination="V8Q-mq-A2f" id="Epo-HD-J21"/>
             </connections>
@@ -664,18 +665,25 @@
                         <action selector="selectXcode:" target="Voe-Tx-rLC" id="rCK-bY-XeP"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Auto Restart Xcode" id="6cM-gd-Yoh">
+                <menuItem title="Auto Restart Xcode" toolTip="Restart Xcode on crash" id="6cM-gd-Yoh">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="updateXcodeRestart:" target="Voe-Tx-rLC" id="KgB-zd-aHd"/>
                     </connections>
                 </menuItem>
-                <menuItem title="...or Watch Project" id="fAp-yw-BqE">
+                <menuItem title="...or Watch Project" toolTip="Start file watcher for project." id="fAp-yw-BqE">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="watchProject:" target="Voe-Tx-rLC" id="8cH-nD-fji"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Intercept Compiler" toolTip="Enable(Disable) interception of swift-frontend commands by replacing it with a script." id="cw9-XM-GH8">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="patchCompiler:" target="Voe-Tx-rLC" id="tSN-cc-ZSG"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="UYl-f8-xeq"/>
                 <menuItem title="Enable Devices" toolTip="Enable injecting on a device" id="s0A-3D-ThA">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Evable Devices"/>
@@ -704,16 +712,16 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Unhide Symbols" toolTip="Make a pass over object files unhiding defualt argument generators" id="FEE-8j-48e">
+                <menuItem title="Unhide Symbols" toolTip="Make a pass over object files &quot;unhiding&quot; defualt argument generators" id="FEE-8j-48e">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <accessibility description="Unhide symbols"/>
                     <connections>
                         <action selector="unhideSymbols:" target="Voe-Tx-rLC" id="6qL-3s-BHb"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Show Last Error" toolTip="Make a pass over object files unhiding defualt argument generators" id="KKx-re-pmY">
+                <menuItem title="Show Last Error" toolTip="Show the last reported error." id="KKx-re-pmY">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <accessibility description="Unhide symbols"/>
+                    <accessibility description="Show Last Error"/>
                     <connections>
                         <action selector="showlastError:" target="Voe-Tx-rLC" id="B1J-ZX-nPf"/>
                     </connections>
@@ -809,7 +817,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" drawsBackground="NO" id="Jya-oY-Tsg">
                             <rect key="frame" x="0.0" y="0.0" width="655" height="251"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <textView wantsLayer="YES" editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="yfA-aU-ldx">
                                     <rect key="frame" x="0.0" y="0.0" width="655" height="251"/>

@@ -94,7 +94,8 @@ class InjectionServer: SimpleSocket {
     // Simple validation to weed out invalid connections
     func validateConnection() -> CInt? {
         let clientVersion = readInt()
-        guard clientVersion == INJECTION_VERSION,
+        guard clientVersion == INJECTION_VERSION ||
+                clientVersion == COMMANDS_VERSION,
               let injectionKey = readString() else { return nil }
         guard injectionKey.hasPrefix(NSHomeDirectory()) else {
             error("Invalid INJECTION_KEY: "+injectionKey)
@@ -107,6 +108,24 @@ class InjectionServer: SimpleSocket {
     override func runInBackground() {
         do {
             try Fortify.protect {
+                guard let magic = validateConnection() else {
+                    sendCommand(.invalid, with: nil)
+                    error("Connection did not validate.")
+                    return
+                }
+                
+                if magic == COMMANDS_VERSION {
+                    do {
+                        try FrontendServer.processFrontendCommandFrom(feed: self)
+                    } catch {
+                        log("Command feed fail: \(error)")
+                    }
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    InjectionHybrid.pendingInjections.removeAll()
+                }
                 appDelegate.setMenuIcon(.ok)
                 processResponses()
                 appDelegate.setMenuIcon(MonitorXcode
@@ -119,15 +138,13 @@ class InjectionServer: SimpleSocket {
     }
 
     func processResponses() {
-        guard let _ = validateConnection() else {
-            sendCommand(.invalid, with: nil)
-            error("Connection did not validate.")
-            return
-        }
-        
         guard MonitorXcode.runningXcode != nil ||
-            !AppDelegate.watchers.isEmpty else {
-            error("Xcode not launched via app. Injection will not be possible unless you file watch a project and Xcode logs are available.")
+                !AppDelegate.watchers.isEmpty ||
+                FrontendServer.loggedFrontend != nil else {
+            error("""
+                Xcode not launched via app. Injection will not be possible \ 
+                unless you file watch a project and Xcode logs are available.
+                """)
             return
         }
         
@@ -169,7 +186,7 @@ class InjectionServer: SimpleSocket {
                 log("Injection failed to load. If this was due to a default " +
                     "argument. Select the app's menu item \"Unhide Symbols\".")
             case .exit:
-                log("**** exit ****")
+                log("**** client disconnected ****")
                 return
             @unknown default:
                 error("**** @unknown case \(responseInt) ****")

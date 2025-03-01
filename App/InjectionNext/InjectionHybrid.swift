@@ -6,7 +6,7 @@
 //  Copyright © 2024 John Holdsworth. All rights reserved.
 //
 //  Provide file watcher/log parser fallback
-//  for use outside Xcode (i.e. Cursor/VSCode)
+//  for use outside Xcode (e.g. Cursor/VSCode)
 //
 import Cocoa
 
@@ -22,31 +22,61 @@ extension AppDelegate {
         if open.runModal() == .OK, let url = open.url {
             setenv("INJECTION_DIRECTORIES",
                    NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
+            Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
             Self.watchers.append(InjectionHybrid())
-            sender.state = .on
+        } else {
+            Self.watchers.removeAll()
         }
+        sender.state = Self.watchers.isEmpty ? .off : .on
     }
 }
 
 class InjectionHybrid: InjectionBase {
+    static var pendingInjections = [String]()
     /// InjectionNext compiler that uses InjectionLite log parser
-    let mixRecompiler = HybridCompiler()
+    var liteRecompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        guard Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
-            .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
+        var recompiler: NextCompiler = liteRecompiler
+        if FrontendServer.loggedFrontend != nil {
+            recompiler = FrontendServer.frontendRecompiler()
+            FrontendServer.lastInjected = source
+        }
+        guard !AppDelegate.watchers.isEmpty,
+              Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
+                .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
+        Self.pendingInjections.append(source)
         MonitorXcode.compileQueue.async {
-            guard let running = MonitorXcode.runningXcode,
-                  running.recompiler.inject(source: source) else {
-                _ = self.mixRecompiler.inject(source: source)
-                return
+            self.injectNext(fallback: recompiler)
+        }
+    }
+    
+    func injectNext(fallback: NextCompiler) {
+        guard let source = DispatchQueue.main.sync(execute: { () -> String? in
+            guard let source = Self.pendingInjections.first else { return nil }
+            Self.pendingInjections.removeFirst()
+            if !Self.pendingInjections.isEmpty {
+                MonitorXcode.compileQueue.async {
+                    self.injectNext(fallback: fallback)
+                }
             }
+            return source
+        }) else { return }
+
+        guard let running = MonitorXcode.runningXcode,
+              running.recompiler.inject(source: source) else {
+            if !fallback.inject(source: source) {
+                fallback.pendingSource = source
+            } else {
+                FrontendServer.writeCache()
+            }
+            return
         }
     }
 }

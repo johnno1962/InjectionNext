@@ -9,6 +9,7 @@
 //
 //  Implementation Toolbar menu "UI".
 //
+
 import Cocoa
 import Popen
 import SwiftRegex
@@ -39,6 +40,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet var lastErrorField: NSTextView!
     // Restart XCode if crashed.
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
+    @IBOutlet weak var patchCompilerItem: NSMenuItem!
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
@@ -81,12 +83,12 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             }
         }
         
-        if NSRunningApplication.runningApplications(
+        if !updatePatchUnpatch() && NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
             InjectionServer.error("""
                 Please quit Xcode and
                 use this app to launch it
-                (unless you are using Cursor).
+                (unless you are using a file watcher).
                 """)
         }
  
@@ -128,7 +130,10 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if open.runModal() == .OK, let path = open.url?.path {
             Defaults.xcodePath = path
             sender.toolTip = path
-            runXcode(sender)
+            updatePatchUnpatch()
+            if Defaults.xcodeRestart {
+                runXcode(sender)
+            }
         }
     }
     
@@ -153,7 +158,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         if sender.state == .on, let script = Bundle.main
             .url(forResource: "copy_bundle", withExtension: "sh") {
             let buildPhase = """
-                RESOURCES="\(script.deletingLastPathComponent().path)"
+                export RESOURCES="\(script.deletingLastPathComponent().path)"
                 if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
                     "$RESOURCES/\(script.lastPathComponent)"
                 fi

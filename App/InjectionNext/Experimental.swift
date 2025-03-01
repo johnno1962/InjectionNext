@@ -7,41 +7,48 @@
 //
 //  $Id: //depot/HotReloading/Sources/injectiond/Experimental.swift#35 $
 //
-//  Some regular expressions to automatically prepare SwiftU sources.
+//  Some regular expressions to automatically prepare SwiftUI sources.
 //
 import Cocoa
 import SwiftRegex
 
 extension AppDelegate {
-
+    
     /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
-        if let lastSource = MonitorXcode.runningXcode?.lastSource {
+        if let lastSource = MonitorXcode.runningXcode?.lastSource ??
+            FrontendServer.lastInjected {
             prepare(source: lastSource)
         }
     }
 
     /// Prepare all sources in the current target for injection.
     @IBAction func prepareProject(_ sender: NSMenuItem) {
-        for source in MonitorXcode.runningXcode?.lastFilelist?
+        var changes = 0, edited = 0
+        for source in (MonitorXcode.runningXcode?.lastFilelist ??
+                       FrontendServer.lastFilelist)?
             .components(separatedBy: "\n").dropLast() ?? [] {
-            prepare(source: source)
+            FrontendServer.frontendRecompiler()
+                .lastInjected[source] = Date().timeIntervalSince1970
+            prepare(source: source, changes: &changes)
+            edited += 1
         }
+        let s = changes == 1 ? "" : "s"
+        InjectionServer.error("\(changes) automatic edit\(s) made to \(edited) files")
     }
     
     /// Use regular expresssions to patch .enableInjection() and @ObserveInject into a source
-    func prepare(source: String) {
+    func prepare(source: String, changes: UnsafeMutablePointer<Int>? = nil) {
         let fileURL = URL(fileURLWithPath: source)
         guard let original = try? String(contentsOf: fileURL) else {
             return
         }
 
-        print("Patching", source)
-        var patched = original
+        var patched = original, before = changes?.pointee
         patched[#"""
             ^((\s+)(public )?(var body:|func body\([^)]*\) -\>) some View \{\n\#
             (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|(\s*|#.+)\n)+)(?<!#endif\n)\2\}\n
-            """#.anchorsMatchLines] = """
+            """#.anchorsMatchLines, count: changes] = """
             $1$2    .enableInjection()
             $2}
 
@@ -50,6 +57,9 @@ extension AppDelegate {
             $2#endif
 
             """
+        if changes?.pointee != before {
+            print("Patched", source)
+        }
 
         if (patched.contains("class AppDelegate") ||
             patched.contains("@main\n")) &&

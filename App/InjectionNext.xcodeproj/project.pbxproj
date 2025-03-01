@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -28,6 +28,10 @@
 		BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E52CDEDAD500704C7A /* LogParser.swift */; };
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
+		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
+		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
+		BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */; };
+		BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
 		BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
 		BBB64DC51FD450AF0020BE47 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF31FAD808B004B267C /* README.md */; };
@@ -69,6 +73,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		BB85A42C2D6B9CA200FA29D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BB439B5D1FABA64300B4F50B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB85A4232D6B9C5300FA29D0;
+			remoteInfo = feedcommands;
+		};
 		BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BB439B5D1FABA64300B4F50B /* Project object */;
@@ -98,6 +109,15 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB85A4222D6B9C5300FA29D0 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -119,6 +139,9 @@
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
+		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
+		BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "swift-frontend.sh"; sourceTree = "<group>"; };
 		BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		BBB64DE41FD571300020BE47 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		BBB64FEB1FD585D50020BE47 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -164,7 +187,18 @@
 		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Experimental.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BB85A4252D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = feedcommands; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		BB85A4212D6B9C5300FA29D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BBCA01FB1FB0F10300E45F0F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -201,6 +235,7 @@
 				BB037DF31FAD808B004B267C /* README.md */,
 				BBCA01FF1FB0F10300E45F0F /* InjectionNext */,
 				BBDD84172C4FE79E000F3124 /* InjectionBundle */,
+				BB85A4252D6B9C5300FA29D0 /* feedcommands */,
 				BB439B661FABA64300B4F50B /* Products */,
 				BBB040621FB1798A007DDD0A /* Frameworks */,
 			);
@@ -213,6 +248,7 @@
 			children = (
 				BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */,
 				BBDD84132C4FE749000F3124 /* macOSInjection.bundle */,
+				BB85A4242D6B9C5300FA29D0 /* feedcommands */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -235,12 +271,13 @@
 				BB16653925E9A5F0001407AE /* main.m */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
-				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
-				CEC17029253ED117002E823F /* Experimental.swift */,
-				BB4654802C257F110080EC40 /* NextCompiler.swift */,
-				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
-				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
+				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
+				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
+				BB4654802C257F110080EC40 /* NextCompiler.swift */,
+				CEC17029253ED117002E823F /* Experimental.swift */,
+				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
+				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				BB5155E22CDED9CF00704C7A /* InjectionBase.swift */,
 				BB5155E12CDED9CF00704C7A /* FileWatcher.swift */,
 				BB5155DF2CDED8C600704C7A /* Recompiler.swift */,
@@ -261,6 +298,7 @@
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
 				BBDD84562C4FED60000F3124 /* build_bundles.sh */,
 				BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */,
+				BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */,
 			);
 			path = InjectionNext;
 			sourceTree = "<group>";
@@ -298,6 +336,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		BB85A4232D6B9C5300FA29D0 /* feedcommands */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB85A42A2D6B9C5300FA29D0 /* Build configuration list for PBXNativeTarget "feedcommands" */;
+			buildPhases = (
+				BB85A4202D6B9C5300FA29D0 /* Sources */,
+				BB85A4212D6B9C5300FA29D0 /* Frameworks */,
+				BB85A4222D6B9C5300FA29D0 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BB85A4252D6B9C5300FA29D0 /* feedcommands */,
+			);
+			name = feedcommands;
+			packageProductDependencies = (
+			);
+			productName = feedcommands;
+			productReference = BB85A4242D6B9C5300FA29D0 /* feedcommands */;
+			productType = "com.apple.product-type.tool";
+		};
 		BBCA01FD1FB0F10300E45F0F /* InjectionNext */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BBCA020C1FB0F10400E45F0F /* Build configuration list for PBXNativeTarget "InjectionNext" */;
@@ -313,6 +373,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				BB85A42D2D6B9CA200FA29D0 /* PBXTargetDependency */,
 				BBDD843E2C4FE8C5000F3124 /* PBXTargetDependency */,
 			);
 			name = InjectionNext;
@@ -354,6 +415,9 @@
 				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = "John Holdsworth";
 				TargetAttributes = {
+					BB85A4232D6B9C5300FA29D0 = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					BBCA01FD1FB0F10300E45F0F = {
 						CreatedOnToolsVersion = 9.0.1;
 						LastSwiftMigration = 1110;
@@ -392,6 +456,7 @@
 			targets = (
 				BBCA01FD1FB0F10300E45F0F /* InjectionNext */,
 				BBDD84122C4FE749000F3124 /* InjectionBundle */,
+				BB85A4232D6B9C5300FA29D0 /* feedcommands */,
 			);
 		};
 /* End PBXProject section */
@@ -401,7 +466,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */,
 				BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */,
+				BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */,
 				BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */,
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
@@ -465,6 +532,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		BB85A4202D6B9C5300FA29D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BBCA01FA1FB0F10300E45F0F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -473,6 +548,7 @@
 				BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
 				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
+				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
@@ -517,6 +593,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		BB85A42D2D6B9CA200FA29D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB85A4232D6B9C5300FA29D0 /* feedcommands */;
+			targetProxy = BB85A42C2D6B9CA200FA29D0 /* PBXContainerItemProxy */;
+		};
 		BBDD843E2C4FE8C5000F3124 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BBDD84122C4FE749000F3124 /* InjectionBundle */;
@@ -659,6 +740,57 @@
 			};
 			name = Release;
 		};
+		BB85A4282D6B9C5300FA29D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		BB85A4292D6B9C5300FA29D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 		BBCA020D1FB0F10400E45F0F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -792,6 +924,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		BB85A42A2D6B9C5300FA29D0 /* Build configuration list for PBXNativeTarget "feedcommands" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB85A4282D6B9C5300FA29D0 /* Debug */,
+				BB85A4292D6B9C5300FA29D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BBCA020C1FB0F10400E45F0F /* Build configuration list for PBXNativeTarget "InjectionNext" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -826,7 +967,7 @@
 			repositoryURL = "https://github.com/johnno1962/SwiftRegex5";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.1.2;
+				minimumVersion = 6.1.3;
 			};
 		};
 		224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */ = {
