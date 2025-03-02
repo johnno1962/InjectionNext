@@ -161,10 +161,10 @@ class FrontendServer: InjectionServer {
                 }
                 if arg.hasSuffix(".swift") {
                     swiftFiles += arg+"\n"
-                } else if arg[
-                    #"(-(pch-output-dir|supplementary-output-file-map|emit-(reference-)?dependencies|serialize-diagnostics|index-(store|unit-output))(-path)?|(-validate-clang-modules-once )?-clang-build-session-file|-Xcc -ivfsstatcache -Xcc)"#] {
+                } else if arg[Recompiler.optionsToRemove] {
                     _ = feed.readString()
-                } else if !arg["-validate-clang-modules-once|-frontend-parseable-output"] {
+                } else if !arg[
+                    "-validate-clang-modules-once|-frontend-parseable-output"] {
                     args.append(arg)
                 }
             }
