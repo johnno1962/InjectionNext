@@ -170,7 +170,6 @@ class MonitorXcode {
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
-                            !arg.hasSuffix("/PackageFrameworks") &&
                             !arg.contains("/Intermediates.noindex/"),
                         let option = args.last {
                         // expands out default argument generators

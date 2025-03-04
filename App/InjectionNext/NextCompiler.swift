@@ -173,8 +173,7 @@ class NextCompiler {
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
             ".platform/Developer/usr/"
-        let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"] +
-            (isSwift ? [] : ["-Xclang", "-fno-validate-pch"])
+        let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
              "-external-plugin-path",
@@ -185,7 +184,7 @@ class NextCompiler {
              platformUsr+"bin/swift-plugin-server",
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
-            ["-c", source]) + baseOptionsToAdd
+            ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
         
         // Call compiler process
         if let errors = Popen.task(exec: compiler,
