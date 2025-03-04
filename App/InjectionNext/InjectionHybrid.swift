@@ -42,7 +42,7 @@ class InjectionHybrid: InjectionBase {
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
         var recompiler: NextCompiler = liteRecompiler
-        if FrontendServer.loggedFrontend != nil {
+        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
             recompiler = FrontendServer.frontendRecompiler()
             FrontendServer.lastInjected = source
         }

@@ -173,7 +173,8 @@ class NextCompiler {
         let platformUsr = Defaults.xcodePath + "/Contents/Developer/Platforms/" +
             platform.replacingOccurrences(of: "Simulator", with: "OS") +
             ".platform/Developer/usr/"
-        let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
+        let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"] +
+            (isSwift ? [] : ["-Xclang", "-fno-validate-pch"])
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
              "-external-plugin-path",
