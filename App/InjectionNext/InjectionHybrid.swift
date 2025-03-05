@@ -73,7 +73,7 @@ class InjectionHybrid: InjectionBase {
               running.recompiler.inject(source: source) else {
             if !fallback.inject(source: source) {
                 fallback.pendingSource = source
-            } else {
+            } else if FrontendServer.loggedFrontend != nil {
                 FrontendServer.writeCache()
             }
             return

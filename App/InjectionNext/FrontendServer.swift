@@ -43,7 +43,7 @@ extension AppDelegate {
                         """)
                 }
             } else if fm.fileExists(atPath: FrontendServer.patched) {
-                try fm.removeItem(at: FrontendServer.unpatchedURL)
+                try? fm.removeItem(at: FrontendServer.unpatchedURL)
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
                 for binary in linksToMove {
@@ -163,7 +163,7 @@ class FrontendServer: InjectionServer {
                     swiftFiles += arg+"\n"
                 } else if arg[Recompiler.optionsToRemove] {
                     _ = feed.readString()
-                } else if !arg[
+                } else if !(arg == "-F" && args.last == "-F") && !arg[
                     "-validate-clang-modules-once|-frontend-parseable-output"] {
                     args.append(arg)
                 }
