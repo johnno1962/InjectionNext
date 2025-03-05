@@ -182,8 +182,8 @@ class MonitorXcode {
                                 [])
 //                        debug(change)
                         args += change
-                    } else if arg != "-Xfrontend" &&
-                            !arg.hasPrefix("-driver-") {
+                    } else if !(arg == "-F" && args.last == "-F") &&
+                        arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
                 }
