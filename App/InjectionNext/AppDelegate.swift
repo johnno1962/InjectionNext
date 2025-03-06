@@ -39,6 +39,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     // Place to display last error that occured
     @IBOutlet var lastErrorField: NSTextView!
     // Restart XCode if crashed.
+    @IBOutlet weak var launchXcodeItem: NSMenuItem!
+    @IBOutlet weak var selectXcodeItem: NSMenuItem!
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
     @IBOutlet weak var patchCompilerItem: NSMenuItem!
 
@@ -82,7 +84,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
                 quit.toolTip = "Quit (build #\(build))"
             }
         }
-        
+
         if !updatePatchUnpatch() && NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
             InjectionServer.error("""
@@ -95,13 +97,14 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         librariesField.stringValue = Defaults.deviceLibraries
         InjectionServer.startServer(INJECTION_ADDRESS)
         setupCodeSigningComboBox()
-        restartDeviceItem.state = Defaults.xcodeRestart == true ? .on : .off
-        
+        restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
+        selectXcodeItem.toolTip = Defaults.xcodePath
+
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
         }
     }
-    
+
     func setMenuIcon(_ state: InjectionState) {
         DispatchQueue.main.async {
             let tiffName = "Injection"+state.rawValue
@@ -119,7 +122,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             _ = MonitorXcode()
         }
     }
-    
+
     @IBAction func selectXcode(_ sender: NSMenuItem) {
         let open = NSOpenPanel()
         open.prompt = "Select Xcode"
@@ -128,20 +131,20 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         open.canChooseDirectories = false
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
+            selectXcodeItem.toolTip = path
             Defaults.xcodePath = path
-            sender.toolTip = path
             updatePatchUnpatch()
             if Defaults.xcodeRestart {
                 runXcode(sender)
             }
         }
     }
-    
+
     lazy var startHostLocatingServerOnce: () = {
         InjectionServer.broadcastServe(HOTRELOADING_MULTICAST,
                                        port: HOTRELOADING_PORT)
     }()
-    
+
     @IBAction func deviceEnable(_ sender: NSMenuItem) {
         var openPort = ""
         if sender.state.toggle() == .on {
@@ -153,7 +156,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         InjectionServer.stopServer()
         InjectionServer.startServer(openPort+INJECTION_ADDRESS)
     }
-    
+
     @IBAction func testingEnable(_ sender: NSButton) {
         if sender.state == .on, let script = Bundle.main
             .url(forResource: "copy_bundle", withExtension: "sh") {
@@ -179,7 +182,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBAction func updateXcodeRestart(_ sender: NSMenuItem) {
         Defaults.xcodeRestart = sender.state.toggle() == .on
     }
-    
+
     @IBAction func unhideSymbols(_ sender: NSMenuItem) {
         Unhider.startUnhide()
     }

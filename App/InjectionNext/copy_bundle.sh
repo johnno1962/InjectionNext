@@ -44,7 +44,7 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib} ||
     echo "*** You should be able to ignore the above errors ***"
-    
+
     # Copy frameworks only used in test target
     PRODUCTS_DIR="$(dirname "$CODESIGNING_FOLDER_PATH")"
     rm -f /tmp/InjectionNext.Products
@@ -56,14 +56,14 @@ if [ "$CONFIGURATION" == "Debug" ]; then
             codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork"
         fi
     done)
-    
+
     # Xcode 16's new SwiftTesting framework
     TESTING="$PLATFORM_DEVELOPER_LIBRARY_DIR/Frameworks/Testing.Framework"
     if [ -d "$TESTING" ]; then
       rsync -a "$TESTING"/* "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework/"
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/Testing.framework";
     fi
-    
+
     # Make copy of "PlugIns" directory when testing
     PLUGINS="/tmp/PlugIns.$PRODUCT_NAME.$PLATFORM_NAME"
     LAST_PLUGINS="/tmp/InjectionNext.PlugIns"

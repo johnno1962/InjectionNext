@@ -35,7 +35,7 @@ class NextCompiler {
         /// Directory to run compiler in (not usually important)
         var workingDir: String
     }
-    
+
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available and last error
@@ -58,7 +58,7 @@ class NextCompiler {
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
-    
+
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
         do {
@@ -74,7 +74,7 @@ class NextCompiler {
                 let compilerTmp = "/tmp/compilertron_patches"
                 let compilerPlatform = "MacOSX"
                 let compilerArch = "arm64"
-                
+
                 let tmpPath = connected?.tmpPath ?? compilerTmp
                 let platform = connected?.platform ?? compilerPlatform
                 let sourceName = URL(fileURLWithPath: source)
@@ -82,7 +82,7 @@ class NextCompiler {
                 if isCompilertron, let previous = prepared[sourceName] {
                     unlink(previous)
                 }
-                
+
                 let dylibName = DYLIB_PREFIX + sourceName +
                     "_\(connected?.injectionNumber ?? compileNumber).dylib"
                 let useFilesystem = connected?.isLocalClient != false
@@ -123,7 +123,7 @@ class NextCompiler {
             return self.error(error)
         }
     }
-    
+
     /// Seek to highlight potentially unsupported injections.
     func unsupported(source: String, dylib: String, client: InjectionServer) {
         if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
@@ -144,7 +144,7 @@ class NextCompiler {
             client.exports[source] = symbols
         }
     }
-    
+
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
@@ -153,7 +153,7 @@ class NextCompiler {
             pendingSource = source
             return nil
         }
-        
+
         lastInjected[source] = Date().timeIntervalSince1970
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
         let object = tmpbase+"_\(uniqueObject).o"
@@ -164,7 +164,7 @@ class NextCompiler {
         unlink(filesfile)
         try? stored.swiftFiles.write(toFile: filesfile, atomically: false,
                                    encoding: .utf8)
-    
+
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
@@ -185,7 +185,7 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-        
+
         // Call compiler process
         if let errors = Popen.task(exec: compiler,
                arguments: stored.arguments + languageSpecific,
@@ -197,10 +197,10 @@ class NextCompiler {
             lastError = errors
             return nil
         }
-        
+
         return object
     }
-    
+
     /// Link and object file to create a dynamic library
     func link(object: String, dylib: String, platform: String, arch: String) -> String? {
         let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
@@ -264,7 +264,7 @@ class NextCompiler {
 
         return dylib
     }
-    
+
     /// Codesign a dynamic library
     func codesign(dylib: String, platform: String) -> Data? {
         if platform != "iPhoneSimulator" {

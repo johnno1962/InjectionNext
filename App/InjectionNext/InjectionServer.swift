@@ -17,12 +17,12 @@ import Fortify
 import Popen
 
 class InjectionServer: SimpleSocket {
-    
+
     /// So commands from differnt threads don't get mixed up
     static let commandQueue = DispatchQueue(label: "InjectionCommand")
     /// Current connection to client app. There can be only one.
     static weak var currentClient: InjectionServer?
-    
+
     /// Sorted last symbols exported by source.
     var exports = [String: [String]]()
     /// Keeps dynamic library file names unique.
@@ -31,7 +31,7 @@ class InjectionServer: SimpleSocket {
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
-    
+
     /// Pops up an alert panel for networking
     @discardableResult
     override public class func error(_ message: String) -> Int32 {
@@ -113,7 +113,7 @@ class InjectionServer: SimpleSocket {
                     error("Connection did not validate.")
                     return
                 }
-                
+
                 if magic == COMMANDS_VERSION {
                     do {
                         try FrontendServer.processFrontendCommandFrom(feed: self)
@@ -122,7 +122,7 @@ class InjectionServer: SimpleSocket {
                     }
                     return
                 }
-                
+
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingInjections.removeAll()
                 }
@@ -148,9 +148,9 @@ class InjectionServer: SimpleSocket {
         }
 
         sendCommand(.xcodePath, with: Defaults.xcodePath)
-        
+
         AppDelegate.watchers.last?.watcher?.restart()
-        
+
         while true {
             let responseInt = readInt()
             guard let response = InjectionResponse(rawValue: responseInt) else {

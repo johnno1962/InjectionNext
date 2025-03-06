@@ -31,7 +31,7 @@ static dispatch_once_t onlyOneClient;
 /// Attempt to connect to InjectionNext.app
 + (void)connectToInjection:(Class)clientClass {
     const char *hostip = getenv("INJECTION_HOST") ?: "127.0.0.1";
-    
+
     // Do we need to use broadcasts to find devlepers Mac on the network
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
     if (!(@available(iOS 14.0, *) && [NSProcessInfo processInfo].isiOSAppOnMac)) {
@@ -40,7 +40,7 @@ static dispatch_once_t onlyOneClient;
                                            message:APP_PREFIX"Connecting to %s (%s)...\n"].UTF8String;
     }
     #endif
-    
+
     // Have the address to connect to, connect and start local thread.
     NSString *socketAddr = [NSString stringWithFormat:@"%s%s", hostip, INJECTION_ADDRESS];
     for (int retry=0, retrys=1; retry<retrys; retry++) {

@@ -56,7 +56,7 @@ class InjectionHybrid: InjectionBase {
             self.injectNext(fallback: recompiler)
         }
     }
-    
+
     func injectNext(fallback: NextCompiler) {
         guard let source = DispatchQueue.main.sync(execute: { () -> String? in
             guard let source = Self.pendingInjections.first else { return nil }

@@ -17,7 +17,7 @@ import DLKit
 import Popen
 
 open class Unhider {
-    
+
     /// Record of previously unhidden symbols by project and platform and their files
     static var unhiddens = [String: [String: [String: String]]]()
     /// One unhide at a time please
@@ -48,7 +48,7 @@ open class Unhider {
             }
         }
     }
-    
+
     /// Unihide all objects in the current project's DerivedData's intermediate products
     open class func unhideAllObjects(intermediates: URL) throws {
         var patched = [String](), files = 0, project = intermediates.path
@@ -85,7 +85,7 @@ open class Unhider {
         log("\(patched.count) symbols exported in \(files)" +
             " object files, please restart your app.")
     }
-    
+
     /// Unhide default argument generators in an object file (avoiding duplicates).
     open class func unhide(object path: String,
                            _ unhidden: inout [String: String]) -> [String] {

@@ -13,7 +13,7 @@ import Cocoa
 import SwiftRegex
 
 extension AppDelegate {
-    
+
     /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
         if let lastSource = MonitorXcode.runningXcode?.lastSource ??
@@ -36,7 +36,7 @@ extension AppDelegate {
         let s = changes == 1 ? "" : "s"
         InjectionServer.error("\(changes) automatic edit\(s) made to \(edited) files")
     }
-    
+
     /// Use regular expresssions to patch .enableInjection() and @ObserveInject into a source
     func prepare(source: String, changes: UnsafeMutablePointer<Int>? = nil) {
         let fileURL = URL(fileURLWithPath: source)
