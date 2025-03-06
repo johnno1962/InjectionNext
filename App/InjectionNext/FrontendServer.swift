@@ -159,7 +159,8 @@ class FrontendServer: InjectionServer {
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") {
+                if arg.hasSuffix(".swift") && args.last != "-F" &&
+                    Fstat(path: arg)?.isDirectory != true {
                     swiftFiles += arg+"\n"
                 } else if arg[Recompiler.optionsToRemove] {
                     _ = feed.readString()

@@ -146,7 +146,8 @@ class MonitorXcode {
                         #endif
                     }
 
-                    if arg.hasSuffix(".swift") {
+                    if arg.hasSuffix(".swift") && args.last != "-F" &&
+                        Fstat(path: arg)?.isDirectory != true {
                         swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
