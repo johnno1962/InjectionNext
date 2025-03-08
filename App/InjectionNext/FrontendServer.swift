@@ -43,7 +43,7 @@ extension AppDelegate {
                         """)
                 }
             } else if fm.fileExists(atPath: FrontendServer.patched) {
-                try fm.removeItem(at: FrontendServer.unpatchedURL)
+                try? fm.removeItem(at: FrontendServer.unpatchedURL)
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
                 for binary in linksToMove {
@@ -82,7 +82,7 @@ class FrontendServer: InjectionServer {
         case unpatched = "Intercept Compiler"
         case patched = "Unpatch Compiler"
     }
-    
+
     static var binURL: URL = URL(fileURLWithPath: Defaults.xcodePath +
         "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin")
     static var unpatchedURL: URL = binURL.appendingPathComponent("swift-frontend")
@@ -137,7 +137,7 @@ class FrontendServer: InjectionServer {
         var swiftFiles = "", args = [String](), platform = "iPhoneSimulator",
             sourceFiles = [String](), workingDir = "/tmp"
         let frontendPath = feed.readString()
-        
+
         while let arg = feed.readString(), arg != COMMANDS_END {
             switch arg {
             case "-filelist":
@@ -159,12 +159,12 @@ class FrontendServer: InjectionServer {
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") {
+                if arg.hasSuffix(".swift") && args.last != "-F" {
                     swiftFiles += arg+"\n"
-                } else if arg[
-                    #"(-(pch-output-dir|supplementary-output-file-map|emit-(reference-)?dependencies|serialize-diagnostics|index-(store|unit-output))(-path)?|(-validate-clang-modules-once )?-clang-build-session-file|-Xcc -ivfsstatcache -Xcc)"#] {
+                } else if arg[Recompiler.optionsToRemove] {
                     _ = feed.readString()
-                } else if !arg["-validate-clang-modules-once|-frontend-parseable-output"] {
+                } else if !(arg == "-F" && args.last == "-F") && !arg[
+                    "-validate-clang-modules-once|-frontend-parseable-output"] {
                     args.append(arg)
                 }
             }
@@ -198,7 +198,7 @@ class FrontendServer: InjectionServer {
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: workingDir)
-                
+
                 recompiler.compilations[source] = update
                 if source == FrontendServer.frontendRecompiler().pendingSource {
                     recompiler.pendingSource = nil

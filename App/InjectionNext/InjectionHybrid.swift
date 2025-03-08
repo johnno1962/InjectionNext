@@ -42,7 +42,7 @@ class InjectionHybrid: InjectionBase {
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
         var recompiler: NextCompiler = liteRecompiler
-        if FrontendServer.loggedFrontend != nil {
+        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
             recompiler = FrontendServer.frontendRecompiler()
             FrontendServer.lastInjected = source
         }
@@ -56,7 +56,7 @@ class InjectionHybrid: InjectionBase {
             self.injectNext(fallback: recompiler)
         }
     }
-    
+
     func injectNext(fallback: NextCompiler) {
         guard let source = DispatchQueue.main.sync(execute: { () -> String? in
             guard let source = Self.pendingInjections.first else { return nil }
@@ -73,7 +73,7 @@ class InjectionHybrid: InjectionBase {
               running.recompiler.inject(source: source) else {
             if !fallback.inject(source: source) {
                 fallback.pendingSource = source
-            } else {
+            } else if FrontendServer.loggedFrontend != nil {
                 FrontendServer.writeCache()
             }
             return

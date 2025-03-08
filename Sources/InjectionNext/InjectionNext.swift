@@ -17,19 +17,19 @@ import InjectionImpl
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {
-    
+
     func log(_ msg: String) {
         print(APP_PREFIX+APP_NAME+": "+msg)
     }
     func error(_ msg: String) {
         log("⚠️ "+msg)
     }
-    
+
     /// Connection from client app opened in ClientBoot.mm arrives here
     open override func runInBackground() {
         super.write(INJECTION_VERSION)
         super.write(INJECTION_KEY)
-        
+
         // Find client platform
         #if os(macOS) || targetEnvironment(macCatalyst)
         var platform = "Mac"
@@ -42,7 +42,7 @@ open class InjectionNext: SimpleSocket {
         #else
         var platform = "iPhone"
         #endif
-        
+
         #if targetEnvironment(simulator)
         platform += "Simulator"
         #else
@@ -51,15 +51,15 @@ open class InjectionNext: SimpleSocket {
         #if os(macOS)
         platform += "X"
         #endif
-        
+
         Reloader.platform = platform
-        
+
         #if arch(x86_64)
         let arch = "x86_64"
         #else
         let arch = "arm64"
         #endif
-        
+
         // Let server side know the platform and architecture
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
@@ -69,7 +69,7 @@ open class InjectionNext: SimpleSocket {
         processCommandsFromApp()
         log("Connection lost, disconnecting.")
     }
-        
+
     func processCommandsFromApp() {
         var loader = Reloader() // InjectionLite injection implementation
         func injectAndSweep(_ dylib: String) {
@@ -85,7 +85,7 @@ open class InjectionNext: SimpleSocket {
             writeCommand(succeeded ? InjectionResponse.injected.rawValue :
                             InjectionResponse.failed.rawValue, with: nil)
         }
-        
+
         while true {
             let commandInt = readInt()
             guard let command = InjectionCommand(rawValue: commandInt) else {

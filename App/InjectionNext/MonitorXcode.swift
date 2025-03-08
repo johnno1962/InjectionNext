@@ -18,7 +18,7 @@ import Fortify
 import Popen
 
 class MonitorXcode {
-    
+
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
     // One compilation at a time.
@@ -42,6 +42,7 @@ class MonitorXcode {
         if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
             "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)") {
             Self.runningXcode = self
+            appDelegate.launchXcodeItem.state = .on
             DispatchQueue.global().async {
                 while true {
                     do {
@@ -51,6 +52,7 @@ class MonitorXcode {
                             appDelegate.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
+                        appDelegate.launchXcodeItem.state = .off
                         if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
                             appDelegate.runXcode(self)
                         }
@@ -63,7 +65,7 @@ class MonitorXcode {
             }
         }
     }
-    
+
     func processSourceKitOutput(from xcodeStdout: Popen) {
         var buffer = [CChar](repeating: 0, count: Popen.initialLineBufferSize)
         func readQuotedString() -> String? {
@@ -94,18 +96,18 @@ class MonitorXcode {
                         }
                         return out
                     }
-                    
+
                     return nil
                 }
-                
+
                 var grown = [CChar](repeating: 0, count: buffer.count*2)
                 strcpy(&grown, buffer)
                 buffer = grown
             }
-            
+
             return nil
         }
-        
+
         let indexBuild = "/Index.noindex/Build/"
         while let line = xcodeStdout.readLine() {
 //            debug(">>"+line+"<<")
@@ -146,7 +148,7 @@ class MonitorXcode {
                         #endif
                     }
 
-                    if arg.hasSuffix(".swift") {
+                    if arg.hasSuffix(".swift") && args.last != "-F" {
                         swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
@@ -170,7 +172,6 @@ class MonitorXcode {
                                args.last == "-Xcc" && (arg.hasPrefix("-I") ||
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
-                            !arg.hasSuffix("/PackageFrameworks") &&
                             !arg.contains("/Intermediates.noindex/"),
                         let option = args.last {
                         // expands out default argument generators
@@ -183,8 +184,8 @@ class MonitorXcode {
                                 [])
 //                        debug(change)
                         args += change
-                    } else if arg != "-Xfrontend" &&
-                            !arg.hasPrefix("-driver-") {
+                    } else if !(arg == "-F" && args.last == "-F") &&
+                        arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
                 }
