@@ -20,11 +20,18 @@ extension AppDelegate {
         let fm = FileManager.default
         do {
             let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
-                "swift-api-digester", "swift-api-extract", "swift-cache-tool"]
+                "swift-api-digester", "swift-cache-tool"]
             if sender.title == FrontendServer.State.unpatched.rawValue {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main
                     .url(forResource: "swift-frontend", withExtension: "sh") {
+                    InjectionServer.error("""
+                        The Swift compiler of your current toolchain \
+                        \(FrontendServer.unpatchedURL.path) will be \
+                        replaced by a symbolic link to a script to \
+                        capture all compilation commands. Use menu \
+                        item "Unpatch Compiler" to revert this change.
+                        """)
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
                     try fm.createSymbolicLink(at: FrontendServer
@@ -34,13 +41,6 @@ extension AppDelegate {
                         try fm.removeItem(at: link)
                         symlink("swift-frontend.save", link.path)
                     }
-                    InjectionServer.error("""
-                        The Swift compiler of your current toolchain \
-                        \(FrontendServer.unpatchedURL.path) has been replaced \
-                        by a symbolic link to a script to capture all \
-                        compilation commands. Use menu item "Unpatch \
-                        Compiler" to revert this change.
-                        """)
                 }
             } else if fm.fileExists(atPath: FrontendServer.patched) {
                 try? fm.removeItem(at: FrontendServer.unpatchedURL)
