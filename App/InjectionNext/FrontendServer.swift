@@ -34,10 +34,11 @@ extension AppDelegate {
                         """)
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
-                    try fm.createSymbolicLink(at: FrontendServer
-                        .unpatchedURL, withDestinationURL: feeder)
+                    try fm.copyItem(at: feeder,
+                                    to: FrontendServer.unpatchedURL)
                     for binary in linksToMove {
-                        let link = FrontendServer.binURL.appendingPathComponent(binary)
+                        let link = FrontendServer.binURL
+                            .appendingPathComponent(binary)
                         try fm.removeItem(at: link)
                         symlink("swift-frontend.save", link.path)
                     }
@@ -47,7 +48,8 @@ extension AppDelegate {
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
                 for binary in linksToMove {
-                    let link = FrontendServer.binURL.appendingPathComponent(binary)
+                    let link = FrontendServer.binURL
+                        .appendingPathComponent(binary)
                     try fm.removeItem(at: link)
                     symlink("swift-frontend", link.path)
                 }

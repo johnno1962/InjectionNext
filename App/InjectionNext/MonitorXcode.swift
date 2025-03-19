@@ -179,7 +179,7 @@ class MonitorXcode {
                             of: indexBuild, with: "/Build/")] +
                             // alternate fix of Defaults problem
                             // hopefully without causing unhides
-                            (arg.hasPrefix("-") ? [arg] :
+                            (arg.hasPrefix("-") ? [] :
                                 option.hasPrefix("-") ? [option, arg] :
                                 [])
 //                        debug(change)
