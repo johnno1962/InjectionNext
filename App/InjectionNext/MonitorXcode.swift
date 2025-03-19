@@ -175,13 +175,16 @@ class MonitorXcode {
                             !arg.contains("/Intermediates.noindex/"),
                         let option = args.last {
                         // expands out default argument generators
-                        let change = [arg.replacingOccurrences(
-                            of: indexBuild, with: "/Build/")] +
+                        var change = [arg.replacingOccurrences(
+                            of: indexBuild, with: "/Build/")]
                             // alternate fix of Defaults problem
                             // hopefully without causing unhides
-                            (arg.hasPrefix("-") ? [] :
-                                option.hasPrefix("-") ? [option, arg] :
-                                [])
+                        if InjectionServer.currentClient?
+                            .platform.hasPrefix("AppleTV") != true {
+                            change += (arg.hasPrefix("-") ? [arg] :
+                                        option.hasPrefix("-") ? [option, arg] :
+                                        [])
+                        }
 //                        debug(change)
                         args += change
                     } else if !(arg == "-F" && args.last == "-F") &&
