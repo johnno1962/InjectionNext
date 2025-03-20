@@ -8,5 +8,5 @@
 
 FRONTEND="$0"
 "$FRONTEND.save" "$@" &&
-("/Applications/InjectionNext.app/Contents/Resources/feedcommands"
+("/Applications/InjectionNext.app/Contents/Resources/feedcommands" \
     "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 &)
