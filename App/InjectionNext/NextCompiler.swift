@@ -36,6 +36,8 @@ class NextCompiler {
         var workingDir: String
     }
 
+    // One compilation at a time.
+    static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available and last error
@@ -57,6 +59,18 @@ class NextCompiler {
     }
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
+    }
+    
+    func store(compilation: Compilation, for source: String) {
+        Self.compileQueue.async {
+            self.compilations[source] = compilation
+            if source == self.pendingSource {
+                print("Delayed injection of "+source)
+                if self.inject(source: source) {
+                    self.pendingSource = nil
+                }
+            }
+        }
     }
 
     /// Main entry point called by MonitorXcode

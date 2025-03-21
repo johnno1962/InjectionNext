@@ -137,7 +137,8 @@ class FrontendServer: InjectionServer {
 
     static func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard feed.readString() == "1.0" else {
-           return NSLog(APP_PREFIX+"Re-patch compiler to update script version")
+            return _ = Self.frontendRecompiler()
+                .error("Unpatch then repatch compiler to update script version")
         }
         guard let projectRoot = feed.readString(),
               let frontendPath = feed.readString(),
@@ -177,7 +178,7 @@ class FrontendServer: InjectionServer {
             }
         }
 
-        MonitorXcode.compileQueue.async {
+        NextCompiler.compileQueue.async {
             let recompiler = Self.frontendRecompiler(platform: platform)
             FrontendServer.loggedFrontend = frontendPath
 
@@ -205,16 +206,7 @@ class FrontendServer: InjectionServer {
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: projectRoot)
-
-                recompiler.compilations[source] = update
-                let clientRecompiler = FrontendServer.frontendRecompiler()
-                if source == clientRecompiler.pendingSource {
-                    MonitorXcode.compileQueue.async {
-                        if FrontendServer.frontendRecompiler().inject(source: source) {
-                            clientRecompiler.pendingSource = nil
-                        }
-                    }
-                }
+                recompiler.store(compilation: update, for: source)
             }
         }
     }

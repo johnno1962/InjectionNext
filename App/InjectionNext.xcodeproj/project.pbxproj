@@ -998,8 +998,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMinorVersion;
+				minimumVersion = 13.2.0;
 			};
 		};
 		BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */ = {

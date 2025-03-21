@@ -52,7 +52,7 @@ class InjectionHybrid: InjectionBase {
             return
         }
         Self.pendingInjections.append(source)
-        MonitorXcode.compileQueue.async {
+        NextCompiler.compileQueue.async {
             self.injectNext(fallback: recompiler)
         }
     }
@@ -62,7 +62,7 @@ class InjectionHybrid: InjectionBase {
             guard let source = Self.pendingInjections.first else { return nil }
             Self.pendingInjections.removeFirst()
             if !Self.pendingInjections.isEmpty {
-                MonitorXcode.compileQueue.async {
+                NextCompiler.compileQueue.async {
                     self.injectNext(fallback: fallback)
                 }
             }
