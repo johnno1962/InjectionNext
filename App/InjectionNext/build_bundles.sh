@@ -15,14 +15,22 @@ function build_bundle () {
     SDK=$3
     SWIFT_DYLIBS_PATH="$FIXED_XCODE_DEVELOPER_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$SDK"
     CONCURRENCY_DYLIBS="$FIXED_XCODE_DEVELOPER_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.5/$SDK"
-    XCTEST_FRAMEWORK_PATH="$FIXED_XCODE_DEVELOPER_PATH/Platforms/$PLATFORM.platform/Developer/Library/Frameworks"
+    XCODE_PLATFORM_PATH="$FIXED_XCODE_DEVELOPER_PATH/Platforms/$PLATFORM.platform"
+    XCTEST_FRAMEWORK_PATH="$XCODE_PLATFORM_PATH/Developer/Library/Frameworks"
+    XCTEST_SUPPORT_PATH="$XCODE_PLATFORM_PATH/Developer/usr/lib"
     BUNDLE_CONFIG=Debug
 
     if [ ! -d "$SWIFT_DYLIBS_PATH" -o ! -d "${XCTEST_FRAMEWORK_PATH}/XCTest.framework" ]; then
         echo "Missing RPATH $SWIFT_DYLIBS_PATH $XCTEST_FRAMEWORK_PATH"
         exit 1
     fi
-    "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="$ARCHS" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="@loader_path/Frameworks @loader_path/${FAMILY}Injection.bundle/Frameworks $SWIFT_DYLIBS_PATH $CONCURRENCY_DYLIBS" PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
+    "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="$ARCHS" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="@loader_path/Frameworks @loader_path/${FAMILY}Injection.bundle/Frameworks $SWIFT_DYLIBS_PATH $CONCURRENCY_DYLIBS $XCTEST_FRAMEWORK_PATH $XCTEST_SUPPORT_PATH" PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
+    
+#    BUNDLE_PATH="$SYMROOT/$BUNDLE_CONFIG-$SDK/${FAMILY}Injection.bundle"
+#    if [ -f "$BUNDLE_PATH/Info.plist" ]; then
+#        mv -f "$BUNDLE_PATH/${FAMILY}Injection" "$BUNDLE_PATH/iOSInjection"
+#        /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable iOSInjection" "$BUNDLE_PATH/Info.plist"
+#    fi
 
     rsync -au $SYMROOT/$BUNDLE_CONFIG-$SDK/*.bundle "$CODESIGNING_FOLDER_PATH/Contents/Resources"
 }
