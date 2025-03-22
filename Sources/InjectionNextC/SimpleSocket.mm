@@ -49,6 +49,7 @@ typedef union {
 #if !SWIFT_PACKAGE
 + (void)initialize { // Pre-built bundles (+InjectionNext.app)
     INJECTION_KEY = [NSBundle bundleForClass:self]
+        .infoDictionary[@"UserHome"] ?: [NSBundle mainBundle]
         .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
 }
 #endif

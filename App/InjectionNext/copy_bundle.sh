@@ -9,9 +9,9 @@
 #  $Id: //depot/HotReloading/copy_bundle.sh#14 $
 #
 
-if [ "$CONFIGURATION" == "Debug" ]; then
+if [[ "$CONFIGURATION" =~ Debug ]]; then
     if [ ! -w "$CODESIGNING_FOLDER_PATH" ]; then
-        echo '*** copy_bundle.sh unable to write to file system. ***'
+        echo '*** copy_bundle.sh unable to write to file system. ***' \
             'Change build setting "User Script Sandboxing" to NO'
         exit 1;
     fi
@@ -40,7 +40,10 @@ if [ "$CONFIGURATION" == "Debug" ]; then
      BUNDLE=${1:-iOSInjection}
     fi
 
+    mkdir -p "$CODESIGNING_FOLDER_PATH/Frameworks" &&
+    
     # copy frameworks used for testing into app's bundle/Frameworks
+    cp -f "$RESOURCES/lib${PLATFORM_NAME}Injection.dylib" "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib} ||
     echo "*** You should be able to ignore the above errors ***"
@@ -82,6 +85,7 @@ if [ "$CONFIGURATION" == "Debug" ]; then
     # copy prebuilt bundle into app package and codesign
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
+    /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY" &&
     defaults write com.johnholdsworth.InjectionNext codesigningIdentity "$EXPANDED_CODE_SIGN_IDENTITY"
 fi
