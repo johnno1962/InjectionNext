@@ -43,6 +43,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet weak var selectXcodeItem: NSMenuItem!
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
     @IBOutlet weak var patchCompilerItem: NSMenuItem!
+    @IBOutlet weak var watchDirectoryItem: NSMenuItem!
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults

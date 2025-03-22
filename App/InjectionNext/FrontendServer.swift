@@ -207,6 +207,22 @@ class FrontendServer: InjectionServer {
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: projectRoot)
                 recompiler.store(compilation: update, for: source)
+                
+                DispatchQueue.main.async {
+                    if !projectRoot.hasSuffix(".xcodeproj") &&
+                        nil == (AppDelegate.watchers.keys.first {
+                        projectRoot.hasPrefix($0) }) {
+                        let open = NSOpenPanel()
+                        open.prompt = "Watch Project Directory?"
+                        open.directoryURL = URL(fileURLWithPath: projectRoot)
+                        open.canChooseDirectories = true
+                        open.canChooseFiles = false
+                        // open.showsHiddenFiles = TRUE;
+                        if open.runModal() == .OK, let url = open.url {
+                            appDelegate.watch(path: url.path)
+                        }
+                    }
+                }
             }
         }
     }

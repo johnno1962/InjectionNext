@@ -11,7 +11,8 @@
 import Cocoa
 
 extension AppDelegate {
-    static var watchers = [InjectionHybrid]()
+    static var watchers = [String: InjectionHybrid]()
+    static var lastWatched: String?
 
     @IBAction func watchProject(_ sender: NSMenuItem) {
         let open = NSOpenPanel()
@@ -20,15 +21,21 @@ extension AppDelegate {
         open.canChooseFiles = false
         // open.showsHiddenFiles = TRUE;
         if open.runModal() == .OK, let url = open.url {
-            setenv("INJECTION_DIRECTORIES",
-                   NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
-            Self.watchers.append(InjectionHybrid())
+            watch(path: url.path)
         } else {
             Self.watchers.removeAll()
+            Self.lastWatched = nil
         }
-        sender.state = Self.watchers.isEmpty ? .off : .on
+    }
+    
+    func watch(path: String) {
+        setenv("INJECTION_DIRECTORIES",
+               NSHomeDirectory()+"/Library/Developer,"+path, 1)
+        Self.watchers[path] = InjectionHybrid()
+        Self.lastWatched = path
+        watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
 }
 
