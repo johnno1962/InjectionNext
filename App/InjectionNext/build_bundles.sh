@@ -39,6 +39,8 @@ function build_bundle () {
     ln -sf "${FAMILY}Injection.bundle/${FAMILY}Injection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/lib${SDK}Injection.dylib"
 }
 
+ln -sf "macOSInjection.bundle/Contents/MacOS/macOSInjection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/libmacosxInjection.dylib" &&
+
 build_bundle iOS iPhoneSimulator iphonesimulator &&
 build_bundle iOSDev iPhoneOS iphoneos &&
 build_bundle tvOS AppleTVSimulator appletvsimulator &&
