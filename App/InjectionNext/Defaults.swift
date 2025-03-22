@@ -15,6 +15,8 @@ struct Defaults {
     static let librariesDefault = "libraries"
     static let codesigningDefault = "codesigningIdentity"
     private static let xcodeRestartDefault = "xcodeRestartDefault"
+    static var xcodePath: String {
+        xcodeDefault ?? "/Applications/Xcode.app" }
     static var xcodeDefault: String? {
         get {
             userDefaults.string(forKey: xcodePathDefault)
@@ -24,8 +26,6 @@ struct Defaults {
                                   forKey: xcodePathDefault)
         }
     }
-    static var xcodePath: String {
-        xcodeDefault ?? "/Applications/Xcode.app" }
     static var deviceLibraries: String {
         get {
             userDefaults.string(forKey: librariesDefault) ??

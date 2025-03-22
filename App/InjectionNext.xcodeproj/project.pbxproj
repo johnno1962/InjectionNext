@@ -862,6 +862,10 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					$PLATFORM_DIR/Developer/usr/lib,
+				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACH_O_TYPE = mh_dylib;
@@ -899,6 +903,10 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					$PLATFORM_DIR/Developer/usr/lib,
+				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACH_O_TYPE = mh_dylib;
