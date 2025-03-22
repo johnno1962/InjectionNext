@@ -86,13 +86,20 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             }
         }
 
-        if !updatePatchUnpatch() && NSRunningApplication.runningApplications(
-            withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
-            InjectionServer.error("""
-                Please quit Xcode and
-                use this app to launch it
-                (unless you are using a file watcher).
-                """)
+        if let xcodePath = NSRunningApplication
+            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
+            .first?.bundleURL?.path {
+            if Defaults.xcodeDefault == nil {
+                Defaults.xcodeDefault = xcodePath
+            }
+            selectXcodeItem.toolTip = Defaults.xcodePath
+            if !updatePatchUnpatch() {
+                InjectionServer.error("""
+                    Please quit Xcode and
+                    use this app to launch it
+                    (unless you are using a file watcher).
+                    """)
+            }
         }
  
         librariesField.stringValue = Defaults.deviceLibraries
@@ -133,7 +140,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
             selectXcodeItem.toolTip = path
-            Defaults.xcodePath = path
+            Defaults.xcodeDefault = path
             updatePatchUnpatch()
             if Defaults.xcodeRestart {
                 runXcode(sender)
