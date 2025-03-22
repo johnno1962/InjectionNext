@@ -17,6 +17,7 @@
             <connections>
                 <outlet property="codeSignBox" destination="iKZ-P7-T7T" id="KiT-vS-8mL"/>
                 <outlet property="deviceTesting" destination="SQv-Cq-gPC" id="wzU-n5-tvW"/>
+                <outlet property="enableDevicesItem" destination="s0A-3D-ThA" id="xl4-eT-1mM"/>
                 <outlet property="lastErrorField" destination="yfA-aU-ldx" id="oxQ-Xy-ugr"/>
                 <outlet property="launchXcodeItem" destination="B7f-B2-5ZH" id="7Pb-Cs-Q9n"/>
                 <outlet property="librariesField" destination="rw0-Sb-xW5" id="iLm-Qn-E1h"/>
