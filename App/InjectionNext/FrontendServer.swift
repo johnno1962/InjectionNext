@@ -28,16 +28,17 @@ extension AppDelegate {
                     InjectionServer.error("""
                         The Swift compiler of your current toolchain \
                         \(FrontendServer.unpatchedURL.path) will be \
-                        replaced by a symbolic link to a script to \
-                        capture all compilation commands. Use menu \
+                        replaced by a script that calls the compiler \
+                        and captures all compilation commands. Use menu \
                         item "Unpatch Compiler" to revert this change.
                         """)
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
-                    try fm.createSymbolicLink(at: FrontendServer
-                        .unpatchedURL, withDestinationURL: feeder)
+                    try fm.copyItem(at: feeder,
+                                    to: FrontendServer.unpatchedURL)
                     for binary in linksToMove {
-                        let link = FrontendServer.binURL.appendingPathComponent(binary)
+                        let link = FrontendServer.binURL
+                            .appendingPathComponent(binary)
                         try fm.removeItem(at: link)
                         symlink("swift-frontend.save", link.path)
                     }
@@ -47,7 +48,8 @@ extension AppDelegate {
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
                 for binary in linksToMove {
-                    let link = FrontendServer.binURL.appendingPathComponent(binary)
+                    let link = FrontendServer.binURL
+                        .appendingPathComponent(binary)
                     try fm.removeItem(at: link)
                     symlink("swift-frontend", link.path)
                 }
@@ -134,9 +136,17 @@ class FrontendServer: InjectionServer {
     static var lastFilelist: String?, lastArguments: [String]?
 
     static func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        var swiftFiles = "", args = [String](), platform = "iPhoneSimulator",
-            sourceFiles = [String](), workingDir = "/tmp"
-        let frontendPath = feed.readString()
+        guard feed.readString() == "1.0" else {
+            return _ = Self.frontendRecompiler()
+                .error("Unpatch then repatch compiler to update script version")
+        }
+        guard let projectRoot = feed.readString(),
+              let frontendPath = feed.readString(),
+                feed.readString() == "-frontend" &&
+                feed.readString() == "-c" else { return }
+
+        var swiftFiles = "", args = [String](), primaries = [String](),
+            platform = "iPhoneSimulator"
 
         while let arg = feed.readString(), arg != COMMANDS_END {
             switch arg {
@@ -147,12 +157,10 @@ class FrontendServer: InjectionServer {
                 swiftFiles += files
             case "-primary-file":
                 guard let source = feed.readString() else { return }
-                sourceFiles.append(source)
+                primaries.append(source)
                 if !swiftFiles.contains(source) {
                     swiftFiles += source+"\n"
                 }
-            case "-emit-module":
-                return
             case "-o":
                 _ = feed.readString()
             default:
@@ -170,11 +178,11 @@ class FrontendServer: InjectionServer {
             }
         }
 
-        MonitorXcode.compileQueue.async {
+        NextCompiler.compileQueue.async {
             let recompiler = Self.frontendRecompiler(platform: platform)
             FrontendServer.loggedFrontend = frontendPath
 
-            for source in sourceFiles {
+            for source in primaries {
                 if InjectionServer.currentClient != nil &&
                     recompiler.compilations.index(forKey: source) != nil {
                     continue
@@ -197,14 +205,21 @@ class FrontendServer: InjectionServer {
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: workingDir)
-
-                recompiler.compilations[source] = update
-                if source == FrontendServer.frontendRecompiler().pendingSource {
-                    recompiler.pendingSource = nil
-                    MonitorXcode.compileQueue.async {
-                        if FrontendServer.frontendRecompiler().inject(source: source) {
-                            recompiler.pendingSource = nil
+                      swiftFiles: swiftFiles, workingDir: projectRoot)
+                recompiler.store(compilation: update, for: source)
+                
+                DispatchQueue.main.async {
+                    if !projectRoot.hasSuffix(".xcodeproj") &&
+                        nil == (AppDelegate.watchers.keys.first {
+                        projectRoot.hasPrefix($0) }) {
+                        let open = NSOpenPanel()
+                        open.prompt = "Watch Project Directory?"
+                        open.directoryURL = URL(fileURLWithPath: projectRoot)
+                        open.canChooseDirectories = true
+                        open.canChooseFiles = false
+                        // open.showsHiddenFiles = TRUE;
+                        if open.runModal() == .OK, let url = open.url {
+                            appDelegate.watch(path: url.path)
                         }
                     }
                 }

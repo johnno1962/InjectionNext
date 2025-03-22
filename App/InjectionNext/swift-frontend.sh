@@ -7,6 +7,6 @@
 #  Copyright © 2025 John Holdsworth. All rights reserved.
 
 FRONTEND="$0"
-RESOURCES="$(dirname "$(readlink "$FRONTEND")")"
 "$FRONTEND.save" "$@" &&
-("$RESOURCES/feedcommands" "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 &)
+("/Applications/InjectionNext.app/Contents/Resources/feedcommands" \
+    "1.0" "$PWD" "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 &)

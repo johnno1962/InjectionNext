@@ -148,8 +148,8 @@ class InjectionServer: SimpleSocket {
         }
 
         sendCommand(.xcodePath, with: Defaults.xcodePath)
-
-        AppDelegate.watchers.last?.watcher?.restart()
+        AppDelegate.lastWatched.flatMap {
+            AppDelegate.watchers[$0]?.watcher?.restart() }
 
         while true {
             let responseInt = readInt()

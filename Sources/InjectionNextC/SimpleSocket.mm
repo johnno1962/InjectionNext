@@ -49,7 +49,8 @@ typedef union {
 #if !SWIFT_PACKAGE
 + (void)initialize { // Pre-built bundles (+InjectionNext.app)
     INJECTION_KEY = [NSBundle bundleForClass:self]
-        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
+        .infoDictionary[@"UserHome"] ?: [NSBundle mainBundle]
+        .infoDictionary[@"InjectionUserHome"] ?: NSHomeDirectory();
 }
 #endif
 
@@ -120,7 +121,8 @@ static int serverSocket;
 }
 
 + (void)stopServer {
-    close(serverSocket);
+    if (serverSocket)
+        close(serverSocket);
     serverSocket = 0;
 }
 

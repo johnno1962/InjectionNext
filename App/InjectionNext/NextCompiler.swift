@@ -36,6 +36,8 @@ class NextCompiler {
         var workingDir: String
     }
 
+    // One compilation at a time.
+    static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available and last error
@@ -57,6 +59,18 @@ class NextCompiler {
     }
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
+    }
+    
+    func store(compilation: Compilation, for source: String) {
+        Self.compileQueue.async {
+            self.compilations[source] = compilation
+            if source == self.pendingSource {
+                print("Delayed injection of "+source)
+                if self.inject(source: source) {
+                    self.pendingSource = nil
+                }
+            }
+        }
     }
 
     /// Main entry point called by MonitorXcode
@@ -176,6 +190,7 @@ class NextCompiler {
         let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
+             "-warn-long-expression-type-checking=150",
              "-external-plugin-path",
              platformUsr+"lib/swift/host/plugins#" +
              platformUsr+"bin/swift-plugin-server",
@@ -189,13 +204,18 @@ class NextCompiler {
         // Call compiler process
         if let errors = Popen.task(exec: compiler,
                arguments: stored.arguments + languageSpecific,
-               cd: stored.workingDir, errors: nil), // Always returns stdout
-           errors.contains(" error: ") {
-            print(([compiler] + stored.arguments +
-                   languageSpecific).joined(separator: " "))
-            _ = error("Recompile failed for: \(source)\n"+errors)
-            lastError = errors
-            return nil
+               cd: stored.workingDir, errors: nil) { // Always returns stdout
+            if errors.contains(" error: ") {
+                print(([compiler] + stored.arguments +
+                       languageSpecific).joined(separator: " "))
+                _ = error("Recompile failed for: \(source)\n"+errors)
+                lastError = errors
+                return nil
+            }
+            for slow: String in errors[
+                #"(?<=/)\w+\.swift:\d+:\d+: warning: expression took \d+ms to type-check.*"#] {
+                log(slow)
+            }
         }
 
         return object
