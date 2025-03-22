@@ -50,7 +50,7 @@ typedef union {
 + (void)initialize { // Pre-built bundles (+InjectionNext.app)
     INJECTION_KEY = [NSBundle bundleForClass:self]
         .infoDictionary[@"UserHome"] ?: [NSBundle mainBundle]
-        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
+        .infoDictionary[@"InjectionUserHome"] ?: NSHomeDirectory();
 }
 #endif
 
@@ -121,7 +121,8 @@ static int serverSocket;
 }
 
 + (void)stopServer {
-    close(serverSocket);
+    if (serverSocket)
+        close(serverSocket);
     serverSocket = 0;
 }
 

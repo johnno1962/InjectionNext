@@ -43,6 +43,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet weak var selectXcodeItem: NSMenuItem!
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
     @IBOutlet weak var patchCompilerItem: NSMenuItem!
+    @IBOutlet weak var enableDevicesItem: NSMenuItem!
     @IBOutlet weak var watchDirectoryItem: NSMenuItem!
 
     // Interface to app's persistent state.
@@ -103,7 +104,11 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         }
  
         librariesField.stringValue = Defaults.deviceLibraries
-        InjectionServer.startServer(INJECTION_ADDRESS)
+        let enableDevicesSticky = false
+        if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
+            enableDevicesItem.state = .on
+        }
+        deviceEnable(nil)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath
@@ -153,11 +158,13 @@ class AppDelegate : NSObject, NSApplicationDelegate {
                                        port: HOTRELOADING_PORT)
     }()
 
-    @IBAction func deviceEnable(_ sender: NSMenuItem) {
+    @IBAction func deviceEnable(_ sender: NSMenuItem?) {
         var openPort = ""
-        if sender.state.toggle() == .on {
-            codeSignBox.window?.makeKeyAndOrderFront(sender)
-            NSApplication.shared.activate(ignoringOtherApps: true)
+        if enableDevicesItem.state.toggle() == .on {
+            if sender != nil {
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                codeSignBox.window?.makeKeyAndOrderFront(sender)
+            }
             _ = startHostLocatingServerOnce
             openPort = "*"
         }

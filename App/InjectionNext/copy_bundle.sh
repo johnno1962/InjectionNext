@@ -44,9 +44,14 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     
     # copy frameworks used for testing into app's bundle/Frameworks
     cp -f "$RESOURCES/lib${PLATFORM_NAME}Injection.dylib" "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
+    if [[ "$BUNDLE" =~ Dev ]]; then
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib} ||
     echo "*** You should be able to ignore the above errors ***"
+    else
+    rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/XC* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
+    codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,*.dylib}
+    fi &&
 
     # Copy frameworks only used in test target
     PRODUCTS_DIR="$(dirname "$CODESIGNING_FOLDER_PATH")"
@@ -84,8 +89,10 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
 
     # copy prebuilt bundle into app package and codesign
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
+    # See +[SimpleSocket initialize] for pre-built bundles/dylibs
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
-    /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&
+    (/usr/libexec/PlistBuddy -c "Delete :InjectionUserHome" "$CODESIGNING_FOLDER_PATH/Info.plist" || echo -n) &&
+    /usr/libexec/PlistBuddy -c "Add :InjectionUserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$COPY" &&
     defaults write com.johnholdsworth.InjectionNext codesigningIdentity "$EXPANDED_CODE_SIGN_IDENTITY"
 fi
