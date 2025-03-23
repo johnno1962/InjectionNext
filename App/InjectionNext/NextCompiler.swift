@@ -113,7 +113,7 @@ class NextCompiler {
 
                 print("Prepared dylib: "+dylib)
                 prepared[sourceName] = dylib
-                InjectionServer.commandQueue.sync {
+                InjectionServer.clientQueue.sync {
                     guard let client = InjectionServer.currentClient else {
                         AppDelegate.ui.setMenuIcon(.ready)
                         return

@@ -180,14 +180,14 @@ class FrontendServer: InjectionServer {
 
         DispatchQueue.main.async {
             if !projectRoot.hasSuffix(".xcodeproj") &&
-                (AppDelegate.watchers.keys.first {
-                projectRoot.hasPrefix($0) }) == nil {
+                AppDelegate.alreadyWatching(projectRoot) == nil {
                 let open = NSOpenPanel()
-                open.prompt = "Watch Project Directory?"
+//                open.titleVisibility = .visible
+//                open.title = "InjectionNext: add directory"
+                open.prompt = "InjectionNext - Watch Directory?"
                 open.directoryURL = URL(fileURLWithPath: projectRoot)
                 open.canChooseDirectories = true
                 open.canChooseFiles = false
-                // open.showsHiddenFiles = TRUE;
                 if open.runModal() == .OK, let url = open.url {
                     AppDelegate.ui.watch(path: url.path)
                 }
@@ -199,11 +199,13 @@ class FrontendServer: InjectionServer {
             loggedFrontend = frontendPath
 
             for source in primaries {
+                // Don't update compilations while connected
                 if InjectionServer.currentClient != nil &&
                     recompiler.compilations.index(forKey: source) != nil {
                     continue
                 }
 
+                // Try to minimise memory churn
                 if let previous = recompiler
                     .compilations[source]?.arguments ?? lastArguments,
                    args == previous {

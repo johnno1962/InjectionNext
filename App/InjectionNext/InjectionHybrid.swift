@@ -40,6 +40,14 @@ extension AppDelegate {
         Self.lastWatched = path
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
+    static func alreadyWatching(_ projectRoot: String) -> String? {
+        return watchers.keys.first { projectRoot.hasPrefix($0) }
+    }
+    static func restartLastWatcher() {
+        DispatchQueue.main.async {
+            lastWatched.flatMap { watchers[$0]?.watcher?.restart() }
+        }
+    }
 }
 
 class InjectionHybrid: InjectionBase {

@@ -20,7 +20,7 @@ import Popen
 class InjectionServer: SimpleSocket {
 
     /// So commands from differnt threads don't get mixed up
-    static let commandQueue = DispatchQueue(label: "InjectionCommand")
+    static let clientQueue = DispatchQueue(label: "InjectionCommand")
     /// Current connection to client app. There can be only one.
     static weak var currentClient: InjectionServer?
 
@@ -52,7 +52,7 @@ class InjectionServer: SimpleSocket {
 
     // Send command to client app
     func sendCommand(_ command: InjectionCommand, with string: String?) {
-        Self.commandQueue.async {
+        Self.clientQueue.async {
             _ = self.writeCommand(command.rawValue, with: string)
         }
     }
@@ -135,7 +135,7 @@ class InjectionServer: SimpleSocket {
         } catch {
             self.error("\(self) error \(error)")
         }
-        Self.commandQueue.sync {} // flush messages
+        Self.clientQueue.sync {} // flush messages
     }
 
     func processResponses() {
@@ -150,8 +150,7 @@ class InjectionServer: SimpleSocket {
         }
 
         sendCommand(.xcodePath, with: Defaults.xcodePath)
-        AppDelegate.lastWatched.flatMap {
-            AppDelegate.watchers[$0]?.watcher?.restart() }
+        AppDelegate.restartLastWatcher()
 
         while true {
             let responseInt = readInt()
