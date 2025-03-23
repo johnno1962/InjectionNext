@@ -5,12 +5,11 @@
 //  Created by John Holdsworth on 23/02/2025.
 //  Copyright © 2025 John Holdsworth. All rights reserved.
 //
-//  Code realted to "Intercepting" version where the binary
+//  Code related to "Intercepting" version where the binary
 //  swift-frontend is replaced by a script which feeds all
 //  compilation commands to the app where they can be reused
 //  when a file is injected to recompile individual Swift files.
 //
-
 import Cocoa
 import Popen
 
@@ -67,8 +66,10 @@ extension AppDelegate {
     func updatePatchUnpatch() -> Bool {
         let isPatched = FileManager.default
             .fileExists(atPath: FrontendServer.patched)
-        patchCompilerItem.title = (isPatched ?
-            FrontendServer.State.patched : .unpatched).rawValue
+        DispatchQueue.main.async {
+            self.patchCompilerItem.title = (isPatched ?
+                FrontendServer.State.patched : .unpatched).rawValue
+        }
         return isPatched
     }
 }
@@ -118,10 +119,9 @@ class FrontendServer: InjectionServer {
         return recompiler
     }
     static func writeCache(platform: String = clientPlatform) {
-        let encoder = JSONEncoder()
         do {
             let cache = cacheURL(platform: clientPlatform)
-            let data = try encoder.encode(frontendRecompiler().compilations)
+            let data = try JSONEncoder().encode(frontendRecompiler().compilations)
             try data.write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
@@ -137,7 +137,7 @@ class FrontendServer: InjectionServer {
 
     static func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard feed.readString() == "1.0" else {
-            return _ = Self.frontendRecompiler()
+            return _ = frontendRecompiler()
                 .error("Unpatch then repatch compiler to update script version")
         }
         guard let projectRoot = feed.readString(),
@@ -178,9 +178,25 @@ class FrontendServer: InjectionServer {
             }
         }
 
+        DispatchQueue.main.async {
+            if !projectRoot.hasSuffix(".xcodeproj") &&
+                (AppDelegate.watchers.keys.first {
+                projectRoot.hasPrefix($0) }) == nil {
+                let open = NSOpenPanel()
+                open.prompt = "Watch Project Directory?"
+                open.directoryURL = URL(fileURLWithPath: projectRoot)
+                open.canChooseDirectories = true
+                open.canChooseFiles = false
+                // open.showsHiddenFiles = TRUE;
+                if open.runModal() == .OK, let url = open.url {
+                    AppDelegate.ui.watch(path: url.path)
+                }
+            }
+        }
+
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
-            FrontendServer.loggedFrontend = frontendPath
+            let recompiler = frontendRecompiler(platform: platform)
+            loggedFrontend = frontendPath
 
             for source in primaries {
                 if InjectionServer.currentClient != nil &&
@@ -189,40 +205,24 @@ class FrontendServer: InjectionServer {
                 }
 
                 if let previous = recompiler
-                    .compilations[source]?.arguments ?? Self.lastArguments,
+                    .compilations[source]?.arguments ?? lastArguments,
                    args == previous {
                     args = previous
                 } else {
-                    Self.lastArguments = args
+                    lastArguments = args
                 }
                 if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? Self.lastFilelist,
+                    .compilations[source]?.swiftFiles ?? lastFilelist,
                    swiftFiles == previous {
                     swiftFiles = previous
                 }
-                Self.lastFilelist = swiftFiles
+                lastFilelist = swiftFiles
 
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
                       swiftFiles: swiftFiles, workingDir: projectRoot)
                 recompiler.store(compilation: update, for: source)
-                
-                DispatchQueue.main.async {
-                    if !projectRoot.hasSuffix(".xcodeproj") &&
-                        nil == (AppDelegate.watchers.keys.first {
-                        projectRoot.hasPrefix($0) }) {
-                        let open = NSOpenPanel()
-                        open.prompt = "Watch Project Directory?"
-                        open.directoryURL = URL(fileURLWithPath: projectRoot)
-                        open.canChooseDirectories = true
-                        open.canChooseFiles = false
-                        // open.showsHiddenFiles = TRUE;
-                        if open.runModal() == .OK, let url = open.url {
-                            appDelegate.watch(path: url.path)
-                        }
-                    }
-                }
             }
         }
     }

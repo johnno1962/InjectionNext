@@ -40,19 +40,19 @@ class MonitorXcode {
         if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
             "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)") {
             Self.runningXcode = self
-            appDelegate.launchXcodeItem.state = .on
+            AppDelegate.ui.launchXcodeItem.state = .on
             DispatchQueue.global().async {
                 while true {
                     do {
                         try Fortify.protect {
-                            appDelegate.setMenuIcon(.ready)
+                            AppDelegate.ui.setMenuIcon(.ready)
                             self.processSourceKitOutput(from: xcodeStdout)
-                            appDelegate.setMenuIcon(.idle)
+                            AppDelegate.ui.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        appDelegate.launchXcodeItem.state = .off
+                        AppDelegate.ui.launchXcodeItem.state = .off
                         if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
-                            appDelegate.runXcode(self)
+                            AppDelegate.ui.runXcode(self)
                         }
                         break // break on clean exit and EOF.
                     } catch {

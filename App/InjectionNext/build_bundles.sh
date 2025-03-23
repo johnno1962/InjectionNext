@@ -24,17 +24,13 @@ function build_bundle () {
         echo "Missing RPATH $SWIFT_DYLIBS_PATH $XCTEST_FRAMEWORK_PATH"
         exit 1
     fi
+    
+    ADD_INSTALL_NAME=""
     if [[ ${FAMILY} =~ Dev ]]; then
         ADD_INSTALL_NAME="LD_DYLIB_INSTALL_NAME=@rpath/lib${SDK}Injection.dylib"
     fi
     "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="$ARCHS" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="@loader_path/Frameworks @loader_path/${FAMILY}Injection.bundle/Frameworks $SWIFT_DYLIBS_PATH $CONCURRENCY_DYLIBS $XCTEST_FRAMEWORK_PATH $XCTEST_SUPPORT_PATH" $ADD_INSTALL_NAME PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
     
-#    BUNDLE_PATH="$SYMROOT/$BUNDLE_CONFIG-$SDK/${FAMILY}Injection.bundle"
-#    if [ -f "$BUNDLE_PATH/Info.plist" ]; then
-#        mv -f "$BUNDLE_PATH/${FAMILY}Injection" "$BUNDLE_PATH/iOSInjection"
-#        /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable iOSInjection" "$BUNDLE_PATH/Info.plist"
-#    fi
-
     rsync -au $SYMROOT/$BUNDLE_CONFIG-$SDK/*.bundle "$CODESIGNING_FOLDER_PATH/Contents/Resources" &&
     ln -sf "${FAMILY}Injection.bundle/${FAMILY}Injection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/lib${SDK}Injection.dylib"
 }
@@ -42,9 +38,10 @@ function build_bundle () {
 ln -sf "macOSInjection.bundle/Contents/MacOS/macOSInjection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/libmacosxInjection.dylib" &&
 
 build_bundle iOS iPhoneSimulator iphonesimulator &&
-build_bundle iOSDev iPhoneOS iphoneos &&
 build_bundle tvOS AppleTVSimulator appletvsimulator &&
-build_bundle tvOSDev AppleTVOS appletvos &&
 build_bundle xrOS XRSimulator xrsimulator &&
+build_bundle iOSDev iPhoneOS iphoneos &&
+build_bundle tvOSDev AppleTVOS appletvos &&
 build_bundle xrOSDev XROS xros &&
+
 exit 0

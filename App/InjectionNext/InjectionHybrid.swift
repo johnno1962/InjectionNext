@@ -7,6 +7,9 @@
 //
 //  Provide file watcher/log parser fallback
 //  for use outside Xcode (e.g. Cursor/VSCode)
+//  Also uses FileWatcher for operation when
+//  swift-frontend has been replaced by a
+//  script to capture compiler invocations.
 //
 import Cocoa
 
@@ -49,7 +52,7 @@ class InjectionHybrid: InjectionBase {
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
         var recompiler: NextCompiler = liteRecompiler
-        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
+        if AppDelegate.ui.updatePatchUnpatch() && source.hasSuffix(".swift") {
             recompiler = FrontendServer.frontendRecompiler()
             FrontendServer.lastInjected = source
         }

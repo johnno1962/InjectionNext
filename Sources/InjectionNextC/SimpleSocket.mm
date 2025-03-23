@@ -257,10 +257,14 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 }
 
 - (NSString *)readString {
-    NSData *data = [self readData];
-    if (!data) return nil;
-    NSString *str = [[NSString alloc] initWithData:data
-                                          encoding:NSUTF8StringEncoding];
+    size_t length = [self readInt];
+    if (length == EOS) return nil;
+    void *bytes = malloc(length+1);
+    if (!bytes || ![self readBytes:bytes length:length cmd:_cmd])
+        return nil;
+    ((char *)bytes)[length] = 0;
+    NSString *str = [[NSString alloc] initWithBytesNoCopy:bytes length:length
+                             encoding:NSUTF8StringEncoding freeWhenDone:YES];
     SLog(@"#%d <- %d '%@'", clientSocket, (int)str.length, str);
     return str;
 }

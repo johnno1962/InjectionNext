@@ -79,7 +79,7 @@ class NextCompiler {
             return try Fortify.protect { () -> Bool in
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
-                appDelegate.setMenuIcon(.busy)
+                AppDelegate.ui.setMenuIcon(.busy)
                 compileNumber += 1
                 lastError = nil
 
@@ -107,7 +107,7 @@ class NextCompiler {
                    let dylib = link(object: object, dylib: dylibPath, platform:
                             platform, arch: connected?.arch ?? compilerArch),
                    let data = codesign(dylib: dylib, platform: platform) else {
-                    appDelegate.setMenuIcon(.error)
+                    AppDelegate.ui.setMenuIcon(.error)
                     return error("Injection failed. Was your app connected?")
                 }
 
@@ -115,7 +115,7 @@ class NextCompiler {
                 prepared[sourceName] = dylib
                 InjectionServer.commandQueue.sync {
                     guard let client = InjectionServer.currentClient else {
-                        appDelegate.setMenuIcon(.ready)
+                        AppDelegate.ui.setMenuIcon(.ready)
                         return
                     }
                     if Reloader.injectingXCTest(in: dylib) {
@@ -253,9 +253,9 @@ class NextCompiler {
         let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
         var testingOptions = ""
         if DispatchQueue.main.sync(execute: {
-            appDelegate.deviceTesting.state == .on }) {
+            AppDelegate.ui.deviceTesting.state == .on }) {
             let otherOptions = DispatchQueue.main.sync(execute: {
-                appDelegate.librariesField.stringValue = Defaults.deviceLibraries
+                AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
                 return Defaults.deviceLibraries })
             let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
             testingOptions = """
@@ -290,7 +290,7 @@ class NextCompiler {
         if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
-            identity = DispatchQueue.main.sync { appDelegate.codeSigningID }
+            identity = DispatchQueue.main.sync { AppDelegate.ui.codeSigningID }
         }
         let codesign = """
             (export CODESIGN_ALLOCATE="\(Defaults.xcodePath+"/Contents/Developer"

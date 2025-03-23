@@ -7,10 +7,11 @@
 //
 //  Subclass of SimpleSocket to receive connection from
 //  user apps using the InjectionNext Swift Package. An
-//  incoming connection with enter runInBackground() on
+//  incoming connection will enter runInBackground() on
 //  a background thread. Validiates the connection and
 //  forwards "commands" to the client app to load dynamic
-//  libraries and inject them etc.
+//  libraries and inject them etc. Also receives feeds
+//  of compilation commands from swift-frontend.sh.
 //
 import Cocoa
 import Fortify
@@ -126,9 +127,9 @@ class InjectionServer: SimpleSocket {
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingInjections.removeAll()
                 }
-                appDelegate.setMenuIcon(.ok)
+                AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
-                appDelegate.setMenuIcon(MonitorXcode
+                AppDelegate.ui.setMenuIcon(MonitorXcode
                     .runningXcode != nil ? .ready : .idle)
             }
         } catch {
@@ -139,11 +140,12 @@ class InjectionServer: SimpleSocket {
 
     func processResponses() {
         if MonitorXcode.runningXcode == nil &&
-                AppDelegate.watchers.isEmpty &&
-                FrontendServer.loggedFrontend == nil {
+            AppDelegate.watchers.isEmpty &&
+            !AppDelegate.ui.updatePatchUnpatch() {
             error("""
                 Xcode not launched via app. Injection will not be possible \ 
-                unless you file watch a project and Xcode logs are available.
+                unless you file-watch a project and Xcode logs are available \
+                or use the "Intercept Compiler" menu item.
                 """)
         }
 
@@ -178,9 +180,9 @@ class InjectionServer: SimpleSocket {
                     error("**** Bad tmp ****")
                 }
             case .injected:
-                appDelegate.setMenuIcon(.ok)
+                AppDelegate.ui.setMenuIcon(.ok)
             case .failed:
-                appDelegate.setMenuIcon(.error)
+                AppDelegate.ui.setMenuIcon(.error)
             case .unhide:
                 log("Injection failed to load. If this was due to a default " +
                     "argument. Select the app's menu item \"Unhide Symbols\".")

@@ -14,8 +14,6 @@ import Cocoa
 import Popen
 import SwiftRegex
 
-var appDelegate: AppDelegate!
-
 enum InjectionState: String {
     case ok = "OK" // Orange
     case idle = "Idle" // Blue
@@ -25,7 +23,9 @@ enum InjectionState: String {
 }
 
 @objc(AppDelegate)
-class AppDelegate : NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    static var ui: AppDelegate!
 
     // Status menu
     @IBOutlet weak var statusMenu: NSMenu!
@@ -59,7 +59,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-        appDelegate = self
+        Self.ui = self
 
         let appName = "InjectionNext"
         let statusBar = NSStatusBar.system
