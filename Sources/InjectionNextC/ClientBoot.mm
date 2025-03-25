@@ -36,7 +36,7 @@ static dispatch_once_t onlyOneClient;
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
     if (!(@available(iOS 14.0, *) && [NSProcessInfo processInfo].isiOSAppOnMac)) {
         printf(APP_PREFIX APP_NAME": Locating developer's Mac. Have you selected \"Enable Devices\"?\n");
-        hostip = [SimpleSocket getBroadcastService:HOTRELOADING_MULTICAST port:HOTRELOADING_PORT
+        hostip = [SimpleSocket getMulticastService:HOTRELOADING_MULTICAST port:HOTRELOADING_PORT
                                            message:APP_PREFIX"Connecting to %s (%s)...\n"].UTF8String;
     }
     #endif

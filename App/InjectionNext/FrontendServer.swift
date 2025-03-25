@@ -20,17 +20,25 @@ extension AppDelegate {
         do {
             let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
                 "swift-api-digester", "swift-cache-tool"]
-            if sender.title == FrontendServer.State.unpatched.rawValue {
+            if updatePatchUnpatch() == .unpatched {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main
                     .url(forResource: "swift-frontend", withExtension: "sh") {
-                    InjectionServer.error("""
+                    let alert: NSAlert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = APP_NAME
+                    alert.informativeText = """
                         The Swift compiler of your current toolchain \
                         \(FrontendServer.unpatchedURL.path) will be \
                         replaced by a script that calls the compiler \
                         and captures all compilation commands. Use menu \
                         item "Unpatch Compiler" to revert this change.
-                        """)
+                        """
+                    alert.addButton(withTitle: "OK")
+                    alert.addButton(withTitle: "Cancel")
+                    if alert.runModal() != .alertFirstButtonReturn {
+                        return
+                    }
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
                     try fm.copyItem(at: feeder,
@@ -63,14 +71,14 @@ extension AppDelegate {
     }
 
     @discardableResult
-    func updatePatchUnpatch() -> Bool {
-        let isPatched = FileManager.default
-            .fileExists(atPath: FrontendServer.patched)
+    func updatePatchUnpatch() -> FrontendServer.State {
+        let state = FileManager.default
+            .fileExists(atPath: FrontendServer.patched) ?
+            FrontendServer.State.patched : .unpatched
         DispatchQueue.main.async {
-            self.patchCompilerItem.title = (isPatched ?
-                FrontendServer.State.patched : .unpatched).rawValue
+            self.patchCompilerItem?.title = state.rawValue
         }
-        return isPatched
+        return state
     }
 }
 
@@ -80,7 +88,7 @@ extension JSONDecoder {
     }
 }
 
-class FrontendServer: InjectionServer {
+class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"
         case patched = "Unpatch Compiler"
@@ -135,20 +143,33 @@ class FrontendServer: InjectionServer {
 
     static var lastFilelist: String?, lastArguments: [String]?
 
-    static func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        guard feed.readString() == "1.0" else {
-            return _ = frontendRecompiler()
+    func validateConnection() -> Bool {
+        return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
+    }
+
+    override func runInBackground() {
+        guard validateConnection() && readString() == "1.0" else {
+            return _ = Self.frontendRecompiler()
                 .error("Unpatch then repatch compiler to update script version")
         }
+        do {
+            try Self.processFrontendCommandFrom(feed: self)
+        } catch {
+            Self.error("Feed error: \(error)")
+        }
+    }
+    
+    class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard let projectRoot = feed.readString(),
               let frontendPath = feed.readString(),
-                feed.readString() == "-frontend" &&
+              frontendPath.hasSuffix(".save"),
+              feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
 
         var swiftFiles = "", args = [String](), primaries = [String](),
             platform = "iPhoneSimulator"
 
-        while let arg = feed.readString(), arg != COMMANDS_END {
+        while let arg = feed.readString() {
             switch arg {
             case "-filelist":
                 guard let filelist = feed.readString() else { return }
@@ -169,7 +190,7 @@ class FrontendServer: InjectionServer {
                 }
                 if arg.hasSuffix(".swift") && args.last != "-F" {
                     swiftFiles += arg+"\n"
-                } else if arg[Recompiler.optionsToRemove] {
+                } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()
                 } else if !(arg == "-F" && args.last == "-F") && !arg[
                     "-validate-clang-modules-once|-frontend-parseable-output"] {
@@ -195,30 +216,32 @@ class FrontendServer: InjectionServer {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = frontendRecompiler(platform: platform)
-            loggedFrontend = frontendPath
+            let recompiler = Self.frontendRecompiler(platform: platform)
+            Self.loggedFrontend = frontendPath
 
             for source in primaries {
+                #if !INJECTION_III_APP
                 // Don't update compilations while connected
                 if InjectionServer.currentClient != nil &&
                     recompiler.compilations.index(forKey: source) != nil {
                     continue
                 }
+                #endif
 
                 // Try to minimise memory churn
                 if let previous = recompiler
-                    .compilations[source]?.arguments ?? lastArguments,
+                    .compilations[source]?.arguments ?? Self.lastArguments,
                    args == previous {
                     args = previous
                 } else {
-                    lastArguments = args
+                    Self.lastArguments = args
                 }
                 if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? lastFilelist,
+                    .compilations[source]?.swiftFiles ?? Self.lastFilelist,
                    swiftFiles == previous {
                     swiftFiles = previous
                 }
-                lastFilelist = swiftFiles
+                Self.lastFilelist = swiftFiles
 
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)

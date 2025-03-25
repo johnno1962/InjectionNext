@@ -94,12 +94,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 Defaults.xcodeDefault = xcodePath
             }
             selectXcodeItem.toolTip = Defaults.xcodePath
-            if !updatePatchUnpatch() {
+            if updatePatchUnpatch() == .unpatched {
                 InjectionServer.error("""
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
                     """)
+            } else {
+                FrontendServer.startServer(COMMANDS_PORT)
             }
         }
  
@@ -154,7 +156,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     lazy var startHostLocatingServerOnce: () = {
-        InjectionServer.broadcastServe(HOTRELOADING_MULTICAST,
+        InjectionServer.multicastServe(HOTRELOADING_MULTICAST,
                                        port: HOTRELOADING_PORT)
     }()
 
@@ -168,7 +170,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _ = startHostLocatingServerOnce
             openPort = "*"
         }
-        InjectionServer.stopServer()
+        if sender != nil { InjectionServer.stopLastServer() }
         InjectionServer.startServer(openPort+INJECTION_ADDRESS)
     }
 

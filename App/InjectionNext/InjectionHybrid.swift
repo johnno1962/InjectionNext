@@ -60,7 +60,8 @@ class InjectionHybrid: InjectionBase {
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
         var recompiler: NextCompiler = liteRecompiler
-        if AppDelegate.ui.updatePatchUnpatch() && source.hasSuffix(".swift") {
+        if source.hasSuffix(".swift") &&
+            AppDelegate.ui.updatePatchUnpatch() == .patched {
             recompiler = FrontendServer.frontendRecompiler()
             FrontendServer.lastInjected = source
         }

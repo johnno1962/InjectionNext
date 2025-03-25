@@ -43,7 +43,7 @@ class InjectionServer: SimpleSocket {
             let alert = NSAlert()
             alert.messageText = "\(self)"
             alert.informativeText = msg
-            alert.alertStyle = NSAlert.Style.warning
+            alert.alertStyle = .warning
             alert.addButton(withTitle: "OK")
             _ = alert.runModal()
         }
@@ -93,37 +93,25 @@ class InjectionServer: SimpleSocket {
     }()
 
     // Simple validation to weed out invalid connections
-    func validateConnection() -> CInt? {
-        let clientVersion = readInt()
-        guard clientVersion == INJECTION_VERSION ||
-                clientVersion == COMMANDS_VERSION,
-              let injectionKey = readString() else { return nil }
+    func validateConnection() -> Bool {
+        guard readInt() == INJECTION_VERSION,
+              let injectionKey = readString() else { return false }
         guard injectionKey.hasPrefix(NSHomeDirectory()) else {
             error("Invalid INJECTION_KEY: "+injectionKey)
-            return nil
+            return false
         }
-        return clientVersion
+        return true
     }
 
     // On a new connection starts executing here
     override func runInBackground() {
         do {
             try Fortify.protect {
-                guard let magic = validateConnection() else {
+                guard validateConnection() else {
                     sendCommand(.invalid, with: nil)
                     error("Connection did not validate.")
                     return
                 }
-
-                if magic == COMMANDS_VERSION {
-                    do {
-                        try FrontendServer.processFrontendCommandFrom(feed: self)
-                    } catch {
-                        log("Command feed fail: \(error)")
-                    }
-                    return
-                }
-
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingInjections.removeAll()
                 }
@@ -141,7 +129,7 @@ class InjectionServer: SimpleSocket {
     func processResponses() {
         if MonitorXcode.runningXcode == nil &&
             AppDelegate.watchers.isEmpty &&
-            !AppDelegate.ui.updatePatchUnpatch() {
+            AppDelegate.ui.updatePatchUnpatch() == .unpatched {
             error("""
                 Xcode not launched via app. Injection will not be possible \ 
                 unless you file-watch a project and Xcode logs are available \

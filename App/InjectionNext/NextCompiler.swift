@@ -18,7 +18,10 @@ struct Reloader {}
 
 @discardableResult
 public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
-    let msg = prefix+what.map {"\($0)"}.joined(separator: separator)
+    var msg = what.map {"\($0)"}.joined(separator: separator)
+//    #if !INJECTION_III_APP
+    msg = prefix+msg
+//    #endif
     print(msg)
     InjectionServer.currentClient?.sendCommand(.log, with: msg)
     return true
@@ -73,10 +76,8 @@ class NextCompiler {
         }
     }
 
-    /// Main entry point called by MonitorXcode
-    func inject(source: String) -> Bool {
-        do {
-            return try Fortify.protect { () -> Bool in
+    func prepare(source: String)
+        -> (dylib: String, dylibName: String, platform: String, Bool)? {
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
                 AppDelegate.ui.setMenuIcon(.busy)
@@ -100,27 +101,37 @@ class NextCompiler {
                 let dylibName = DYLIB_PREFIX + sourceName +
                     "_\(connected?.injectionNumber ?? compileNumber).dylib"
                 let useFilesystem = connected?.isLocalClient != false
-                let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
+                let dylibPath = (true ? tmpPath : "/tmp") + dylibName
 
                 guard let object = recompile(source: source, platform: platform),
                    tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
                    let dylib = link(object: object, dylib: dylibPath, platform:
-                            platform, arch: connected?.arch ?? compilerArch),
+                    platform, arch: connected?.arch ?? compilerArch) else { return nil }
+
+                prepared[sourceName] = dylib
+                print("Prepared dylib: "+dylib)
+                return (dylib, dylibName, platform, useFilesystem)
+   }
+
+    /// Main entry point called by MonitorXcode
+    func inject(source: String) -> Bool {
+        do {
+            return try Fortify.protect { () -> Bool in
+                guard let (dylib, dylibName, platform, useFilesystem)
+                        = prepare(source: source),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     AppDelegate.ui.setMenuIcon(.error)
                     return error("Injection failed. Was your app connected?")
                 }
 
-                print("Prepared dylib: "+dylib)
-                prepared[sourceName] = dylib
                 InjectionServer.clientQueue.sync {
                     guard let client = InjectionServer.currentClient else {
                         AppDelegate.ui.setMenuIcon(.ready)
                         return
                     }
-                    if Reloader.injectingXCTest(in: dylib) {
-                        _ = client.copyPlugIns
-                    }
+//                    if Reloader.injectingXCTest(in: dylib) {
+//                        _ = client.copyPlugIns
+//                    }
                     if useFilesystem {
                         client.writeCommand(InjectionCommand
                             .load.rawValue, with: dylib)
@@ -140,6 +151,7 @@ class NextCompiler {
 
     /// Seek to highlight potentially unsupported injections.
     func unsupported(source: String, dylib: String, client: InjectionServer) {
+        #if !INJECTION_III_APP
         if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
             .filter({ entry in
                 lazy var symbol: String = String(cString: entry.name)
@@ -157,6 +169,7 @@ class NextCompiler {
             }
             client.exports[source] = symbols
         }
+        #endif
     }
 
     /// Compile a source file using inforation provided by MonitorXcode
@@ -253,8 +266,8 @@ class NextCompiler {
         let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
         var testingOptions = ""
         if DispatchQueue.main.sync(execute: {
-            AppDelegate.ui.deviceTesting.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync(execute: {
+            AppDelegate.ui.deviceTesting?.state == .on }) {
+            let otherOptions = DispatchQueue.main.sync(execute: { () -> String in
                 AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
                 return Defaults.deviceLibraries })
             let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"

@@ -24,7 +24,7 @@
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         // insert code here...
-        if (SimpleSocket *app = [FeedSocket connectTo:@HOTRELOADING_PORT]) {
+        if (SimpleSocket *app = [FeedSocket connectTo:@COMMANDS_PORT]) {
             [app writeInt:COMMANDS_VERSION];
             [app writeString:NSHomeDirectory()];
             for (int i=1; i<argc; i++)

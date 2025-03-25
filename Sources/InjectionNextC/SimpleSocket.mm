@@ -77,19 +77,20 @@ typedef union {
     freeifaddrs(addrs);
 }
 
-static int serverSocket;
+static int lastServerSocket;
 
 + (void)runServer:(NSString *)address {
     sockaddr_union serverAddr;
     [self parseV4Address:address into:&serverAddr.any];
 
-    serverSocket = [self newSocket:serverAddr.sa_family];
+    int serverSocket = [self newSocket:serverAddr.sa_family];
     if (serverSocket < 0)
         return;
 
+    lastServerSocket = serverSocket;
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
-    else if (listen(serverSocket, 5) < 0)
+    else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
         while (serverSocket) {
@@ -115,15 +116,20 @@ static int serverSocket;
                     [client run];
                 }
             }
-            else
+            else if (lastServerSocket)
                 [NSThread sleepForTimeInterval:.5];
+            else
+                break;
         }
+
+    close(serverSocket);
 }
 
-+ (void)stopServer {
-    if (serverSocket)
-        close(serverSocket);
-    serverSocket = 0;
++ (void)stopLastServer {
+    if (lastServerSocket)
+        close(lastServerSocket);
+    lastServerSocket = 0;
+    [NSThread sleepForTimeInterval:.5];
 }
 
 + (instancetype)connectTo:(NSString *)address {
@@ -380,7 +386,7 @@ struct multicast_socket_packet {
 /// Used for HotReloading clients to find their controlling Mac.
 /// @param multicast MULTICAST address to use
 /// @param port Port identifier of form ":NNNN"
-+ (void)broadcastServe:(const char *)multicast port:(const char *)port {
++ (void)multicastServe:(const char *)multicast port:(const char *)port {
     #ifdef DEVELOPER_HOST
     if (isdigit(DEVELOPER_HOST[0]))
         return;
@@ -446,7 +452,7 @@ struct multicast_socket_packet {
 /// @param multicast Multicast IP address to use.
 /// @param port Port number as string.
 /// @param format Format for connecting message.
-+ (NSString *)getBroadcastService:(const char *)multicast
++ (NSString *)getMulticastService:(const char *)multicast
     port:(const char *)port message:(const char *)format {
     #ifdef DEVELOPER_HOST
     if (isdigit(DEVELOPER_HOST[0]))
