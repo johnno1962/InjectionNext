@@ -101,8 +101,11 @@ class NextCompiler {
                 let dylibName = DYLIB_PREFIX + sourceName +
                     "_\(connected?.injectionNumber ?? compileNumber).dylib"
                 let useFilesystem = connected?.isLocalClient != false
+                #if INJECTION_III_APP
                 let dylibPath = (true ? tmpPath : "/tmp") + dylibName
-
+                #else
+                let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
+                #endif
                 guard let object = recompile(source: source, platform: platform),
                    tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
                    let dylib = link(object: object, dylib: dylibPath, platform:
