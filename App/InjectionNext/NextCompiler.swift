@@ -19,9 +19,11 @@ struct Reloader {}
 @discardableResult
 public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
     var msg = what.map {"\($0)"}.joined(separator: separator)
-//    #if !INJECTION_III_APP
+    #if INJECTION_III_APP
+    msg = "⏳ "+msg
+    #else
     msg = prefix+msg
-//    #endif
+    #endif
     print(msg)
     InjectionServer.currentClient?.sendCommand(.log, with: msg)
     return true
