@@ -21,13 +21,13 @@
 + (void)startServer:(NSString *_Nonnull)address;
 + (void)runServer:(NSString *_Nonnull)address;
 + (int)error:(NSString *_Nonnull)message;
-+ (void)stopServer;
++ (void)stopLastServer;
 
 + (instancetype _Nullable)connectTo:(NSString *_Nonnull)address;
 + (BOOL)parseV4Address:(NSString *_Nonnull)address into:(struct sockaddr_storage *_Nonnull)serverAddr;
 
-+ (void)broadcastServe:(const char *_Nonnull)multicast port:(const char *_Nonnull)port;
-+ (NSString *_Nonnull)getBroadcastService:(const char *_Nonnull)multicast
++ (void)multicastServe:(const char *_Nonnull)multicast port:(const char *_Nonnull)port;
++ (NSString *_Nonnull)getMulticastService:(const char *_Nonnull)multicast
                                      port:(const char *_Nonnull)port
                                   message:(const char *_Nonnull)format;
 

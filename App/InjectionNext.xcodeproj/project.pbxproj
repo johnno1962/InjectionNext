@@ -270,11 +270,11 @@
 			children = (
 				BB16653925E9A5F0001407AE /* main.m */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
-				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
-				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
-				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
-				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				BB4654802C257F110080EC40 /* NextCompiler.swift */,
+				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
+				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
+				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
+				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
 				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
@@ -801,11 +801,12 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -824,11 +825,12 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -860,8 +862,13 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					$PLATFORM_DIR/Developer/usr/lib,
+				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACH_O_TYPE = mh_dylib;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -896,8 +903,13 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					$PLATFORM_DIR/Developer/usr/lib,
+				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACH_O_TYPE = mh_dylib;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
@@ -998,8 +1010,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMinorVersion;
+				minimumVersion = 13.2.0;
 			};
 		};
 		BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */ = {

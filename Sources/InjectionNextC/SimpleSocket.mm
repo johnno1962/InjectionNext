@@ -49,7 +49,8 @@ typedef union {
 #if !SWIFT_PACKAGE
 + (void)initialize { // Pre-built bundles (+InjectionNext.app)
     INJECTION_KEY = [NSBundle bundleForClass:self]
-        .infoDictionary[@"UserHome"] ?: NSHomeDirectory();
+        .infoDictionary[@"UserHome"] ?: [NSBundle mainBundle]
+        .infoDictionary[@"InjectionUserHome"] ?: NSHomeDirectory();
 }
 #endif
 
@@ -76,19 +77,20 @@ typedef union {
     freeifaddrs(addrs);
 }
 
-static int serverSocket;
+static int lastServerSocket;
 
 + (void)runServer:(NSString *)address {
     sockaddr_union serverAddr;
     [self parseV4Address:address into:&serverAddr.any];
 
-    serverSocket = [self newSocket:serverAddr.sa_family];
+    int serverSocket = [self newSocket:serverAddr.sa_family];
     if (serverSocket < 0)
         return;
 
+    lastServerSocket = serverSocket;
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
-    else if (listen(serverSocket, 5) < 0)
+    else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
         while (serverSocket) {
@@ -114,14 +116,20 @@ static int serverSocket;
                     [client run];
                 }
             }
-            else
+            else if (lastServerSocket)
                 [NSThread sleepForTimeInterval:.5];
+            else
+                break;
         }
+
+    close(serverSocket);
 }
 
-+ (void)stopServer {
-    close(serverSocket);
-    serverSocket = 0;
++ (void)stopLastServer {
+    if (lastServerSocket)
+        close(lastServerSocket);
+    lastServerSocket = 0;
+    [NSThread sleepForTimeInterval:.5];
 }
 
 + (instancetype)connectTo:(NSString *)address {
@@ -255,10 +263,14 @@ typedef ssize_t (*io_func)(int, void *, size_t);
 }
 
 - (NSString *)readString {
-    NSData *data = [self readData];
-    if (!data) return nil;
-    NSString *str = [[NSString alloc] initWithData:data
-                                          encoding:NSUTF8StringEncoding];
+    size_t length = [self readInt];
+    if (length == EOS) return nil;
+    void *bytes = malloc(length+1);
+    if (!bytes || ![self readBytes:bytes length:length cmd:_cmd])
+        return nil;
+    ((char *)bytes)[length] = 0;
+    NSString *str = [[NSString alloc] initWithBytesNoCopy:bytes length:length
+                             encoding:NSUTF8StringEncoding freeWhenDone:YES];
     SLog(@"#%d <- %d '%@'", clientSocket, (int)str.length, str);
     return str;
 }
@@ -374,7 +386,7 @@ struct multicast_socket_packet {
 /// Used for HotReloading clients to find their controlling Mac.
 /// @param multicast MULTICAST address to use
 /// @param port Port identifier of form ":NNNN"
-+ (void)broadcastServe:(const char *)multicast port:(const char *)port {
++ (void)multicastServe:(const char *)multicast port:(const char *)port {
     #ifdef DEVELOPER_HOST
     if (isdigit(DEVELOPER_HOST[0]))
         return;
@@ -440,7 +452,7 @@ struct multicast_socket_packet {
 /// @param multicast Multicast IP address to use.
 /// @param port Port number as string.
 /// @param format Format for connecting message.
-+ (NSString *)getBroadcastService:(const char *)multicast
++ (NSString *)getMulticastService:(const char *)multicast
     port:(const char *)port message:(const char *)format {
     #ifdef DEVELOPER_HOST
     if (isdigit(DEVELOPER_HOST[0]))
@@ -485,7 +497,7 @@ struct multicast_socket_packet {
         int idx = if_nametoindex(ifa->ifa_name);
         setsockopt(multicastSocket, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof idx);
         addr.sin_addr.s_addr = laddr | ~nmask;
-        printf("Broadcasting to %s#%d:%s to locate InjectionNext host...\n",
+        printf("Broadcasting to %s#%d:%s to locate Injection host...\n",
                ifa->ifa_name, idx, inet_ntoa(addr.sin_addr));
         if (sendto(multicastSocket, &msgbuf, sizeof msgbuf, 0,
                    (struct sockaddr *)&addr, sizeof addr) < 0)

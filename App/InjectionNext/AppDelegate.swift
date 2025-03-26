@@ -14,8 +14,6 @@ import Cocoa
 import Popen
 import SwiftRegex
 
-var appDelegate: AppDelegate!
-
 enum InjectionState: String {
     case ok = "OK" // Orange
     case idle = "Idle" // Blue
@@ -25,7 +23,9 @@ enum InjectionState: String {
 }
 
 @objc(AppDelegate)
-class AppDelegate : NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    static var ui: AppDelegate!
 
     // Status menu
     @IBOutlet weak var statusMenu: NSMenu!
@@ -43,6 +43,8 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     @IBOutlet weak var selectXcodeItem: NSMenuItem!
     @IBOutlet weak var restartDeviceItem: NSMenuItem!
     @IBOutlet weak var patchCompilerItem: NSMenuItem!
+    @IBOutlet weak var enableDevicesItem: NSMenuItem!
+    @IBOutlet weak var watchDirectoryItem: NSMenuItem!
 
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
@@ -57,7 +59,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-        appDelegate = self
+        Self.ui = self
 
         let appName = "InjectionNext"
         let statusBar = NSStatusBar.system
@@ -85,17 +87,30 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             }
         }
 
-        if !updatePatchUnpatch() && NSRunningApplication.runningApplications(
-            withBundleIdentifier: "com.apple.dt.Xcode").first != nil {
-            InjectionServer.error("""
-                Please quit Xcode and
-                use this app to launch it
-                (unless you are using a file watcher).
-                """)
+        if let xcodePath = NSRunningApplication
+            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
+            .first?.bundleURL?.path {
+            if Defaults.xcodeDefault == nil {
+                Defaults.xcodeDefault = xcodePath
+            }
+            selectXcodeItem.toolTip = Defaults.xcodePath
+            if updatePatchUnpatch() == .unpatched {
+                InjectionServer.error("""
+                    Please quit Xcode and
+                    use this app to launch it
+                    (unless you are using a file watcher).
+                    """)
+            } else {
+                FrontendServer.startServer(COMMANDS_PORT)
+            }
         }
  
         librariesField.stringValue = Defaults.deviceLibraries
-        InjectionServer.startServer(INJECTION_ADDRESS)
+        let enableDevicesSticky = false
+        if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
+            enableDevicesItem.state = .on
+        }
+        deviceEnable(nil)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath
@@ -132,7 +147,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
             selectXcodeItem.toolTip = path
-            Defaults.xcodePath = path
+            Defaults.xcodeDefault = path
             updatePatchUnpatch()
             if Defaults.xcodeRestart {
                 runXcode(sender)
@@ -141,19 +156,21 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }
 
     lazy var startHostLocatingServerOnce: () = {
-        InjectionServer.broadcastServe(HOTRELOADING_MULTICAST,
+        InjectionServer.multicastServe(HOTRELOADING_MULTICAST,
                                        port: HOTRELOADING_PORT)
     }()
 
-    @IBAction func deviceEnable(_ sender: NSMenuItem) {
+    @IBAction func deviceEnable(_ sender: NSMenuItem?) {
         var openPort = ""
-        if sender.state.toggle() == .on {
-            codeSignBox.window?.makeKeyAndOrderFront(sender)
-            NSApplication.shared.activate(ignoringOtherApps: true)
+        if enableDevicesItem.state.toggle() == .on {
+            if sender != nil {
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                codeSignBox.window?.makeKeyAndOrderFront(sender)
+            }
             _ = startHostLocatingServerOnce
             openPort = "*"
         }
-        InjectionServer.stopServer()
+        if sender != nil { InjectionServer.stopLastServer() }
         InjectionServer.startServer(openPort+INJECTION_ADDRESS)
     }
 

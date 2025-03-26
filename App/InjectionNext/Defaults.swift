@@ -16,9 +16,10 @@ struct Defaults {
     static let codesigningDefault = "codesigningIdentity"
     private static let xcodeRestartDefault = "xcodeRestartDefault"
     static var xcodePath: String {
+        xcodeDefault ?? "/Applications/Xcode.app" }
+    static var xcodeDefault: String? {
         get {
-            userDefaults.string(forKey: xcodePathDefault) ??
-                "/Applications/Xcode.app"
+            userDefaults.string(forKey: xcodePathDefault)
         }
         set {
             userDefaults.setValue(newValue,

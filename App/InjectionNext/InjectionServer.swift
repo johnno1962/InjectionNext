@@ -7,10 +7,11 @@
 //
 //  Subclass of SimpleSocket to receive connection from
 //  user apps using the InjectionNext Swift Package. An
-//  incoming connection with enter runInBackground() on
+//  incoming connection will enter runInBackground() on
 //  a background thread. Validiates the connection and
 //  forwards "commands" to the client app to load dynamic
-//  libraries and inject them etc.
+//  libraries and inject them etc. Also receives feeds
+//  of compilation commands from swift-frontend.sh.
 //
 import Cocoa
 import Fortify
@@ -19,7 +20,7 @@ import Popen
 class InjectionServer: SimpleSocket {
 
     /// So commands from differnt threads don't get mixed up
-    static let commandQueue = DispatchQueue(label: "InjectionCommand")
+    static let clientQueue = DispatchQueue(label: "InjectionCommand")
     /// Current connection to client app. There can be only one.
     static weak var currentClient: InjectionServer?
 
@@ -42,7 +43,7 @@ class InjectionServer: SimpleSocket {
             let alert = NSAlert()
             alert.messageText = "\(self)"
             alert.informativeText = msg
-            alert.alertStyle = NSAlert.Style.warning
+            alert.alertStyle = .warning
             alert.addButton(withTitle: "OK")
             _ = alert.runModal()
         }
@@ -51,7 +52,7 @@ class InjectionServer: SimpleSocket {
 
     // Send command to client app
     func sendCommand(_ command: InjectionCommand, with string: String?) {
-        Self.commandQueue.async {
+        Self.clientQueue.async {
             _ = self.writeCommand(command.rawValue, with: string)
         }
     }
@@ -92,64 +93,52 @@ class InjectionServer: SimpleSocket {
     }()
 
     // Simple validation to weed out invalid connections
-    func validateConnection() -> CInt? {
-        let clientVersion = readInt()
-        guard clientVersion == INJECTION_VERSION ||
-                clientVersion == COMMANDS_VERSION,
-              let injectionKey = readString() else { return nil }
+    func validateConnection() -> Bool {
+        guard readInt() == INJECTION_VERSION,
+              let injectionKey = readString() else { return false }
         guard injectionKey.hasPrefix(NSHomeDirectory()) else {
             error("Invalid INJECTION_KEY: "+injectionKey)
-            return nil
+            return false
         }
-        return clientVersion
+        return true
     }
 
     // On a new connection starts executing here
     override func runInBackground() {
         do {
             try Fortify.protect {
-                guard let magic = validateConnection() else {
+                guard validateConnection() else {
                     sendCommand(.invalid, with: nil)
                     error("Connection did not validate.")
                     return
                 }
-
-                if magic == COMMANDS_VERSION {
-                    do {
-                        try FrontendServer.processFrontendCommandFrom(feed: self)
-                    } catch {
-                        log("Command feed fail: \(error)")
-                    }
-                    return
-                }
-
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingInjections.removeAll()
                 }
-                appDelegate.setMenuIcon(.ok)
+                AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
-                appDelegate.setMenuIcon(MonitorXcode
+                AppDelegate.ui.setMenuIcon(MonitorXcode
                     .runningXcode != nil ? .ready : .idle)
             }
         } catch {
             self.error("\(self) error \(error)")
         }
-        Self.commandQueue.sync {} // flush messages
+        Self.clientQueue.sync {} // flush messages
     }
 
     func processResponses() {
         if MonitorXcode.runningXcode == nil &&
-                AppDelegate.watchers.isEmpty &&
-                FrontendServer.loggedFrontend == nil {
+            AppDelegate.watchers.isEmpty &&
+            AppDelegate.ui.updatePatchUnpatch() == .unpatched {
             error("""
                 Xcode not launched via app. Injection will not be possible \ 
-                unless you file watch a project and Xcode logs are available.
+                unless you file-watch a project and Xcode logs are available \
+                or use the "Intercept Compiler" menu item.
                 """)
         }
 
         sendCommand(.xcodePath, with: Defaults.xcodePath)
-
-        AppDelegate.watchers.last?.watcher?.restart()
+        AppDelegate.restartLastWatcher()
 
         while true {
             let responseInt = readInt()
@@ -178,9 +167,9 @@ class InjectionServer: SimpleSocket {
                     error("**** Bad tmp ****")
                 }
             case .injected:
-                appDelegate.setMenuIcon(.ok)
+                AppDelegate.ui.setMenuIcon(.ok)
             case .failed:
-                appDelegate.setMenuIcon(.error)
+                AppDelegate.ui.setMenuIcon(.error)
             case .unhide:
                 log("Injection failed to load. If this was due to a default " +
                     "argument. Select the app's menu item \"Unhide Symbols\".")

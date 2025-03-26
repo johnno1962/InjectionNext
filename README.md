@@ -8,36 +8,46 @@ app without having to relaunch it. This can save a developer a significant
 amount of time tweaking code or iterating over a design.
 
 This repo is a refresh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
-app that uses a different technique to determine how to rebuild source files
-that should be faster and more reliable for very large projects. Gone is the 
-involved parsing of Xcode build logs (if you can locate them) and messy 
-escaping of special characters in filenames. A new app is used to launch Xcode 
-with a [SourceKit debugging flag](https://www.jpsim.com/uncovering-sourcekit/) 
-enabled which provides all the information you need to be able to recompile
-files and then the runtime implementation of injection included in the
-[InjectionLite](https://github.com/johnno1962/InjectionLite) package looks after the rest.
+app that uses different techniques to determine how to rebuild source files
+that should be faster and more reliable for very large projects. With versions 
+1.3.0+ the only changes that are required to your project are to add the 
+following "Other Linker Flags" to your project's **Debug** build settings:
 
+![Icon](App/interposable.png)
+
+That last flag is to link what were bundles in InjectionIII as a dynamic library:
+
+`/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
+
+If you want to inject on a device you'll also need to add the following
+as a "Run Script/Build Phase" of your main target to copy the required
+libraries into your app bundle (for a Debug build) and toggle "Enable Devices"
+to open a network port for incoming connections from your client app.
+
+```
+export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
+if [ -f "$RESOURCES/copy_bundle.sh" ]; then
+    "$RESOURCES/copy_bundle.sh"
+fi
+```
 The basic MO is to build the app in the `App` directory, or download one of 
 the binary releases in this repo, move it /Applications, quit Xcode and run the
 resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
-`Launch Xcode` from the status bar. You then add this repo as a Swift package 
-dependency of your project and that should be all that is required for injection 
-in the simulator, injection on devices and injection of a MacOS app. No more 
-code changes required to load binary code bundles etc and you can leave 
-the InjectionNext package configured into your project permanently as
-its code is only included for a DEBUG build. Your code changes take effect
+`Launch Xcode` from the status bar. No more code changes required to load binary 
+code bundles etc. Your code changes take effect
 when you save a source for an app that has this package as a dependency
-and has connected to the InjectIonNext app which has launched Xcode.
+and has connected to the InjectionNext app which has launched Xcode.
 
-As ever, it is important to add the options `-Xlinker` and `-interposable` 
-(without double quotes and on separate lines) to the "Other Linker Flags" of 
-the targets of your project (for the `Debug` configuration only) to enable 
-"interposing". Otherwise, you will only be able to inject non-final class methods.
+**Please note:** you can only inject changes to code inside a function body
+and you can not add/remove or rename properties with storage or add or 
+reorder methods in a non final class or change function signatures.
+
 To inject SwiftUI sucessfully a couple of minor code changes to each View are 
 required. Consult the https://github.com/johnno1962/HotSwiftUI README or you
 can make these changes automatically using the menu item "Prepare SwiftUI/".
-
-![Icon](App/interposable.png)
+For SwiftUI you would also generally also integrate either the
+[Inject](https://github.com/krzysztofzablocki/Inject) or
+[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) package into your project. 
 
 When your app runs it should connect to the `InjectionNext.app` and it's icon
 change to orange. After that, by parsing the messages from the "supervised"
@@ -50,67 +60,54 @@ phase of your build logs in the window that pops up. Sometimes a
 device will not connect to the app first time after unlocking it.
 If at first it doesn't succeed, try again.
 
-If you'd rather not be adding a SPM dependency to your project, the app's
-resources contains pre-built bundles which you can copy into your app during
-the build by using a "Run Script/Build Phase" (while disabling the "user 
-script sandboxing" build setting) such as the following:
+The colours of the menu bar icon bar correspond to:
 
-```
-export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
-if [ -f "$RESOURCES/copy_bundle.sh" ]; then
-    "$RESOURCES/copy_bundle.sh"
-fi
-```
-These bundles should load automatically if you've integrated the
-[Inject](https://github.com/krzysztofzablocki/Inject) or
-[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
-Otherwise, you can add the following code to run on startup of your app:
+* Blue when you first run the InjectionNext app.
+* Purple when you have launched Xcode using the app.
+* Orange when your client app has connected to it.
+* Green while it is recompiling a saved source.
+* Yellow if the source has failed to compile.
 
-```
-    #if DEBUG
-    if let path = Bundle.main.path(forResource:
-            "iOSInjection", ofType: "bundle") ??
-        Bundle.main.path(forResource:
-            "macOSInjection", ofType: "bundle") {
-        Bundle(path: path)!.load()
-    }
-    #endif
-```
-The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
+The binary dylibs also integrate [Nimble](https://github.com/Quick/Nimble)
 and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
 testing framework to inhibit spec caching under their respective Apache licences.
 
-To inject tests on a device: use these bundles and, when enabling the
-"Enable Devices" menu item select "Enable testing on device" which 
-will add the parameters shown to the link of each dynamic library. 
-As you do this, the above command will be inserted into the clipboard 
+To inject tests on a device: when enabling the
+"Enable Devices" menu item, select "Enable testing on device" which 
+will add the arguments shown to the link of each dynamic library. 
+As you do this, the command above will be inserted into the clipboard 
 which you should add to your project as a "Run Script" "Build Phase" 
-to copy the required libraries into the app bundle.
+of the main target to copy the required libraries into the app bundle.
 
 ### Cursor/VSCode mode.
 
 If you would like to use InjectionNext with the Cursor code editor,
 you can have it fall back to InjectionIII-style log parsing using
 the "...or Watch Project" menu item to select the project root
-you will be working under. In this case you shouldn't launch 
+you will be working under (or use the new "Proxy" mode below
+for Swift projects.) In this case, you shouldn't launch 
 Xcode from inside the InjectionNext.app but you'll need to have 
 built your app in Xcode at some point in the past for the logs
 to be available. You should build using the same version as that 
 selected by `xcode-select`.
 
-### Compiler "proxy" mode.
+### New compiler "proxy" mode.
 
-It is also possible to intercept swift compilation commands as a proof of
-concept in case at some point in the future these are no longer captured in 
+It is also possible to intercept swift compilation commands as a new proof of
+concept for when at some point in the future these are no longer captured in 
 the Xcode logs (as was the case with Xcode 16.3 beta1). In this case, select 
 "Intercept compiler" to patch the current toolchain slightly to capture all
 compilations using a script and send them to the InjectionNext.app. Once this 
 patch has been applied you don't need to launch Xcode from the app and you can 
-inject by starting a file watcher using the "...or Watch Project" menu item.
+inject by starting a file watcher using the "...or Watch Project" menu item
+(though this should happen automatically when you recompile Swift sources).
 
+So, InjectionNext has three ways in which it can operate of which the newest and 
+the simplest one if you're prepared to patch your toolchain is the "proxy" mode.
 The original mode of operation launching Xcode inside the app takes preference 
-otherwise, if you have selected a file watcher and are intercepting the compiler
-commands that is next in line followed by the log parsing fallback which 
+and, if you have selected a file watcher and are intercepting the compiler
+commands that is the next preference followed by the log parsing fallback using
+the [InjectionLite](https://github.com/johnno1962/InjectionLite) package which 
 essentially works as InjectionIII did when the logs are available.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
@@ -123,17 +120,5 @@ your project in Xcode automatically using the -projectPath option.
 
 Set a user default with the same name if you want to always open 
 this project inside the selected Xcode on launching the app.
-
-The colours of the menu bar icon bar correspond to:
-
-* Blue when you first run the InjectionNext app.
-* Purple when you have launched Xcode using the app.
-* Orange when your client app has connected to it.
-* Green while it is recompiling a saved source.
-* Yellow if the source has failed to compile.
-
-Please note: you can only inject changes to code inside a function body
-and you can not add/remove or rename properties with storage or add or 
-reorder methods in a non final class or change function signatures.
 
 The fabulous app icon is thanks to Katya of [pixel-mixer.com](http://pixel-mixer.com/).

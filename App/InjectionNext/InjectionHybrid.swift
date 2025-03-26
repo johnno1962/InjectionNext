@@ -7,11 +7,15 @@
 //
 //  Provide file watcher/log parser fallback
 //  for use outside Xcode (e.g. Cursor/VSCode)
+//  Also uses FileWatcher for operation when
+//  swift-frontend has been replaced by a
+//  script to capture compiler invocations.
 //
 import Cocoa
 
 extension AppDelegate {
-    static var watchers = [InjectionHybrid]()
+    static var watchers = [String: InjectionHybrid]()
+    static var lastWatched: String?
 
     @IBAction func watchProject(_ sender: NSMenuItem) {
         let open = NSOpenPanel()
@@ -20,15 +24,29 @@ extension AppDelegate {
         open.canChooseFiles = false
         // open.showsHiddenFiles = TRUE;
         if open.runModal() == .OK, let url = open.url {
-            setenv("INJECTION_DIRECTORIES",
-                   NSHomeDirectory()+"/Library/Developer,"+url.path, 1)
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             Reloader.injectionQueue = .main
-            Self.watchers.append(InjectionHybrid())
+            watch(path: url.path)
         } else {
             Self.watchers.removeAll()
+            Self.lastWatched = nil
         }
-        sender.state = Self.watchers.isEmpty ? .off : .on
+    }
+    
+    func watch(path: String) {
+        setenv("INJECTION_DIRECTORIES",
+               NSHomeDirectory()+"/Library/Developer,"+path, 1)
+        Self.watchers[path] = InjectionHybrid()
+        Self.lastWatched = path
+        watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
+    }
+    static func alreadyWatching(_ projectRoot: String) -> String? {
+        return watchers.keys.first { projectRoot.hasPrefix($0) }
+    }
+    static func restartLastWatcher() {
+        DispatchQueue.main.async {
+            lastWatched.flatMap { watchers[$0]?.watcher?.restart() }
+        }
     }
 }
 
@@ -42,7 +60,8 @@ class InjectionHybrid: InjectionBase {
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
         var recompiler: NextCompiler = liteRecompiler
-        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
+        if source.hasSuffix(".swift") &&
+            AppDelegate.ui.updatePatchUnpatch() == .patched {
             recompiler = FrontendServer.frontendRecompiler()
             FrontendServer.lastInjected = source
         }
@@ -52,7 +71,7 @@ class InjectionHybrid: InjectionBase {
             return
         }
         Self.pendingInjections.append(source)
-        MonitorXcode.compileQueue.async {
+        NextCompiler.compileQueue.async {
             self.injectNext(fallback: recompiler)
         }
     }
@@ -62,7 +81,7 @@ class InjectionHybrid: InjectionBase {
             guard let source = Self.pendingInjections.first else { return nil }
             Self.pendingInjections.removeFirst()
             if !Self.pendingInjections.isEmpty {
-                MonitorXcode.compileQueue.async {
+                NextCompiler.compileQueue.async {
                     self.injectNext(fallback: fallback)
                 }
             }

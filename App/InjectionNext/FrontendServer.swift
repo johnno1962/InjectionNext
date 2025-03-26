@@ -5,12 +5,11 @@
 //  Created by John Holdsworth on 23/02/2025.
 //  Copyright © 2025 John Holdsworth. All rights reserved.
 //
-//  Code realted to "Intercepting" version where the binary
+//  Code related to "Intercepting" version where the binary
 //  swift-frontend is replaced by a script which feeds all
 //  compilation commands to the app where they can be reused
 //  when a file is injected to recompile individual Swift files.
 //
-
 import Cocoa
 import Popen
 
@@ -21,23 +20,32 @@ extension AppDelegate {
         do {
             let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
                 "swift-api-digester", "swift-cache-tool"]
-            if sender.title == FrontendServer.State.unpatched.rawValue {
+            if updatePatchUnpatch() == .unpatched {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main
                     .url(forResource: "swift-frontend", withExtension: "sh") {
-                    InjectionServer.error("""
+                    let alert: NSAlert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = APP_NAME
+                    alert.informativeText = """
                         The Swift compiler of your current toolchain \
                         \(FrontendServer.unpatchedURL.path) will be \
-                        replaced by a symbolic link to a script to \
-                        capture all compilation commands. Use menu \
+                        replaced by a script that calls the compiler \
+                        and captures all compilation commands. Use menu \
                         item "Unpatch Compiler" to revert this change.
-                        """)
+                        """
+                    alert.addButton(withTitle: "OK")
+                    alert.addButton(withTitle: "Cancel")
+                    if alert.runModal() != .alertFirstButtonReturn {
+                        return
+                    }
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
-                    try fm.createSymbolicLink(at: FrontendServer
-                        .unpatchedURL, withDestinationURL: feeder)
+                    try fm.copyItem(at: feeder,
+                                    to: FrontendServer.unpatchedURL)
                     for binary in linksToMove {
-                        let link = FrontendServer.binURL.appendingPathComponent(binary)
+                        let link = FrontendServer.binURL
+                            .appendingPathComponent(binary)
                         try fm.removeItem(at: link)
                         symlink("swift-frontend.save", link.path)
                     }
@@ -47,7 +55,8 @@ extension AppDelegate {
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
                 for binary in linksToMove {
-                    let link = FrontendServer.binURL.appendingPathComponent(binary)
+                    let link = FrontendServer.binURL
+                        .appendingPathComponent(binary)
                     try fm.removeItem(at: link)
                     symlink("swift-frontend", link.path)
                 }
@@ -62,12 +71,14 @@ extension AppDelegate {
     }
 
     @discardableResult
-    func updatePatchUnpatch() -> Bool {
-        let isPatched = FileManager.default
-            .fileExists(atPath: FrontendServer.patched)
-        patchCompilerItem.title = (isPatched ?
-            FrontendServer.State.patched : .unpatched).rawValue
-        return isPatched
+    func updatePatchUnpatch() -> FrontendServer.State {
+        let state = FileManager.default
+            .fileExists(atPath: FrontendServer.patched) ?
+            FrontendServer.State.patched : .unpatched
+        DispatchQueue.main.async {
+            self.patchCompilerItem?.title = state.rawValue
+        }
+        return state
     }
 }
 
@@ -77,7 +88,7 @@ extension JSONDecoder {
     }
 }
 
-class FrontendServer: InjectionServer {
+class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"
         case patched = "Unpatch Compiler"
@@ -116,10 +127,9 @@ class FrontendServer: InjectionServer {
         return recompiler
     }
     static func writeCache(platform: String = clientPlatform) {
-        let encoder = JSONEncoder()
         do {
             let cache = cacheURL(platform: clientPlatform)
-            let data = try encoder.encode(frontendRecompiler().compilations)
+            let data = try JSONEncoder().encode(frontendRecompiler().compilations)
             try data.write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
@@ -133,12 +143,33 @@ class FrontendServer: InjectionServer {
 
     static var lastFilelist: String?, lastArguments: [String]?
 
-    static func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        var swiftFiles = "", args = [String](), platform = "iPhoneSimulator",
-            sourceFiles = [String](), workingDir = "/tmp"
-        let frontendPath = feed.readString()
+    func validateConnection() -> Bool {
+        return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
+    }
 
-        while let arg = feed.readString(), arg != COMMANDS_END {
+    override func runInBackground() {
+        guard validateConnection() && readString() == "1.0" else {
+            return _ = Self.frontendRecompiler()
+                .error("Unpatch then repatch compiler to update script version")
+        }
+        do {
+            try Self.processFrontendCommandFrom(feed: self)
+        } catch {
+            Self.error("Feed error: \(error)")
+        }
+    }
+    
+    class func processFrontendCommandFrom(feed: SimpleSocket) throws {
+        guard let projectRoot = feed.readString(),
+              let frontendPath = feed.readString(),
+              frontendPath.hasSuffix(".save"),
+              feed.readString() == "-frontend" &&
+                feed.readString() == "-c" else { return }
+
+        var swiftFiles = "", args = [String](), primaries = [String](),
+            platform = "iPhoneSimulator"
+
+        while let arg = feed.readString() {
             switch arg {
             case "-filelist":
                 guard let filelist = feed.readString() else { return }
@@ -147,12 +178,10 @@ class FrontendServer: InjectionServer {
                 swiftFiles += files
             case "-primary-file":
                 guard let source = feed.readString() else { return }
-                sourceFiles.append(source)
+                primaries.append(source)
                 if !swiftFiles.contains(source) {
                     swiftFiles += source+"\n"
                 }
-            case "-emit-module":
-                return
             case "-o":
                 _ = feed.readString()
             default:
@@ -161,7 +190,7 @@ class FrontendServer: InjectionServer {
                 }
                 if arg.hasSuffix(".swift") && args.last != "-F" {
                     swiftFiles += arg+"\n"
-                } else if arg[Recompiler.optionsToRemove] {
+                } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()
                 } else if !(arg == "-F" && args.last == "-F") && !arg[
                     "-validate-clang-modules-once|-frontend-parseable-output"] {
@@ -170,16 +199,36 @@ class FrontendServer: InjectionServer {
             }
         }
 
-        MonitorXcode.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
-            FrontendServer.loggedFrontend = frontendPath
+        DispatchQueue.main.async {
+            if !projectRoot.hasSuffix(".xcodeproj") &&
+                AppDelegate.alreadyWatching(projectRoot) == nil {
+                let open = NSOpenPanel()
+//                open.titleVisibility = .visible
+//                open.title = "InjectionNext: add directory"
+                open.prompt = "InjectionNext - Watch Directory?"
+                open.directoryURL = URL(fileURLWithPath: projectRoot)
+                open.canChooseDirectories = true
+                open.canChooseFiles = false
+                if open.runModal() == .OK, let url = open.url {
+                    AppDelegate.ui.watch(path: url.path)
+                }
+            }
+        }
 
-            for source in sourceFiles {
+        NextCompiler.compileQueue.async {
+            let recompiler = Self.frontendRecompiler(platform: platform)
+            Self.loggedFrontend = frontendPath
+
+            for source in primaries {
+                #if !INJECTION_III_APP
+                // Don't update compilations while connected
                 if InjectionServer.currentClient != nil &&
                     recompiler.compilations.index(forKey: source) != nil {
                     continue
                 }
+                #endif
 
+                // Try to minimise memory churn
                 if let previous = recompiler
                     .compilations[source]?.arguments ?? Self.lastArguments,
                    args == previous {
@@ -197,17 +246,8 @@ class FrontendServer: InjectionServer {
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: workingDir)
-
-                recompiler.compilations[source] = update
-                if source == FrontendServer.frontendRecompiler().pendingSource {
-                    recompiler.pendingSource = nil
-                    MonitorXcode.compileQueue.async {
-                        if FrontendServer.frontendRecompiler().inject(source: source) {
-                            recompiler.pendingSource = nil
-                        }
-                    }
-                }
+                      swiftFiles: swiftFiles, workingDir: projectRoot)
+                recompiler.store(compilation: update, for: source)
             }
         }
     }

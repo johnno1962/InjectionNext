@@ -18,7 +18,12 @@ struct Reloader {}
 
 @discardableResult
 public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
-    let msg = prefix+what.map {"\($0)"}.joined(separator: separator)
+    var msg = what.map {"\($0)"}.joined(separator: separator)
+    #if INJECTION_III_APP
+    msg = "⏳ "+msg
+    #else
+    msg = prefix+msg
+    #endif
     print(msg)
     InjectionServer.currentClient?.sendCommand(.log, with: msg)
     return true
@@ -36,6 +41,8 @@ class NextCompiler {
         var workingDir: String
     }
 
+    // One compilation at a time.
+    static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available and last error
@@ -58,14 +65,24 @@ class NextCompiler {
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
+    
+    func store(compilation: Compilation, for source: String) {
+        Self.compileQueue.async {
+            self.compilations[source] = compilation
+            if source == self.pendingSource {
+                print("Delayed injection of "+source)
+                if self.inject(source: source) {
+                    self.pendingSource = nil
+                }
+            }
+        }
+    }
 
-    /// Main entry point called by MonitorXcode
-    func inject(source: String) -> Bool {
-        do {
-            return try Fortify.protect { () -> Bool in
+    func prepare(source: String)
+        -> (dylib: String, dylibName: String, platform: String, Bool)? {
                 let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
-                appDelegate.setMenuIcon(.busy)
+                AppDelegate.ui.setMenuIcon(.busy)
                 compileNumber += 1
                 lastError = nil
 
@@ -86,27 +103,40 @@ class NextCompiler {
                 let dylibName = DYLIB_PREFIX + sourceName +
                     "_\(connected?.injectionNumber ?? compileNumber).dylib"
                 let useFilesystem = connected?.isLocalClient != false
+                #if INJECTION_III_APP
+                let dylibPath = (true ? tmpPath : "/tmp") + dylibName
+                #else
                 let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
-
+                #endif
                 guard let object = recompile(source: source, platform: platform),
                    tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
                    let dylib = link(object: object, dylib: dylibPath, platform:
-                            platform, arch: connected?.arch ?? compilerArch),
+                    platform, arch: connected?.arch ?? compilerArch) else { return nil }
+
+                prepared[sourceName] = dylib
+                print("Prepared dylib: "+dylib)
+                return (dylib, dylibName, platform, useFilesystem)
+   }
+
+    /// Main entry point called by MonitorXcode
+    func inject(source: String) -> Bool {
+        do {
+            return try Fortify.protect { () -> Bool in
+                guard let (dylib, dylibName, platform, useFilesystem)
+                        = prepare(source: source),
                    let data = codesign(dylib: dylib, platform: platform) else {
-                    appDelegate.setMenuIcon(.error)
+                    AppDelegate.ui.setMenuIcon(.error)
                     return error("Injection failed. Was your app connected?")
                 }
 
-                print("Prepared dylib: "+dylib)
-                prepared[sourceName] = dylib
-                InjectionServer.commandQueue.sync {
+                InjectionServer.clientQueue.sync {
                     guard let client = InjectionServer.currentClient else {
-                        appDelegate.setMenuIcon(.ready)
+                        AppDelegate.ui.setMenuIcon(.ready)
                         return
                     }
-                    if Reloader.injectingXCTest(in: dylib) {
-                        _ = client.copyPlugIns
-                    }
+//                    if Reloader.injectingXCTest(in: dylib) {
+//                        _ = client.copyPlugIns
+//                    }
                     if useFilesystem {
                         client.writeCommand(InjectionCommand
                             .load.rawValue, with: dylib)
@@ -126,6 +156,7 @@ class NextCompiler {
 
     /// Seek to highlight potentially unsupported injections.
     func unsupported(source: String, dylib: String, client: InjectionServer) {
+        #if !INJECTION_III_APP
         if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
             .filter({ entry in
                 lazy var symbol: String = String(cString: entry.name)
@@ -143,6 +174,7 @@ class NextCompiler {
             }
             client.exports[source] = symbols
         }
+        #endif
     }
 
     /// Compile a source file using inforation provided by MonitorXcode
@@ -176,6 +208,7 @@ class NextCompiler {
         let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
+             "-warn-long-expression-type-checking=150",
              "-external-plugin-path",
              platformUsr+"lib/swift/host/plugins#" +
              platformUsr+"bin/swift-plugin-server",
@@ -189,13 +222,18 @@ class NextCompiler {
         // Call compiler process
         if let errors = Popen.task(exec: compiler,
                arguments: stored.arguments + languageSpecific,
-               cd: stored.workingDir, errors: nil), // Always returns stdout
-           errors.contains(" error: ") {
-            print(([compiler] + stored.arguments +
-                   languageSpecific).joined(separator: " "))
-            _ = error("Recompile failed for: \(source)\n"+errors)
-            lastError = errors
-            return nil
+               cd: stored.workingDir, errors: nil) { // Always returns stdout
+            if errors.contains(" error: ") {
+                print(([compiler] + stored.arguments +
+                       languageSpecific).joined(separator: " "))
+                _ = error("Recompile failed for: \(source)\n"+errors)
+                lastError = errors
+                return nil
+            }
+            for slow: String in errors[
+                #"(?<=/)\w+\.swift:\d+:\d+: warning: expression took \d+ms to type-check.*"#] {
+                log(slow)
+            }
         }
 
         return object
@@ -233,9 +271,9 @@ class NextCompiler {
         let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
         var testingOptions = ""
         if DispatchQueue.main.sync(execute: {
-            appDelegate.deviceTesting.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync(execute: {
-                appDelegate.librariesField.stringValue = Defaults.deviceLibraries
+            AppDelegate.ui.deviceTesting?.state == .on }) {
+            let otherOptions = DispatchQueue.main.sync(execute: { () -> String in
+                AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
                 return Defaults.deviceLibraries })
             let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
             testingOptions = """
@@ -270,7 +308,7 @@ class NextCompiler {
         if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
-            identity = DispatchQueue.main.sync { appDelegate.codeSigningID }
+            identity = DispatchQueue.main.sync { AppDelegate.ui.codeSigningID }
         }
         let codesign = """
             (export CODESIGN_ALLOCATE="\(Defaults.xcodePath+"/Contents/Developer"

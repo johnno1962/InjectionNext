@@ -21,8 +21,6 @@ class MonitorXcode {
 
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
-    // One compilation at a time.
-    static let compileQueue = DispatchQueue(label: "InjectionCompile")
     // Trying to avoid fragmenting memory
     var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
     // The service to recompile and inject a source file.
@@ -42,19 +40,19 @@ class MonitorXcode {
         if let xcodeStdout = Popen(cmd: "export SOURCEKIT_LOGGING=1; " +
             "'\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)") {
             Self.runningXcode = self
-            appDelegate.launchXcodeItem.state = .on
+            AppDelegate.ui.launchXcodeItem.state = .on
             DispatchQueue.global().async {
                 while true {
                     do {
                         try Fortify.protect {
-                            appDelegate.setMenuIcon(.ready)
+                            AppDelegate.ui.setMenuIcon(.ready)
                             self.processSourceKitOutput(from: xcodeStdout)
-                            appDelegate.setMenuIcon(.idle)
+                            AppDelegate.ui.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        appDelegate.launchXcodeItem.state = .off
+                        AppDelegate.ui.launchXcodeItem.state = .off
                         if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
-                            appDelegate.runXcode(self)
+                            AppDelegate.ui.runXcode(self)
                         }
                         break // break on clean exit and EOF.
                     } catch {
@@ -175,13 +173,16 @@ class MonitorXcode {
                             !arg.contains("/Intermediates.noindex/"),
                         let option = args.last {
                         // expands out default argument generators
-                        let change = [arg.replacingOccurrences(
-                            of: indexBuild, with: "/Build/")] +
+                        var change = [arg.replacingOccurrences(
+                            of: indexBuild, with: "/Build/")]
                             // alternate fix of Defaults problem
                             // hopefully without causing unhides
-                            (arg.hasPrefix("-") ? [arg] :
-                                option.hasPrefix("-") ? [option, arg] :
-                                [])
+                        if InjectionServer.currentClient?
+                            .platform.hasPrefix("AppleTV") != true {
+                            change += (arg.hasPrefix("-") ? [arg] :
+                                        option.hasPrefix("-") ? [option, arg] :
+                                        [])
+                        }
 //                        debug(change)
                         args += change
                     } else if !(arg == "-F" && args.last == "-F") &&
@@ -216,21 +217,12 @@ class MonitorXcode {
                 let update = NextCompiler.Compilation(arguments: args,
                     swiftFiles: swiftFiles, workingDir: workingDir)
  
-                // The folling line should be on the compileQueue
-                // but it seems to provoke a Swift compiler bug.
-                self.recompiler.compilations[source] = update
-                Self.compileQueue.async {
-                    if source == self.recompiler.pendingSource {
-                        print("Delayed injection of "+source)
-                        self.recompiler.pendingSource = nil
-                        _ = self.recompiler.inject(source: source)
-                    }
-                }
+                recompiler.store(compilation: update, for: source)
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
-                Self.compileQueue.async {
+                NextCompiler.compileQueue.async {
                     _ = self.recompiler.inject(source: source)
                 }
             }
