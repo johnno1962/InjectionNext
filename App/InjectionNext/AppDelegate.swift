@@ -209,8 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func showlastError(_ sender: NSMenuItem) {
-        lastErrorField.string = MonitorXcode
-            .runningXcode?.recompiler.lastError ?? "No error."
+        lastErrorField.string = NextCompiler.lastError ?? "No error."
         lastErrorField.window?.makeKeyAndOrderFront(sender)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }

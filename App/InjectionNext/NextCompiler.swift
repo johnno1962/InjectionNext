@@ -41,12 +41,15 @@ class NextCompiler {
         var workingDir: String
     }
 
-    // One compilation at a time.
+    /// Queue for one compilation at a time.
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
+    /// Last build error.
+    static var lastError: String?
+
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
-    /// Injection pending if information was not available and last error
-    var pendingSource: String?, lastError: String?
+    /// Injection pending if information was not available
+    var pendingSource: String?
     /// Information for compiling a file per source file.
     var compilations = [String: Compilation]()
     /// Last Injected
@@ -84,7 +87,7 @@ class NextCompiler {
                 connected?.injectionNumber += 1
                 AppDelegate.ui.setMenuIcon(.busy)
                 compileNumber += 1
-                lastError = nil
+                Self.lastError = nil
 
                 // Support for https://github.com/johnno1962/Compilertron
                 let isCompilertron = connected == nil && source.hasSuffix(".cpp")
@@ -220,20 +223,23 @@ class NextCompiler {
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
         // Call compiler process
-        if let errors = Popen.task(exec: compiler,
+        let compile = Topen(exec: compiler,
                arguments: stored.arguments + languageSpecific,
-               cd: stored.workingDir, errors: nil) { // Always returns stdout
-            if errors.contains(" error: ") {
-                print(([compiler] + stored.arguments +
-                       languageSpecific).joined(separator: " "))
-                _ = error("Recompile failed for: \(source)\n"+errors)
-                lastError = errors
-                return nil
-            }
-            for slow: String in errors[
+               cd: stored.workingDir)
+        var errors = ""
+        while let line = compile.readLine() {
+            if let slow: String = line[
                 #"(?<=/)\w+\.swift:\d+:\d+: warning: expression took \d+ms to type-check.*"#] {
                 log(slow)
             }
+            errors += line+"\n"
+        }
+        if errors.contains(" error: ") {
+            print(([compiler] + stored.arguments +
+                   languageSpecific).joined(separator: " "))
+            _ = error("Recompile failed for: \(source)\n"+errors)
+            Self.lastError = errors
+            return nil
         }
 
         return object
@@ -296,7 +302,7 @@ class NextCompiler {
 
         if let errors = Popen.system(linkCommand, errors: true) {
             _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
-            lastError = errors
+            Self.lastError = errors
             return nil
         }
 
@@ -319,7 +325,7 @@ class NextCompiler {
             """
         if let errors = Popen.system(codesign, errors: true) {
             _ = error("Codesign failed \(codesign) errors:\n"+errors)
-            lastError = errors
+            Self.lastError = errors
         }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))

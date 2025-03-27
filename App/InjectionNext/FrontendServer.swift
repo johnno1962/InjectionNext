@@ -128,8 +128,10 @@ class FrontendServer: SimpleSocket {
     }
     static func writeCache(platform: String = clientPlatform) {
         do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(frontendRecompiler().compilations)
             let cache = cacheURL(platform: clientPlatform)
-            let data = try JSONEncoder().encode(frontendRecompiler().compilations)
             try data.write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
