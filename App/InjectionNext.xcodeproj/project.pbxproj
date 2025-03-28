@@ -862,6 +862,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_DYLIB_INSTALL_NAME = "/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					$PLATFORM_DIR/Developer/usr/lib,
@@ -903,6 +904,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_DYLIB_INSTALL_NAME = "/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					$PLATFORM_DIR/Developer/usr/lib,
