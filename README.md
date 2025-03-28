@@ -89,7 +89,9 @@ for Swift projects.) In this case, you shouldn't launch
 Xcode from inside the InjectionNext.app but you'll need to have 
 built your app in Xcode at some point in the past for the logs
 to be available. You should build using the same version as that 
-selected by `xcode-select`.
+selected by `xcode-select`. With Xcode 16.3+, for this log parsing
+mode to continue working you'll need to add a custom build setting
+EMIT_FRONTEND_COMMAND_LINES.
 
 ### New compiler "proxy" mode.
 
