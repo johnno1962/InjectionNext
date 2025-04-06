@@ -100,8 +100,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     use this app to launch it
                     (unless you are using a file watcher).
                     """)
-            } else {
-                FrontendServer.startServer(COMMANDS_PORT)
             }
         }
  
@@ -141,8 +139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func selectXcode(_ sender: NSMenuItem) {
         let open = NSOpenPanel()
         open.prompt = "Select Xcode"
-        open.directoryURL = URL(fileURLWithPath:
-            Defaults.xcodePath).deletingLastPathComponent()
+        open.directoryURL = URL(fileURLWithPath: Defaults.xcodePath)
         open.canChooseDirectories = false
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {

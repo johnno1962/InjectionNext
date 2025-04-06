@@ -77,6 +77,9 @@ extension AppDelegate {
             FrontendServer.State.patched : .unpatched
         DispatchQueue.main.async {
             self.patchCompilerItem?.title = state.rawValue
+            if state == .patched {
+                _ = FrontendServer.startOnce
+            }
         }
         return state
     }
@@ -100,6 +103,9 @@ class FrontendServer: SimpleSocket {
     static var patched: String = unpatchedURL.path + ".save"
     static var patchedURL: URL = URL(fileURLWithPath: patched)
     static var loggedFrontend: String?, lastInjected: String?
+    static var startOnce: Void = {
+        FrontendServer.startServer(COMMANDS_PORT)
+    }()
 
     static var clientPlatform: String {
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
