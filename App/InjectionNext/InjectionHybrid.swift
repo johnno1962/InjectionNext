@@ -53,13 +53,13 @@ extension AppDelegate {
 class InjectionHybrid: InjectionBase {
     static var pendingInjections = [String]()
     /// InjectionNext compiler that uses InjectionLite log parser
-    var liteRecompiler = HybridCompiler()
+    var liteRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        var recompiler: NextCompiler = liteRecompiler
+        var recompiler = liteRecompiler
         if source.hasSuffix(".swift") &&
             AppDelegate.ui.updatePatchUnpatch() == .patched {
             recompiler = FrontendServer.frontendRecompiler()

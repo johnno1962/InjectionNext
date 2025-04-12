@@ -13,84 +13,6 @@
 import Cocoa
 import Popen
 
-extension AppDelegate {
-
-    @IBAction func patchCompiler(_ sender: NSMenuItem) {
-        let fm = FileManager.default
-        do {
-            let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
-                "swift-api-digester", "swift-cache-tool"]
-            if updatePatchUnpatch() == .unpatched {
-                if !fm.fileExists(atPath: FrontendServer.patched),
-                   let feeder = Bundle.main
-                    .url(forResource: "swift-frontend", withExtension: "sh") {
-                    let alert: NSAlert = NSAlert()
-                    alert.alertStyle = .warning
-                    alert.messageText = APP_NAME
-                    alert.informativeText = """
-                        The Swift compiler of your current toolchain \
-                        \(FrontendServer.unpatchedURL.path) will be \
-                        replaced by a script that calls the compiler \
-                        and captures all compilation commands. Use menu \
-                        item "Unpatch Compiler" to revert this change.
-                        """
-                    alert.addButton(withTitle: "OK")
-                    alert.addButton(withTitle: "Cancel")
-                    if alert.runModal() != .alertFirstButtonReturn {
-                        return
-                    }
-                    try fm.moveItem(at: FrontendServer.unpatchedURL,
-                                    to: FrontendServer.patchedURL)
-                    try fm.copyItem(at: feeder,
-                                    to: FrontendServer.unpatchedURL)
-                    for binary in linksToMove {
-                        let link = FrontendServer.binURL
-                            .appendingPathComponent(binary)
-                        try fm.removeItem(at: link)
-                        symlink("swift-frontend.save", link.path)
-                    }
-                }
-            } else if fm.fileExists(atPath: FrontendServer.patched) {
-                try? fm.removeItem(at: FrontendServer.unpatchedURL)
-                try fm.moveItem(at: FrontendServer.patchedURL,
-                                to: FrontendServer.unpatchedURL)
-                for binary in linksToMove {
-                    let link = FrontendServer.binURL
-                        .appendingPathComponent(binary)
-                    try fm.removeItem(at: link)
-                    symlink("swift-frontend", link.path)
-                }
-                FrontendServer.loggedFrontend = nil
-            }
-        } catch {
-            let chmod = FrontendServer.unpatchedURL.deletingLastPathComponent()
-            InjectionServer.error("Patching error: \(error). " +
-                                  "Is the directory \(chmod.path) writable?")
-        }
-        updatePatchUnpatch()
-    }
-
-    @discardableResult
-    func updatePatchUnpatch() -> FrontendServer.State {
-        let state = FileManager.default
-            .fileExists(atPath: FrontendServer.patched) ?
-            FrontendServer.State.patched : .unpatched
-        DispatchQueue.main.async {
-            self.patchCompilerItem?.title = state.rawValue
-            if state == .patched {
-                _ = FrontendServer.startOnce
-            }
-        }
-        return state
-    }
-}
-
-extension JSONDecoder {
-    func decode<T: Decodable>(from: Data) throws -> T {
-        return try decode(T.self, from: from)
-    }
-}
-
 class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"
@@ -123,7 +45,12 @@ class FrontendServer: SimpleSocket {
             if Fstat(path: compressed)?.st_size ?? 0 != 0,
                let stream = Popen(cmd: "gunzip <"+compressed)?.readAll(),
                let cached = stream.data(using: .utf8) {
-                recompiler.compilations = try JSONDecoder().decode(from: cached)
+                let stored = try JSONDecoder().decode(
+                    [String: NextCompiler.Compilation].self, from: cached)
+                for source in stored.keys.sorted() {
+                    guard let compile = stored[source] else { continue }
+                    recompiler.store(compilation: compile, for: source)
+                }
                 print("Loaded \(recompiler.compilations.count) cached commands")
             }
         } catch {
@@ -205,9 +132,10 @@ class FrontendServer: SimpleSocket {
             }
         }
 
-        DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") &&
-                AppDelegate.alreadyWatching(projectRoot) == nil {
+        if !projectRoot.hasSuffix(".xcodeproj") &&
+            MonitorXcode.runningXcode == nil &&
+            AppDelegate.alreadyWatching(projectRoot) == nil {
+            DispatchQueue.main.async {
                 let open = NSOpenPanel()
 //                open.titleVisibility = .visible
 //                open.title = "InjectionNext: add directory"
@@ -237,6 +165,197 @@ class FrontendServer: SimpleSocket {
                 print("Updating \(compile.arguments.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 recompiler.store(compilation: compile, for: source)
+            }
+        }
+    }
+}
+
+extension AppDelegate {
+
+    @IBAction func patchCompiler(_ sender: NSMenuItem) {
+        let fm = FileManager.default
+        do {
+            let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
+                "swift-api-digester", "swift-cache-tool"]
+            if updatePatchUnpatch() == .unpatched {
+                if !fm.fileExists(atPath: FrontendServer.patched),
+                   let feeder = Bundle.main
+                    .url(forResource: "swift-frontend", withExtension: "sh") {
+                    let alert: NSAlert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = APP_NAME
+                    alert.informativeText = """
+                        The Swift compiler of your current toolchain \
+                        \(FrontendServer.unpatchedURL.path) will be \
+                        replaced by a script that calls the compiler \
+                        and captures all compilation commands. Use menu \
+                        item "Unpatch Compiler" to revert this change.
+                        """
+                    alert.addButton(withTitle: "OK")
+                    alert.addButton(withTitle: "Cancel")
+                    if alert.runModal() != .alertFirstButtonReturn {
+                        return
+                    }
+                    try fm.moveItem(at: FrontendServer.unpatchedURL,
+                                    to: FrontendServer.patchedURL)
+                    try fm.copyItem(at: feeder,
+                                    to: FrontendServer.unpatchedURL)
+                    for binary in linksToMove {
+                        let link = FrontendServer.binURL
+                            .appendingPathComponent(binary)
+                        try fm.removeItem(at: link)
+                        symlink("swift-frontend.save", link.path)
+                    }
+                }
+            } else if fm.fileExists(atPath: FrontendServer.patched) {
+                try? fm.removeItem(at: FrontendServer.unpatchedURL)
+                try fm.moveItem(at: FrontendServer.patchedURL,
+                                to: FrontendServer.unpatchedURL)
+                for binary in linksToMove {
+                    let link = FrontendServer.binURL
+                        .appendingPathComponent(binary)
+                    try fm.removeItem(at: link)
+                    symlink("swift-frontend", link.path)
+                }
+                FrontendServer.loggedFrontend = nil
+            }
+        } catch {
+            let chmod = FrontendServer.unpatchedURL.deletingLastPathComponent()
+            InjectionServer.error("Patching error: \(error). " +
+                                  "Is the directory \(chmod.path) writable?")
+        }
+        updatePatchUnpatch()
+    }
+
+    @discardableResult
+    func updatePatchUnpatch() -> FrontendServer.State {
+        let state = FileManager.default
+            .fileExists(atPath: FrontendServer.patched) ?
+            FrontendServer.State.patched : .unpatched
+        DispatchQueue.main.async {
+            self.patchCompilerItem?.title = state.rawValue
+            if state == .patched {
+                _ = FrontendServer.startOnce
+            }
+        }
+        return state
+    }
+
+    /// Shared regular expresssions to patch .enableInjection() and @ObserveInject into a source
+    func prepareSwiftUI(source: String, changes: UnsafeMutablePointer<Int>? = nil) {
+        let fileURL = URL(fileURLWithPath: source)
+        guard let original = try? String(contentsOf: fileURL) else {
+            return
+        }
+
+        var patched = original, before = changes?.pointee
+        patched[#"""
+            ^((\s+)(public )?(var body:|func body\([^)]*\) -\>) some View \{\n\#
+            (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|(\s*|#.+)\n)+)(?<!#endif\n)\2\}\n
+            """#.anchorsMatchLines, count: changes] = """
+            $1$2    .enableInjection()
+            $2}
+
+            $2#if DEBUG
+            $2@ObserveInjection var forceRedraw
+            $2#endif
+
+            """
+        if changes?.pointee != before {
+            print("Patched", source)
+        }
+
+        if (patched.contains("class AppDelegate") ||
+            patched.contains("@main\n")) &&
+            !patched.contains("InjectionObserver") {
+            if !patched.contains("import SwiftUI") {
+                patched += "\nimport SwiftUI\n"
+            }
+
+            patched += """
+
+                #if canImport(HotSwiftUI)
+                @_exported import HotSwiftUI
+                #elseif canImport(Inject)
+                @_exported import Inject
+                #else
+                // This code can be found in the Swift package:
+                // https://github.com/johnno1962/HotSwiftUI or
+                // https://github.com/krzysztofzablocki/Inject
+
+                #if DEBUG
+                import Combine
+
+                public class InjectionObserver: ObservableObject {
+                    public static let shared = InjectionObserver()
+                    @Published var injectionNumber = 0
+                    var cancellable: AnyCancellable? = nil
+                    let publisher = PassthroughSubject<Void, Never>()
+                    init() {
+                        cancellable = NotificationCenter.default.publisher(for:
+                            Notification.Name("INJECTION_BUNDLE_NOTIFICATION"))
+                            .sink { [weak self] change in
+                            self?.injectionNumber += 1
+                            self?.publisher.send()
+                        }
+                    }
+                }
+
+                extension SwiftUI.View {
+                    public func eraseToAnyView() -> some SwiftUI.View {
+                        return AnyView(self)
+                    }
+                    public func enableInjection() -> some SwiftUI.View {
+                        return eraseToAnyView()
+                    }
+                    public func onInjection(bumpState: @escaping () -> ()) -> some SwiftUI.View {
+                        return self
+                            .onReceive(InjectionObserver.shared.publisher, perform: bumpState)
+                            .eraseToAnyView()
+                    }
+                }
+
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+                @propertyWrapper
+                public struct ObserveInjection: DynamicProperty {
+                    @ObservedObject private var iO = InjectionObserver.shared
+                    public init() {}
+                    public private(set) var wrappedValue: Int {
+                        get {0} set {}
+                    }
+                }
+                #else
+                extension SwiftUI.View {
+                    @inline(__always)
+                    public func eraseToAnyView() -> some SwiftUI.View { return self }
+                    @inline(__always)
+                    public func enableInjection() -> some SwiftUI.View { return self }
+                    @inline(__always)
+                    public func onInjection(bumpState: @escaping () -> ()) -> some SwiftUI.View {
+                        return self
+                    }
+                }
+
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+                @propertyWrapper
+                public struct ObserveInjection {
+                    public init() {}
+                    public private(set) var wrappedValue: Int {
+                        get {0} set {}
+                    }
+                }
+                #endif
+                #endif
+
+                """
+        }
+
+        if patched != original {
+            do {
+                try patched.write(to: fileURL,
+                                  atomically: false, encoding: .utf8)
+            } catch {
+                InjectionServer.error("Could not save \(source): \(error)")
             }
         }
     }

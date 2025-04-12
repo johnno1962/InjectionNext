@@ -72,12 +72,10 @@ class NextCompiler {
     }
     
     func store(compilation: Compilation, for source: String) {
-        if compilation != lastCompilation {
+        if lastCompilation != compilation {
             lastCompilation = compilation
-        } else { print("reusing") }
-        if compilations[source] != lastCompilation {
-            compilations[source] = lastCompilation
-        }
+        } //else { print("reusing") }
+        compilations[source] = lastCompilation
         if source == pendingSource {
             print("Delayed injection of "+source)
             if inject(source: source) {
