@@ -16,8 +16,7 @@ extension AppDelegate {
 
     /// Prepare the SwiftUI source file currently being edited for injection.
     @IBAction func prepareSource(_ sender: NSMenuItem) {
-        if let lastSource = MonitorXcode.runningXcode?.lastSource ??
-            FrontendServer.lastInjected {
+        if let lastSource = NextCompiler.lastSource {
             prepare(source: lastSource)
         }
     }
@@ -25,9 +24,9 @@ extension AppDelegate {
     /// Prepare all sources in the current target for injection.
     @IBAction func prepareProject(_ sender: NSMenuItem) {
         var changes = 0, edited = 0
-        for source in (MonitorXcode.runningXcode?.lastFilelist ??
-                       FrontendServer.lastFilelist)?
-            .components(separatedBy: "\n").dropLast() ?? [] {
+        for source in (MonitorXcode.runningXcode?.recompiler ??
+                       FrontendServer.frontendRecompiler()).lastCompilation?
+            .swiftFiles.components(separatedBy: "\n").dropLast() ?? [] {
             FrontendServer.frontendRecompiler()
                 .lastInjected[source] = Date().timeIntervalSince1970
             prepare(source: source, changes: &changes)

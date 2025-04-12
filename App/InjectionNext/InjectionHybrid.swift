@@ -63,7 +63,6 @@ class InjectionHybrid: InjectionBase {
         if source.hasSuffix(".swift") &&
             AppDelegate.ui.updatePatchUnpatch() == .patched {
             recompiler = FrontendServer.frontendRecompiler()
-            FrontendServer.lastInjected = source
         }
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?

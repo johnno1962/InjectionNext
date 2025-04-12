@@ -102,7 +102,7 @@ class FrontendServer: SimpleSocket {
     static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
     static var patched: String { unpatchedURL.path + ".save" }
     static var patchedURL: URL { URL(fileURLWithPath: patched) }
-    static var loggedFrontend: String?, lastInjected: String?
+    static var loggedFrontend: String?
     static var startOnce: Void = {
         FrontendServer.startServer(COMMANDS_PORT)
     }()
@@ -149,8 +149,6 @@ class FrontendServer: SimpleSocket {
         }
     }
 
-    static var lastFilelist: String?, lastArguments: [String]?
-
     func validateConnection() -> Bool {
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
@@ -174,8 +172,8 @@ class FrontendServer: SimpleSocket {
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
 
-        var swiftFiles = "", args = [String](), primaries = [String](),
-            platform = "iPhoneSimulator"
+        var primaries = [String](), platform = "iPhoneSimulator"
+        var compile = NextCompiler.Compilation()
 
         while let arg = feed.readString() {
             switch arg {
@@ -183,12 +181,12 @@ class FrontendServer: SimpleSocket {
                 guard let filelist = feed.readString() else { return }
                 let files = try String(contentsOfFile: filelist,
                                        encoding: .utf8)
-                swiftFiles += files
+                compile.swiftFiles += files
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 primaries.append(source)
-                if !swiftFiles.contains(source) {
-                    swiftFiles += source+"\n"
+                if !compile.swiftFiles.contains(source) {
+                    compile.swiftFiles += source+"\n"
                 }
             case "-o":
                 _ = feed.readString()
@@ -196,13 +194,13 @@ class FrontendServer: SimpleSocket {
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") && args.last != "-F" {
-                    swiftFiles += arg+"\n"
+                if arg.hasSuffix(".swift") && compile.arguments.last != "-F" {
+                    compile.swiftFiles += arg+"\n"
                 } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()
-                } else if !(arg == "-F" && args.last == "-F") && !arg[
+                } else if !(arg == "-F" && compile.arguments.last == "-F") && !arg[
                     "-validate-clang-modules-once|-frontend-parseable-output"] {
-                    args.append(arg)
+                    compile.arguments.append(arg)
                 }
             }
         }
@@ -236,26 +234,9 @@ class FrontendServer: SimpleSocket {
                 }
                 #endif
 
-                // Try to minimise memory churn
-                if let previous = recompiler
-                    .compilations[source]?.arguments ?? Self.lastArguments,
-                   args == previous {
-                    args = previous
-                } else {
-                    Self.lastArguments = args
-                }
-                if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? Self.lastFilelist,
-                   swiftFiles == previous {
-                    swiftFiles = previous
-                }
-                Self.lastFilelist = swiftFiles
-
-                print("Updating \(args.count) args for \(platform)/" +
+                print("Updating \(compile.arguments.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
-                let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: projectRoot)
-                recompiler.store(compilation: update, for: source)
+                recompiler.store(compilation: compile, for: source)
             }
         }
     }

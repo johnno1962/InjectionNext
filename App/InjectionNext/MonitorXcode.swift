@@ -21,8 +21,6 @@ class MonitorXcode {
 
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
-    // Trying to avoid fragmenting memory
-    var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
     // The service to recompile and inject a source file.
     var recompiler = NextCompiler()
 
@@ -116,8 +114,7 @@ class MonitorXcode {
                  line == "  key.request: source.request.relatedidents,") &&
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
-                var swiftFiles = "", args = [String](), fileCount = 0,
-                    workingDir = "/tmp", configDirs = Set<String>()
+                var compile = NextCompiler.Compilation(), fileCount = 0
 
                 while var arg = readQuotedString() {
                     let llvmIncs = "/llvm-macosx-arm64/lib"
@@ -125,7 +122,8 @@ class MonitorXcode {
                         arg = arg.replacingOccurrences(of: llvmIncs,
                             with: "/../buildbot_osx"+llvmIncs)
                     }
-                    if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
+                    if compile.arguments.last == "-F" &&
+                        arg.hasSuffix("/PackageFrameworks") {
                         Unhider.packageFrameworks = arg
                         #if DEFAULTS_PACKAGE_PROBLEM || false
                         let frameworksURL = URL(fileURLWithPath: arg)
@@ -146,8 +144,9 @@ class MonitorXcode {
                         #endif
                     }
 
-                    if arg.hasSuffix(".swift") && args.last != "-F" {
-                        swiftFiles += arg+"\n"
+                    if arg.hasSuffix(".swift") &&
+                        compile.arguments.last != "-F" {
+                        compile.swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
                         _ = xcodeStdout.readLine()
@@ -156,11 +155,11 @@ class MonitorXcode {
                            let swork = readQuotedString() {
                             work = swork
                         }
-                        workingDir = work
-                    } else if args.last == "-vfsoverlay" &&
+                        compile.workingDir = work
+                    } else if compile.arguments.last == "-vfsoverlay" &&
                                 arg.contains(indexBuild) {
                         // injecting tests without having run tests
-                        args.removeLast()
+                        compile.arguments.removeLast()
                     // Xcode seems to maintain two sets of "build inputs"
                     // i.e. .swiftmodule, .modulemap etc. files and it
                     // seems the main build allows you to avoid "unhiding"
@@ -171,7 +170,7 @@ class MonitorXcode {
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
                             !arg.contains("/Intermediates.noindex/"),
-                        let option = args.last {
+                        let option = compile.arguments.last {
                         // expands out default argument generators
                         var change = [arg.replacingOccurrences(
                             of: indexBuild, with: "/Build/")]
@@ -184,40 +183,23 @@ class MonitorXcode {
                                         [])
                         }
 //                        debug(change)
-                        args += change
-                    } else if !(arg == "-F" && args.last == "-F") &&
+                        compile.arguments += change
+                    } else if !(arg == "-F" && compile.arguments.last == "-F") &&
                         arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
-                        args.append(arg)
+                        compile.arguments.append(arg)
                     }
                 }
 
-                guard !args.isEmpty, let source =
+                guard !compile.arguments.isEmpty, let source =
                         readQuotedString() ?? readQuotedString(),
                       !source.contains("\\n") else {
                     continue
                 }
-                lastSource = source
 
-                if let previous = recompiler
-                    .compilations[source]?.arguments ?? lastArguments,
-                    args == previous {
-                    args = previous
-                } else {
-                    lastArguments = args
+                print("Updating \(compile.arguments.count) args with \(fileCount) swift files "+source+" "+line)
+                NextCompiler.compileQueue.async {
+                    self.recompiler.store(compilation: compile, for: source)
                 }
-                if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? lastFilelist,
-                    swiftFiles == previous {
-                    swiftFiles = previous
-                } else {
-                    lastFilelist = swiftFiles
-                }
-
-                print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
-                let update = NextCompiler.Compilation(arguments: args,
-                    swiftFiles: swiftFiles, workingDir: workingDir)
- 
-                recompiler.store(compilation: update, for: source)
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
