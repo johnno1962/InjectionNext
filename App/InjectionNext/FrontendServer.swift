@@ -97,11 +97,11 @@ class FrontendServer: SimpleSocket {
         case patched = "Unpatch Compiler"
     }
 
-    static var binURL: URL = URL(fileURLWithPath: Defaults.xcodePath +
-        "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin")
-    static var unpatchedURL: URL = binURL.appendingPathComponent("swift-frontend")
-    static var patched: String = unpatchedURL.path + ".save"
-    static var patchedURL: URL = URL(fileURLWithPath: patched)
+    static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
+        "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
+    static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
+    static var patched: String { unpatchedURL.path + ".save" }
+    static var patchedURL: URL { URL(fileURLWithPath: patched) }
     static var loggedFrontend: String?, lastInjected: String?
     static var startOnce: Void = {
         FrontendServer.startServer(COMMANDS_PORT)
@@ -112,7 +112,7 @@ class FrontendServer: SimpleSocket {
     static func cacheURL(platform: String) -> URL {
         return URL(fileURLWithPath: "/tmp/\(platform)_commands.json")
     }
-    static var recompilers = [String: NextCompiler]()
+    static private var recompilers = [String: NextCompiler]()
     static func frontendRecompiler(platform: String = clientPlatform) -> NextCompiler {
         if let recompiler = recompilers[platform] {
             return recompiler
@@ -136,13 +136,13 @@ class FrontendServer: SimpleSocket {
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
-            let data = try encoder.encode(frontendRecompiler().compilations)
-            let cache = cacheURL(platform: clientPlatform)
-            try data.write(to: cache, options: .atomic)
+            let cache = cacheURL(platform: platform)
+            let commands = frontendRecompiler(platform: platform).compilations
+            try encoder.encode(commands).write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
             } else {
-                print("Cached \(frontendRecompiler().compilations.count) \(platform) commands")
+                print("Cached \(commands.count) \(platform) commands")
             }
         } catch {
             InjectionServer.error("Unable to write commands cache: \(error)")
