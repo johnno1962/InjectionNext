@@ -99,8 +99,8 @@ class FrontendServer: SimpleSocket {
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
 
-        var primaries = [String](), platform = "iPhoneSimulator"
-        var compile = NextCompiler.Compilation()
+        var swiftFiles = "", args = [String](), primaries = [String](),
+            platform = "iPhoneSimulator"
 
         while let arg = feed.readString() {
             switch arg {
@@ -108,12 +108,12 @@ class FrontendServer: SimpleSocket {
                 guard let filelist = feed.readString() else { return }
                 let files = try String(contentsOfFile: filelist,
                                        encoding: .utf8)
-                compile.swiftFiles += files
+                swiftFiles += files
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 primaries.append(source)
-                if !compile.swiftFiles.contains(source) {
-                    compile.swiftFiles += source+"\n"
+                if !swiftFiles.contains(source) {
+                    swiftFiles += source+"\n"
                 }
             case "-o":
                 _ = feed.readString()
@@ -121,21 +121,21 @@ class FrontendServer: SimpleSocket {
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") && compile.arguments.last != "-F" {
-                    compile.swiftFiles += arg+"\n"
+                if arg.hasSuffix(".swift") && args.last != "-F" {
+                    swiftFiles += arg+"\n"
                 } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()
-                } else if !(arg == "-F" && compile.arguments.last == "-F") && !arg[
+                } else if !(arg == "-F" && args.last == "-F") && !arg[
                     "-validate-clang-modules-once|-frontend-parseable-output"] {
-                    compile.arguments.append(arg)
+                    args.append(arg)
                 }
             }
         }
 
-        if !projectRoot.hasSuffix(".xcodeproj") &&
-            MonitorXcode.runningXcode == nil &&
-            AppDelegate.alreadyWatching(projectRoot) == nil {
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            if !projectRoot.hasSuffix(".xcodeproj") &&
+                MonitorXcode.runningXcode == nil &&
+                AppDelegate.alreadyWatching(projectRoot) == nil {
                 let open = NSOpenPanel()
 //                open.titleVisibility = .visible
 //                open.title = "InjectionNext: add directory"
@@ -162,9 +162,11 @@ class FrontendServer: SimpleSocket {
                 }
                 #endif
 
-                print("Updating \(compile.arguments.count) args for \(platform)/" +
+                print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
-                recompiler.store(compilation: compile, for: source)
+                let update = NextCompiler.Compilation(arguments: args,
+                      swiftFiles: swiftFiles, workingDir: projectRoot)
+                recompiler.store(compilation: update, for: source)
             }
         }
     }

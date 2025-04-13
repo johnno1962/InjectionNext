@@ -34,11 +34,11 @@ class NextCompiler {
     /// Information required to call the compiler for a file.
     struct Compilation: Codable, Hashable {
         /// Sundry arguments to the compiler
-        var arguments = [String]()
+        let arguments: [String]
         /// Swift files in the target ready to be written as a -filelist
-        var swiftFiles = ""
-        /// Directory to run compiler in (not usually important)
-        var workingDir = "/tmp"
+        let swiftFiles: String
+        /// Directory to run compiler in (not important for Swift)
+        let workingDir: String
     }
 
     /// Queue for one compilation at a time.
