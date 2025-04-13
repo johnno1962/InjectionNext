@@ -113,7 +113,7 @@ class InjectionServer: SimpleSocket {
                     return
                 }
                 DispatchQueue.main.async {
-                    InjectionHybrid.pendingInjections.removeAll()
+                    InjectionHybrid.pendingFilesChanged.removeAll()
                 }
                 AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()

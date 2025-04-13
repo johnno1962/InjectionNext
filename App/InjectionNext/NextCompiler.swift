@@ -32,7 +32,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
 class NextCompiler {
 
     /// Information required to call the compiler for a file.
-    struct Compilation: Codable, Equatable {
+    struct Compilation: Codable, Hashable {
         /// Sundry arguments to the compiler
         var arguments = [String]()
         /// Swift files in the target ready to be written as a -filelist
