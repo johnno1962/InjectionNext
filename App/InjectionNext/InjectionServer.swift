@@ -139,6 +139,10 @@ class InjectionServer: SimpleSocket {
 
         sendCommand(.xcodePath, with: Defaults.xcodePath)
         AppDelegate.restartLastWatcher()
+        if !AppDelegate.watchers.isEmpty {
+            log("Watching directory: " +
+                AppDelegate.watchers.keys.joined(separator: ", "))
+        }
 
         while true {
             let responseInt = readInt()

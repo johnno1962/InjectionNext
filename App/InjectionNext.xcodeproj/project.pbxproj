@@ -12,7 +12,6 @@
 		224E57FB2C08978F00B71C79 /* SwiftRegex in Frameworks */ = {isa = PBXBuildFile; productRef = 224E57FA2C08978F00B71C79 /* SwiftRegex */; };
 		224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FD2C08BBE300B71C79 /* InjectionServer.swift */; };
 		224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */; };
-		224E58032C08C44900B71C79 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = 224E58022C08C44900B71C79 /* Popen */; };
 		229127F12C1EEF69005D7625 /* Experimental.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC17029253ED117002E823F /* Experimental.swift */; };
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
@@ -20,6 +19,12 @@
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
+		BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E12CDED9CF00704C7A /* FileWatcher.swift */; };
+		BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E22CDED9CF00704C7A /* InjectionBase.swift */; };
+		BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423C2DAD02C60085C9B9 /* LogParser.swift */; };
+		BB2D41A82DAD145A0073C203 /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */; };
+		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
+		BB2D41BE2DAD1BBB0073C203 /* InjectionLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */; };
 		BB4654812C257F110080EC40 /* NextCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4654802C257F110080EC40 /* NextCompiler.swift */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
 		BB5155E02CDED8C600704C7A /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155DF2CDED8C600704C7A /* Recompiler.swift */; };
@@ -129,6 +134,9 @@
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InjectionLite.swift; path = ../InjectionLite/Sources/InjectionLite/InjectionLite.swift; sourceTree = SOURCE_ROOT; };
+		BB1E423C2DAD02C60085C9B9 /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogParser.swift; path = ../InjectionLite/Sources/InjectionLite/LogParser.swift; sourceTree = SOURCE_ROOT; };
+		BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
 		BB4654802C257F110080EC40 /* NextCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextCompiler.swift; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
 		BB5155DF2CDED8C600704C7A /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
@@ -210,7 +218,7 @@
 				BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */,
 				224E57FB2C08978F00B71C79 /* SwiftRegex in Frameworks */,
 				BBB64DE51FD571310020BE47 /* libz.tbd in Frameworks */,
-				224E58032C08C44900B71C79 /* Popen in Frameworks */,
+				BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,11 +329,14 @@
 				BBDD841C2C4FE802000F3124 /* Interposing.swift */,
 				BBDD841D2C4FE802000F3124 /* Iterators.swift */,
 				BBDD84532C4FEB16000F3124 /* TupleRegex.swift */,
+				BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */,
+				BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */,
+				BB1E423C2DAD02C60085C9B9 /* LogParser.swift */,
 				BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */,
 				BBDD84382C4FE880000F3124 /* fishhook.c */,
 				BBDD84372C4FE880000F3124 /* fishhook.h */,
-				BBDD84362C4FE863000F3124 /* DLKitC.h */,
 				BBDD84302C4FE849000F3124 /* DLKitC.c */,
+				BBDD84362C4FE863000F3124 /* DLKitC.h */,
 				BBDD84312C4FE849000F3124 /* trie_dladdr.mm */,
 				BBDD84322C4FE849000F3124 /* trie_dlops.mm */,
 				BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */,
@@ -379,10 +390,10 @@
 			name = InjectionNext;
 			packageProductDependencies = (
 				224E57FA2C08978F00B71C79 /* SwiftRegex */,
-				224E58022C08C44900B71C79 /* Popen */,
 				2217BE802C0A65C20032A832 /* Fortify */,
 				22E3D98A2C19009900BB234E /* DLKit */,
 				22E3D98C2C19009900BB234E /* DLKitC */,
+				BB2D41AB2DAD14EA0073C203 /* Popen */,
 			);
 			productName = InjectionIII;
 			productReference = BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */;
@@ -399,6 +410,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				BB2D41AE2DAD15220073C203 /* PBXTargetDependency */,
 			);
 			name = InjectionBundle;
 			productName = InjectionBundle;
@@ -444,11 +456,11 @@
 			mainGroup = BB439B5C1FABA64300B4F50B;
 			packageReferences = (
 				224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */,
-				224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */,
 				2217BE7F2C0A65C20032A832 /* XCRemoteSwiftPackageReference "Fortify" */,
 				22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */,
 				BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */,
 				BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */,
+				BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */,
 			);
 			productRefGroup = BB439B661FABA64300B4F50B /* Products */;
 			projectDirPath = "";
@@ -569,6 +581,7 @@
 			files = (
 				BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */,
 				BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */,
+				BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */,
 				BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */,
 				BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */,
 				BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */,
@@ -579,13 +592,17 @@
 				BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */,
 				BBDD84432C4FEA52000F3124 /* Common.swift in Sources */,
 				BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */,
+				BB2D41A82DAD145A0073C203 /* Recompiler.swift in Sources */,
 				BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */,
 				BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */,
 				BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */,
 				BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */,
+				BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */,
+				BB2D41BE2DAD1BBB0073C203 /* InjectionLite.swift in Sources */,
 				BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */,
 				BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */,
 				BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */,
+				BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */,
 				BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -593,6 +610,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		BB2D41AE2DAD15220073C203 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = BB2D41AD2DAD15220073C203 /* Popen */;
+		};
 		BB85A42D2D6B9CA200FA29D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BB85A4232D6B9C5300FA29D0 /* feedcommands */;
@@ -664,7 +685,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = $SRCROOT/HotReloading/Sources/HotReloadingGuts/include;
 				HELPER_MACH_ID = com.johnholdsworth.InjectionIII.Helper.mach;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(SWIFT_PLATFORM_TARGET_PREFIX)",
 					$PLATFORM_DIR/Developer/Library/Frameworks,
@@ -725,7 +746,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = $SRCROOT/HotReloading/Sources/HotReloadingGuts/include;
 				HELPER_MACH_ID = com.johnholdsworth.InjectionIII.Helper.mach;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(SWIFT_PLATFORM_TARGET_PREFIX)",
 					$PLATFORM_DIR/Developer/Library/Frameworks,
@@ -806,7 +827,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -830,7 +851,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -874,7 +895,10 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "-lXCTestSwiftSupport";
+				OTHER_LDFLAGS = (
+					"-lXCTestSwiftSupport",
+					"$(BUILT_PRODUCTS_DIR)/Popen.o",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
@@ -915,7 +939,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "-lXCTestSwiftSupport";
+				OTHER_LDFLAGS = (
+					"-lXCTestSwiftSupport",
+					"$(BUILT_PRODUCTS_DIR)/Popen.o",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
@@ -984,14 +1011,6 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/johnno1962/Popen";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.6;
-			};
-		};
 		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnno1962/DLKit";
@@ -1016,6 +1035,14 @@
 				minimumVersion = 13.2.0;
 			};
 		};
+		BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnno1962/Popen";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.7;
+			};
+		};
 		BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnno1962/Quick";
@@ -1037,11 +1064,6 @@
 			package = 224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */;
 			productName = SwiftRegex;
 		};
-		224E58022C08C44900B71C79 /* Popen */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 224E58012C08C44900B71C79 /* XCRemoteSwiftPackageReference "Popen" */;
-			productName = Popen;
-		};
 		22E3D98A2C19009900BB234E /* DLKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */;
@@ -1061,6 +1083,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		BB2D41AB2DAD14EA0073C203 /* Popen */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */;
+			productName = Popen;
+		};
+		BB2D41AD2DAD15220073C203 /* Popen */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */;
+			productName = Popen;
 		};
 		BBEB87112C74FD930044578A /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;

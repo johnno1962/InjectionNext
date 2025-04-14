@@ -19,12 +19,15 @@ class FrontendServer: SimpleSocket {
         case patched = "Unpatch Compiler"
     }
 
+    /// Paths to unpatched/patched swift-frontend binary/script in toolchain.
     static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
         "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
     static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
     static var patched: String { unpatchedURL.path + ".save" }
     static var patchedURL: URL { URL(fileURLWithPath: patched) }
+    /// Path to swift-frontend  last logged.
     static var loggedFrontend: String?
+    /// Start server for command logging.
     static var startOnce: Void = {
         FrontendServer.startServer(COMMANDS_PORT)
     }()
@@ -134,7 +137,7 @@ class FrontendServer: SimpleSocket {
 
         DispatchQueue.main.async {
             if !projectRoot.hasSuffix(".xcodeproj") &&
-                MonitorXcode.runningXcode == nil &&
+//                MonitorXcode.runningXcode == nil &&
                 AppDelegate.alreadyWatching(projectRoot) == nil {
                 let open = NSOpenPanel()
 //                open.titleVisibility = .visible

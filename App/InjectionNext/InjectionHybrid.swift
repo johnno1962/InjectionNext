@@ -82,8 +82,7 @@ class InjectionHybrid: InjectionBase {
            running.recompiler.inject(source: source) { return }
 
         var recompiler = liteRecompiler
-        if source.hasSuffix(".swift") &&
-            AppDelegate.ui.updatePatchUnpatch() == .patched {
+        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
             recompiler = FrontendServer.frontendRecompiler()
         }
         if !recompiler.inject(source: source) {
