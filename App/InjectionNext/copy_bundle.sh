@@ -43,7 +43,7 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     mkdir -p "$CODESIGNING_FOLDER_PATH/Frameworks" &&
     
     # copy frameworks used for testing into app's bundle/Frameworks
-    cp -f "$RESOURCES/lib${PLATFORM_NAME}Injection.dylib" "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
+    ln -sf "../iOSInjection.bundle/$BUNDLE" "$CODESIGNING_FOLDER_PATH/Frameworks/lib${PLATFORM_NAME}Injection.dylib" &&
     if [[ "$BUNDLE" =~ Dev ]]; then
     rsync -a "$PLATFORM_DEVELOPER_LIBRARY_DIR"/*Frameworks/{XC,StoreKit}* "$PLATFORM_DEVELOPER_USR_DIR/lib"/*.dylib "$CODESIGNING_FOLDER_PATH/Frameworks/" &&
     codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks"/{XC*,StoreKit*,*.dylib} ||
