@@ -75,6 +75,8 @@
 		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
 		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
+		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
+		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -192,6 +194,8 @@
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
 		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
+		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
+		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
 		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Experimental.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -240,6 +244,8 @@
 			isa = PBXGroup;
 			children = (
 				BB037DF41FAD80D0004B267C /* LICENSE */,
+				BBF6572D2DAFF00200638170 /* QUICK.md */,
+				BBF6572C2DAFF00200638170 /* NIMBLE.md */,
 				BB037DF31FAD808B004B267C /* README.md */,
 				BBCA01FF1FB0F10300E45F0F /* InjectionNext */,
 				BBDD84172C4FE79E000F3124 /* InjectionBundle */,
@@ -487,6 +493,8 @@
 				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
 				BBCA02591FB112F500E45F0F /* App.icns in Resources */,
 				BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */,
+				BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */,
+				BBF6572F2DAFF00200638170 /* QUICK.md in Resources */,
 				BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */,
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
 				222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */,

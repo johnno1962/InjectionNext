@@ -13,16 +13,32 @@ that should be faster and more reliable for very large projects. With versions
 1.3.0+ the only changes that are required to your project are to add the 
 following "Other Linker Flags" to your project's **Debug** build settings:
 
+The basic M.O. is to download one of the binary releases in this repo (or build 
+the app in the `App` directory), move it to /Applications, quit Xcode and run the
+resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
+`Launch Xcode` from the status bar. You then add this repo as a Swift package 
+dependency of your project and that should be all that is required for injection 
+in the simulator, injection on devices and injection of a MacOS app. No more 
+code changes required to load binary code bundles etc and you can leave 
+the InjectionNext package configured into your project permanently as
+its code is only included for a DEBUG build. Your code changes take effect
+when you save a source for an app that has this package as a dependency
+and has connected to the InjectIonNext app which has launched Xcode.
+
+As ever, it is important to add the options `-Xlinker` and `-interposable` 
+(without double quotes and on separate lines) to the "Other Linker Flags" of 
+the targets of your project (for the `Debug` configuration only) to enable 
+"interposing". Otherwise, you will only be able to inject non-final class methods.
+To inject SwiftUI sucessfully a couple of minor code changes to each View are 
+required. Consult the https://github.com/johnno1962/HotSwiftUI README or you
+can make these changes automatically using the menu item "Prepare SwiftUI/".
+
 ![Icon](App/interposable.png)
 
-That last flag is to link what were bundles in InjectionIII as a dynamic library:
-
-`/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
-
-If you want to inject on a device you'll also need to add the following
-as a "Run Script/Build Phase" of your main target to copy the required
-libraries into your app bundle (for a Debug build) and toggle "Enable Devices"
-to open a network port for incoming connections from your client app.
+If you'd rather not be adding a SPM dependency to your project, the app's
+resources contains pre-built bundles which you can copy into your app during
+the build by using a "Run Script/Build Phase" (while disabling the "user 
+script sandboxing" build setting) such as the following:
 
 ```
 export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
@@ -30,28 +46,28 @@ if [ -f "$RESOURCES/copy_bundle.sh" ]; then
     "$RESOURCES/copy_bundle.sh"
 fi
 ```
-The basic MO is download one of the binary releases in this repo (or build 
-the app in the `App` directory), move it /Applications, quit Xcode and run 
-`InjectionNext.app` and use that to re-launch an Xcode using the menu item 
-`Launch Xcode` from the status bar. No other code changes should be required 
-to load binary code bundles etc in the simulator. When your app connects,
-code changes should take effect when you save a source file. 
+These bundles should load automatically if you've integrated the
+[Inject](https://github.com/krzysztofzablocki/Inject) or
+[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
+Otherwise, you can add the following code to run on startup of your app:
 
-As an alternative to linking directly with the .dylib and altering your
-build you can add this package as an SPM dependency of your project or 
-load one of the pre-built "bundles" copied into your app package when using 
-the `copy_bundle.sh` `Build Phase` and include this code on start-up.
-
-```swift
-#if DEBUG
-if let path = Bundle.main.path(forResource:
-        "iOSInjection", ofType: "bundle") ??
-    Bundle.main.path(forResource:
-        "macOSInjection", ofType: "bundle") {
-    Bundle(path: path)!.load()
-}
-#endif
 ```
+    #if DEBUG
+    if let path = Bundle.main.path(forResource:
+            "iOSInjection", ofType: "bundle") ??
+        Bundle.main.path(forResource:
+            "macOSInjection", ofType: "bundle") {
+        Bundle(path: path)!.load()
+    }
+    #endif
+```
+The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
+and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
+testing framework to inhibit spec caching under their respective Apache licences.
+
+An alternative to loading a bundle is to add the following "Other Linker Flag"
+
+`/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
 
 **Please note:** you can only inject changes to code inside a function body
 and you can not add/remove or rename properties with storage or add or 
