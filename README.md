@@ -30,13 +30,28 @@ if [ -f "$RESOURCES/copy_bundle.sh" ]; then
     "$RESOURCES/copy_bundle.sh"
 fi
 ```
-The basic MO is to build the app in the `App` directory, or download one of 
-the binary releases in this repo, move it /Applications, quit Xcode and run the
-resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
-`Launch Xcode` from the status bar. No more code changes required to load binary 
-code bundles etc. Your code changes take effect
-when you save a source for an app that has this package as a dependency
-and has connected to the InjectionNext app which has launched Xcode.
+The basic MO is download one of the binary releases in this repo (or build 
+the app in the `App` directory), move it /Applications, quit Xcode and run 
+`InjectionNext.app` and use that to re-launch an Xcode using the menu item 
+`Launch Xcode` from the status bar. No other code changes should be required 
+to load binary code bundles etc in the simulator. When your app connects,
+code changes should take effect when you save a source file. 
+
+As an alternative to linking directly with the .dylib and altering your
+build you can add this package as an SPM dependency of your project or 
+load one of the pre-built "bundles" copied into your app package when using 
+the `copy_bundle.sh` `Build Phase` and include this code on start-up.
+
+```swift
+#if DEBUG
+if let path = Bundle.main.path(forResource:
+        "iOSInjection", ofType: "bundle") ??
+    Bundle.main.path(forResource:
+        "macOSInjection", ofType: "bundle") {
+    Bundle(path: path)!.load()
+}
+#endif
+```
 
 **Please note:** you can only inject changes to code inside a function body
 and you can not add/remove or rename properties with storage or add or 
@@ -68,15 +83,15 @@ The colours of the menu bar icon bar correspond to:
 * Green while it is recompiling a saved source.
 * Yellow if the source has failed to compile.
 
-The binary dylibs also integrate [Nimble](https://github.com/Quick/Nimble)
+The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
 and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
 testing framework to inhibit spec caching under their respective Apache licences.
 
 To inject tests on a device: when enabling the
 "Enable Devices" menu item, select "Enable testing on device" which 
-will add the arguments shown to the link of each dynamic library. 
-As you do this, the command above will be inserted into the clipboard 
-which you should add to your project as a "Run Script" "Build Phase" 
+will add the arguments shown to the link of each dynamic library. As you 
+do this, the command mentioned above will be inserted into the clipboard 
+which you should paste into your project as a "Run Script" "Build Phase" 
 of the main target to copy the required libraries into the app bundle.
 
 ### Cursor/VSCode mode.
