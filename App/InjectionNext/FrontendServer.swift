@@ -13,6 +13,168 @@
 import Cocoa
 import Popen
 
+class FrontendServer: SimpleSocket {
+    enum State: String {
+        case unpatched = "Intercept Compiler"
+        case patched = "Unpatch Compiler"
+    }
+
+    /// Paths to unpatched/patched swift-frontend binary/script in toolchain.
+    static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
+        "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
+    static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
+    static var patched: String { unpatchedURL.path + ".save" }
+    static var patchedURL: URL { URL(fileURLWithPath: patched) }
+    /// Path to swift-frontend  last logged.
+    static var loggedFrontend: String?
+    /// Start server for command logging.
+    static var startOnce: Void = {
+        FrontendServer.startServer(COMMANDS_PORT)
+    }()
+
+    static var clientPlatform: String {
+        InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
+    static func cacheURL(platform: String) -> URL {
+        return URL(fileURLWithPath: "/tmp/\(platform)_commands.json")
+    }
+    static private var recompilers = [String: NextCompiler]()
+    static func frontendRecompiler(platform: String = clientPlatform) -> NextCompiler {
+        if let recompiler = recompilers[platform] {
+            return recompiler
+        }
+        let recompiler = NextCompiler()
+        do {
+            let compressed = cacheURL(platform: platform).path+".gz"
+            if Fstat(path: compressed)?.st_size ?? 0 != 0,
+               let stream = Popen(cmd: "gunzip <"+compressed)?.readAll(),
+               let cached = stream.data(using: .utf8) {
+                let stored = try JSONDecoder().decode(
+                    [String: NextCompiler.Compilation].self, from: cached)
+                for source in stored.keys.sorted() {
+                    guard let compile = stored[source] else { continue }
+                    recompiler.store(compilation: compile, for: source)
+                }
+                print("Loaded \(recompiler.compilations.count) cached commands")
+            }
+        } catch {
+            InjectionServer.error("Unable to read commands cache: \(error).")
+        }
+        recompilers[platform] = recompiler
+        return recompiler
+    }
+    static func writeCache(platform: String = clientPlatform) {
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let cache = cacheURL(platform: platform)
+            let commands = frontendRecompiler(platform: platform).compilations
+            try encoder.encode(commands).write(to: cache, options: .atomic)
+            if let error = Popen.system("gzip -f "+cache.path, errors: true) {
+                InjectionServer.error("Unable to zip commands cache: \(error)")
+            } else {
+                print("Cached \(commands.count) \(platform) commands")
+            }
+        } catch {
+            InjectionServer.error("Unable to write commands cache: \(error)")
+        }
+    }
+
+    func validateConnection() -> Bool {
+        return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
+    }
+
+    override func runInBackground() {
+        guard validateConnection() && readString() == "1.0" else {
+            return _ = Self.frontendRecompiler()
+                .error("Unpatch then repatch compiler to update script version")
+        }
+        do {
+            try Self.processFrontendCommandFrom(feed: self)
+        } catch {
+            Self.error("Feed error: \(error)")
+        }
+    }
+    
+    class func processFrontendCommandFrom(feed: SimpleSocket) throws {
+        guard let projectRoot = feed.readString(),
+              let frontendPath = feed.readString(),
+              frontendPath.hasSuffix(".save"),
+              feed.readString() == "-frontend" &&
+                feed.readString() == "-c" else { return }
+
+        var swiftFiles = "", args = [String](), primaries = [String](),
+            platform = "iPhoneSimulator"
+
+        while let arg = feed.readString() {
+            switch arg {
+            case "-filelist":
+                guard let filelist = feed.readString() else { return }
+                let files = try String(contentsOfFile: filelist,
+                                       encoding: .utf8)
+                swiftFiles += files
+            case "-primary-file":
+                guard let source = feed.readString() else { return }
+                primaries.append(source)
+                if !swiftFiles.contains(source) {
+                    swiftFiles += source+"\n"
+                }
+            case "-o":
+                _ = feed.readString()
+            default:
+                if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
+                    platform = sdkPlatform
+                }
+                if arg.hasSuffix(".swift") && args.last != "-F" {
+                    swiftFiles += arg+"\n"
+                } else if arg[Reloader.optionsToRemove] {
+                    _ = feed.readString()
+                } else if !(arg == "-F" && args.last == "-F") && !arg[
+                    "-validate-clang-modules-once|-frontend-parseable-output"] {
+                    args.append(arg)
+                }
+            }
+        }
+
+        DispatchQueue.main.async {
+            if !projectRoot.hasSuffix(".xcodeproj") &&
+//                MonitorXcode.runningXcode == nil &&
+                AppDelegate.alreadyWatching(projectRoot) == nil {
+                let open = NSOpenPanel()
+//                open.titleVisibility = .visible
+//                open.title = "InjectionNext: add directory"
+                open.prompt = "InjectionNext - Watch Directory?"
+                open.directoryURL = URL(fileURLWithPath: projectRoot)
+                open.canChooseDirectories = true
+                open.canChooseFiles = false
+                if open.runModal() == .OK, let url = open.url {
+                    AppDelegate.ui.watch(path: url.path)
+                }
+            }
+        }
+
+        NextCompiler.compileQueue.async {
+            let recompiler = Self.frontendRecompiler(platform: platform)
+            Self.loggedFrontend = frontendPath
+
+            for source in primaries {
+                #if !INJECTION_III_APP
+                // Don't update compilations while connected
+                if InjectionServer.currentClient != nil &&
+                    recompiler.compilations.index(forKey: source) != nil {
+                    continue
+                }
+                #endif
+
+                print("Updating \(args.count) args for \(platform)/" +
+                      URL(fileURLWithPath: source).lastPathComponent)
+                let update = NextCompiler.Compilation(arguments: args,
+                      swiftFiles: swiftFiles, workingDir: projectRoot)
+                recompiler.store(compilation: update, for: source)
+            }
+        }
+    }
+}
+
 extension AppDelegate {
 
     @IBAction func patchCompiler(_ sender: NSMenuItem) {
@@ -83,179 +245,122 @@ extension AppDelegate {
         }
         return state
     }
-}
 
-extension JSONDecoder {
-    func decode<T: Decodable>(from: Data) throws -> T {
-        return try decode(T.self, from: from)
-    }
-}
-
-class FrontendServer: SimpleSocket {
-    enum State: String {
-        case unpatched = "Intercept Compiler"
-        case patched = "Unpatch Compiler"
-    }
-
-    static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
-        "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
-    static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
-    static var patched: String { unpatchedURL.path + ".save" }
-    static var patchedURL: URL { URL(fileURLWithPath: patched) }
-    static var loggedFrontend: String?, lastInjected: String?
-    static var startOnce: Void = {
-        FrontendServer.startServer(COMMANDS_PORT)
-    }()
-
-    static var clientPlatform: String {
-        InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
-    static func cacheURL(platform: String) -> URL {
-        return URL(fileURLWithPath: "/tmp/\(platform)_commands.json")
-    }
-    static private var recompilers = [String: NextCompiler]()
-    static func frontendRecompiler(platform: String = clientPlatform) -> NextCompiler {
-        if let recompiler = recompilers[platform] {
-            return recompiler
+    /// Shared regular expresssions to patch .enableInjection() and @ObserveInject into a source
+    func prepareSwiftUI(source: String, changes: UnsafeMutablePointer<Int>? = nil) {
+        let fileURL = URL(fileURLWithPath: source)
+        guard let original = try? String(contentsOf: fileURL) else {
+            return
         }
-        let recompiler = NextCompiler()
-        do {
-            let compressed = cacheURL(platform: platform).path+".gz"
-            if Fstat(path: compressed)?.st_size ?? 0 != 0,
-               let stream = Popen(cmd: "gunzip <"+compressed)?.readAll(),
-               let cached = stream.data(using: .utf8) {
-                recompiler.compilations = try JSONDecoder().decode(from: cached)
-                print("Loaded \(recompiler.compilations.count) cached commands")
+
+        var patched = original, before = changes?.pointee
+        patched[#"""
+            ^((\s+)(public )?(var body:|func body\([^)]*\) -\>) some View \{\n\#
+            (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|(\s*|#.+)\n)+)(?<!#endif\n)\2\}\n
+            """#.anchorsMatchLines, count: changes] = """
+            $1$2    .enableInjection()
+            $2}
+
+            $2#if DEBUG
+            $2@ObserveInjection var forceRedraw
+            $2#endif
+
+            """
+        if changes?.pointee != before {
+            print("Patched", source)
+        }
+
+        if (patched.contains("class AppDelegate") ||
+            patched.contains("@main\n")) &&
+            !patched.contains("InjectionObserver") {
+            if !patched.contains("import SwiftUI") {
+                patched += "\nimport SwiftUI\n"
             }
-        } catch {
-            InjectionServer.error("Unable to read commands cache: \(error).")
-        }
-        recompilers[platform] = recompiler
-        return recompiler
-    }
-    static func writeCache(platform: String = clientPlatform) {
-        do {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
-            let cache = cacheURL(platform: platform)
-            let commands = frontendRecompiler(platform: platform).compilations
-            try encoder.encode(commands).write(to: cache, options: .atomic)
-            if let error = Popen.system("gzip -f "+cache.path, errors: true) {
-                InjectionServer.error("Unable to zip commands cache: \(error)")
-            } else {
-                print("Cached \(commands.count) \(platform) commands")
-            }
-        } catch {
-            InjectionServer.error("Unable to write commands cache: \(error)")
-        }
-    }
 
-    static var lastFilelist: String?, lastArguments: [String]?
+            patched += """
 
-    func validateConnection() -> Bool {
-        return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
-    }
+                #if canImport(HotSwiftUI)
+                @_exported import HotSwiftUI
+                #elseif canImport(Inject)
+                @_exported import Inject
+                #else
+                // This code can be found in the Swift package:
+                // https://github.com/johnno1962/HotSwiftUI or
+                // https://github.com/krzysztofzablocki/Inject
 
-    override func runInBackground() {
-        guard validateConnection() && readString() == "1.0" else {
-            return _ = Self.frontendRecompiler()
-                .error("Unpatch then repatch compiler to update script version")
-        }
-        do {
-            try Self.processFrontendCommandFrom(feed: self)
-        } catch {
-            Self.error("Feed error: \(error)")
-        }
-    }
-    
-    class func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        guard let projectRoot = feed.readString(),
-              let frontendPath = feed.readString(),
-              frontendPath.hasSuffix(".save"),
-              feed.readString() == "-frontend" &&
-                feed.readString() == "-c" else { return }
+                #if DEBUG
+                import Combine
 
-        var swiftFiles = "", args = [String](), primaries = [String](),
-            platform = "iPhoneSimulator"
-
-        while let arg = feed.readString() {
-            switch arg {
-            case "-filelist":
-                guard let filelist = feed.readString() else { return }
-                let files = try String(contentsOfFile: filelist,
-                                       encoding: .utf8)
-                swiftFiles += files
-            case "-primary-file":
-                guard let source = feed.readString() else { return }
-                primaries.append(source)
-                if !swiftFiles.contains(source) {
-                    swiftFiles += source+"\n"
+                public class InjectionObserver: ObservableObject {
+                    public static let shared = InjectionObserver()
+                    @Published var injectionNumber = 0
+                    var cancellable: AnyCancellable? = nil
+                    let publisher = PassthroughSubject<Void, Never>()
+                    init() {
+                        cancellable = NotificationCenter.default.publisher(for:
+                            Notification.Name("INJECTION_BUNDLE_NOTIFICATION"))
+                            .sink { [weak self] change in
+                            self?.injectionNumber += 1
+                            self?.publisher.send()
+                        }
+                    }
                 }
-            case "-o":
-                _ = feed.readString()
-            default:
-                if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
-                    platform = sdkPlatform
-                }
-                if arg.hasSuffix(".swift") && args.last != "-F" {
-                    swiftFiles += arg+"\n"
-                } else if arg[Reloader.optionsToRemove] {
-                    _ = feed.readString()
-                } else if !(arg == "-F" && args.last == "-F") && !arg[
-                    "-validate-clang-modules-once|-frontend-parseable-output"] {
-                    args.append(arg)
-                }
-            }
-        }
 
-        DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") &&
-                AppDelegate.alreadyWatching(projectRoot) == nil {
-                let open = NSOpenPanel()
-//                open.titleVisibility = .visible
-//                open.title = "InjectionNext: add directory"
-                open.prompt = "InjectionNext - Watch Directory?"
-                open.directoryURL = URL(fileURLWithPath: projectRoot)
-                open.canChooseDirectories = true
-                open.canChooseFiles = false
-                if open.runModal() == .OK, let url = open.url {
-                    AppDelegate.ui.watch(path: url.path)
+                extension SwiftUI.View {
+                    public func eraseToAnyView() -> some SwiftUI.View {
+                        return AnyView(self)
+                    }
+                    public func enableInjection() -> some SwiftUI.View {
+                        return eraseToAnyView()
+                    }
+                    public func onInjection(bumpState: @escaping () -> ()) -> some SwiftUI.View {
+                        return self
+                            .onReceive(InjectionObserver.shared.publisher, perform: bumpState)
+                            .eraseToAnyView()
+                    }
                 }
-            }
-        }
 
-        NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
-            Self.loggedFrontend = frontendPath
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+                @propertyWrapper
+                public struct ObserveInjection: DynamicProperty {
+                    @ObservedObject private var iO = InjectionObserver.shared
+                    public init() {}
+                    public private(set) var wrappedValue: Int {
+                        get {0} set {}
+                    }
+                }
+                #else
+                extension SwiftUI.View {
+                    @inline(__always)
+                    public func eraseToAnyView() -> some SwiftUI.View { return self }
+                    @inline(__always)
+                    public func enableInjection() -> some SwiftUI.View { return self }
+                    @inline(__always)
+                    public func onInjection(bumpState: @escaping () -> ()) -> some SwiftUI.View {
+                        return self
+                    }
+                }
 
-            for source in primaries {
-                #if !INJECTION_III_APP
-                // Don't update compilations while connected
-                if InjectionServer.currentClient != nil &&
-                    recompiler.compilations.index(forKey: source) != nil {
-                    continue
+                @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+                @propertyWrapper
+                public struct ObserveInjection {
+                    public init() {}
+                    public private(set) var wrappedValue: Int {
+                        get {0} set {}
+                    }
                 }
                 #endif
+                #endif
 
-                // Try to minimise memory churn
-                if let previous = recompiler
-                    .compilations[source]?.arguments ?? Self.lastArguments,
-                   args == previous {
-                    args = previous
-                } else {
-                    Self.lastArguments = args
-                }
-                if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? Self.lastFilelist,
-                   swiftFiles == previous {
-                    swiftFiles = previous
-                }
-                Self.lastFilelist = swiftFiles
+                """
+        }
 
-                print("Updating \(args.count) args for \(platform)/" +
-                      URL(fileURLWithPath: source).lastPathComponent)
-                let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: projectRoot)
-                recompiler.store(compilation: update, for: source)
+        if patched != original {
+            do {
+                try patched.write(to: fileURL,
+                                  atomically: false, encoding: .utf8)
+            } catch {
+                InjectionServer.error("Could not save \(source): \(error)")
             }
         }
     }

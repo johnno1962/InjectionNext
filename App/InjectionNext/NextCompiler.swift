@@ -32,19 +32,19 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
 class NextCompiler {
 
     /// Information required to call the compiler for a file.
-    struct Compilation: Codable {
+    struct Compilation: Codable, Hashable {
         /// Sundry arguments to the compiler
         let arguments: [String]
         /// Swift files in the target ready to be written as a -filelist
-        var swiftFiles: String
-        /// Directory to run compiler in (not usually important)
-        var workingDir: String
+        let swiftFiles: String
+        /// Directory to run compiler in (not important for Swift)
+        let workingDir: String
     }
 
     /// Queue for one compilation at a time.
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
-    static var lastError: String?
+    static var lastError: String?, lastSource: String?
 
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
@@ -52,6 +52,8 @@ class NextCompiler {
     var pendingSource: String?
     /// Information for compiling a file per source file.
     var compilations = [String: Compilation]()
+    /// Trying to avoid fragmenting memory
+    var lastCompilation: Compilation?
     /// Last Injected
     var lastInjected = [String: TimeInterval]()
     /// Previous dynamic libraries prepared by source file
@@ -70,13 +72,14 @@ class NextCompiler {
     }
     
     func store(compilation: Compilation, for source: String) {
-        Self.compileQueue.async {
-            self.compilations[source] = compilation
-            if source == self.pendingSource {
-                print("Delayed injection of "+source)
-                if self.inject(source: source) {
-                    self.pendingSource = nil
-                }
+        if lastCompilation != compilation {
+            lastCompilation = compilation
+        } //else { print("reusing") }
+        compilations[source] = lastCompilation
+        if source == pendingSource {
+            print("Delayed injection of "+source)
+            if inject(source: source) {
+                pendingSource = nil
             }
         }
     }
@@ -150,6 +153,7 @@ class NextCompiler {
                     }
                     unsupported(source: source, dylib: dylib, client: client)
                 }
+                Self.lastSource = source
                 return true
             }
         } catch {

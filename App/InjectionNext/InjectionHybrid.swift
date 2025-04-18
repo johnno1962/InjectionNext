@@ -51,51 +51,44 @@ extension AppDelegate {
 }
 
 class InjectionHybrid: InjectionBase {
-    static var pendingInjections = [String]()
+    static var pendingFilesChanged = [String]()
     /// InjectionNext compiler that uses InjectionLite log parser
-    var liteRecompiler = HybridCompiler()
+    var liteRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        var recompiler: NextCompiler = liteRecompiler
-        if source.hasSuffix(".swift") &&
-            AppDelegate.ui.updatePatchUnpatch() == .patched {
-            recompiler = FrontendServer.frontendRecompiler()
-            FrontendServer.lastInjected = source
-        }
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
                 .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
-        Self.pendingInjections.append(source)
-        NextCompiler.compileQueue.async {
-            self.injectNext(fallback: recompiler)
-        }
+        Self.pendingFilesChanged.append(source)
+        NextCompiler.compileQueue.async { self.injectNext() }
     }
 
-    func injectNext(fallback: NextCompiler) {
-        guard let source = DispatchQueue.main.sync(execute: { () -> String? in
-            guard let source = Self.pendingInjections.first else { return nil }
-            Self.pendingInjections.removeFirst()
-            if !Self.pendingInjections.isEmpty {
-                NextCompiler.compileQueue.async {
-                    self.injectNext(fallback: fallback)
-                }
+    func injectNext() {
+        guard let source = (DispatchQueue.main.sync { () -> String? in
+            if Self.pendingFilesChanged.isEmpty { return nil }
+            let source = Self.pendingFilesChanged.removeFirst()
+            if !Self.pendingFilesChanged.isEmpty {
+                NextCompiler.compileQueue.async { self.injectNext() }
             }
             return source
         }) else { return }
 
-        guard let running = MonitorXcode.runningXcode,
-              running.recompiler.inject(source: source) else {
-            if !fallback.inject(source: source) {
-                fallback.pendingSource = source
-            } else if FrontendServer.loggedFrontend != nil {
-                FrontendServer.writeCache()
-            }
-            return
+        if let running = MonitorXcode.runningXcode,
+           running.recompiler.inject(source: source) { return }
+
+        var recompiler = liteRecompiler
+        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
+            recompiler = FrontendServer.frontendRecompiler()
+        }
+        if !recompiler.inject(source: source) {
+            recompiler.pendingSource = source
+        } else if !(recompiler === liteRecompiler) {
+            FrontendServer.writeCache()
         }
     }
 }

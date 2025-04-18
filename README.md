@@ -5,24 +5,46 @@
 Using a feature of Apple's linker this implementation of Code Injection
 allows you to update the implementation (i.e. body) of functions in your
 app without having to relaunch it. This can save a developer a significant
-amount of time tweaking code or iterating over a design.
-
-This repo is a refresh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
+amount of time tweaking code or iterating over a design. This repo is a 
+refresh of the [InjectionIII](https://github.com/johnno1962/InjectionIII)
 app that uses different techniques to determine how to rebuild source files
-that should be faster and more reliable for very large projects. With versions 
-1.3.0+ the only changes that are required to your project are to add the 
-following "Other Linker Flags" to your project's **Debug** build settings:
+that should be faster and more reliable for very large projects.
+
+The basic M.O. is to download one of the binary releases in this repo (or build 
+the app in the `App` directory), move it to /Applications, quit Xcode and run the
+`InjectionNext.app` and use that to re-launch Xcode using the menu item 
+`Launch Xcode` from the status bar. You then add this repo as a Swift package 
+dependency of your project and that should be all that is required for injection 
+in the simulator, injection on devices and injection of a MacOS app. No more 
+code changes required to load binary code bundles etc and you can leave 
+the InjectionNext package configured into your project permanently as
+its code is only included for a DEBUG build. Your code changes take effect
+when you save a source for an app that has this package as a dependency
+and has connected to the InjectIonNext app which has launched Xcode.
+
+As ever, it is important to add the options `-Xlinker` and `-interposable` 
+(without double quotes and on separate lines) to the "Other Linker Flags" of 
+the targets of your project (for the `Debug` configuration only) to enable 
+function "interposing". Otherwise, you will only be able to inject non-final
+class methods.
 
 ![Icon](App/interposable.png)
 
-That last flag is to link what were bundles in InjectionIII as a dynamic library:
+**Please note:** you can only inject changes to code inside a function body
+and you cannot add/remove or rename properties with storage or add or 
+reorder methods in a non final class or change function signatures.
 
-`/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
+To inject SwiftUI sucessfully a couple of minor code changes to each View are 
+required. Consult the README of repo https://github.com/johnno1962/HotSwiftUI
+or you can make the required changes automatically using the menu item
+"Prepare SwiftUI/...". For SwiftUI you would generally also integrate
+either the [Inject](https://github.com/krzysztofzablocki/Inject) or
+[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) package into your project. 
 
-If you want to inject on a device you'll also need to add the following
-as a "Run Script/Build Phase" of your main target to copy the required
-libraries into your app bundle (for a Debug build) and toggle "Enable Devices"
-to open a network port for incoming connections from your client app.
+If you'd rather not be adding a SPM dependency to your project, the app's
+resources contains pre-built bundles which you can copy into your app during
+the build by using a "Run Script/Build Phase" (while disabling the "user 
+script sandboxing" build setting) such as the following:
 
 ```
 export RESOURCES="/Applications/InjectionNext.app/Contents/Resources"
@@ -30,24 +52,28 @@ if [ -f "$RESOURCES/copy_bundle.sh" ]; then
     "$RESOURCES/copy_bundle.sh"
 fi
 ```
-The basic MO is to build the app in the `App` directory, or download one of 
-the binary releases in this repo, move it /Applications, quit Xcode and run the
-resulting `InjectionNext.app` and use that to re-launch Xcode using the menu item 
-`Launch Xcode` from the status bar. No more code changes required to load binary 
-code bundles etc. Your code changes take effect
-when you save a source for an app that has this package as a dependency
-and has connected to the InjectionNext app which has launched Xcode.
-
-**Please note:** you can only inject changes to code inside a function body
-and you can not add/remove or rename properties with storage or add or 
-reorder methods in a non final class or change function signatures.
-
-To inject SwiftUI sucessfully a couple of minor code changes to each View are 
-required. Consult the https://github.com/johnno1962/HotSwiftUI README or you
-can make these changes automatically using the menu item "Prepare SwiftUI/".
-For SwiftUI you would also generally also integrate either the
+These bundles should load automatically if you've integrated the
 [Inject](https://github.com/krzysztofzablocki/Inject) or
-[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) package into your project. 
+[HotSwiftUI](https://github.com/johnno1962/HotSwiftUI) packages into your project. 
+Otherwise, you can add the following code to run at startup of your app:
+
+```
+    #if DEBUG
+    if let path = Bundle.main.path(forResource:
+            "iOSInjection", ofType: "bundle") ??
+        Bundle.main.path(forResource:
+            "macOSInjection", ofType: "bundle") {
+        Bundle(path: path)!.load()
+    }
+    #endif
+```
+The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
+and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
+testing framework to inhibit spec caching under their respective Apache licences.
+
+An alternative to loading a bundle is to add the following additional "Other Linker Flag":
+
+`/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
 
 When your app runs it should connect to the `InjectionNext.app` and it's icon
 change to orange. After that, by parsing the messages from the "supervised"
@@ -68,15 +94,11 @@ The colours of the menu bar icon bar correspond to:
 * Green while it is recompiling a saved source.
 * Yellow if the source has failed to compile.
 
-The binary dylibs also integrate [Nimble](https://github.com/Quick/Nimble)
-and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
-testing framework to inhibit spec caching under their respective Apache licences.
-
-To inject tests on a device: when enabling the
-"Enable Devices" menu item, select "Enable testing on device" which 
-will add the arguments shown to the link of each dynamic library. 
-As you do this, the command above will be inserted into the clipboard 
-which you should add to your project as a "Run Script" "Build Phase" 
+To inject tests on a device: when enabling the "Enable Devices"
+menu item, if you select "Enable testing on device", the arguments
+shown will be added to the link of each dynamic library. As you 
+do this, the command mentioned above will be inserted into the clipboard 
+which you should paste into your project as a "Run Script" "Build Phase" 
 of the main target to copy the required libraries into the app bundle.
 
 ### Cursor/VSCode mode.
@@ -104,11 +126,10 @@ patch has been applied you don't need to launch Xcode from the app and you can
 inject by starting a file watcher using the "...or Watch Project" menu item
 (though this should happen automatically when you recompile Swift sources).
 
-So, InjectionNext has three ways in which it can operate of which the newest and 
-the simplest one if you're prepared to patch your toolchain is the "proxy" mode.
-The original mode of operation launching Xcode inside the app takes preference 
-and, if you have selected a file watcher and are intercepting the compiler
-commands that is the next preference followed by the log parsing fallback using
+So, InjectionNext now has three ways which it can operate. The original mode 
+of operation launching Xcode inside the app takes precedence and, if you have
+selected a file watcher and are intercepting the compiler commands this "proxy
+mode" is the next preference followed by the log parsing fallback using
 the [InjectionLite](https://github.com/johnno1962/InjectionLite) package which 
 essentially works as InjectionIII did when the logs are available.
 

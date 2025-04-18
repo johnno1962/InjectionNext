@@ -21,8 +21,6 @@ class MonitorXcode {
 
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
-    // Trying to avoid fragmenting memory
-    var lastFilelist: String?, lastArguments: [String]?, lastSource: String?
     // The service to recompile and inject a source file.
     var recompiler = NextCompiler()
 
@@ -196,28 +194,14 @@ class MonitorXcode {
                       !source.contains("\\n") else {
                     continue
                 }
-                lastSource = source
-
-                if let previous = recompiler
-                    .compilations[source]?.arguments ?? lastArguments,
-                    args == previous {
-                    args = previous
-                } else {
-                    lastArguments = args
-                }
-                if let previous = recompiler
-                    .compilations[source]?.swiftFiles ?? lastFilelist,
-                    swiftFiles == previous {
-                    swiftFiles = previous
-                } else {
-                    lastFilelist = swiftFiles
-                }
 
                 print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
                 let update = NextCompiler.Compilation(arguments: args,
                     swiftFiles: swiftFiles, workingDir: workingDir)
  
-                recompiler.store(compilation: update, for: source)
+                NextCompiler.compileQueue.async {
+                    self.recompiler.store(compilation: update, for: source)
+                }
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
