@@ -215,7 +215,7 @@ class NextCompiler {
         let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
-             "-warn-long-expression-type-checking=150",
+             Reloader.typeCheckLimit,
              "-external-plugin-path",
              platformUsr+"lib/swift/host/plugins#" +
              platformUsr+"bin/swift-plugin-server",
@@ -232,8 +232,7 @@ class NextCompiler {
                cd: stored.workingDir)
         var errors = ""
         while let line = compile.readLine() {
-            if let slow: String = line[
-                #"(?<=/)\w+\.swift:\d+:\d+: warning: expression took \d+ms to type-check.*"#] {
+            if let slow: String = line[Reloader.typeCheckRegex] {
                 log(slow)
             }
             errors += line+"\n"

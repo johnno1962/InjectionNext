@@ -52,3 +52,12 @@
 - (BOOL)recvFile:(NSString *_Nonnull)path;
 
 @end
+
+@interface SimpleService: SimpleSocket
+typedef void (^_Nonnull SimpleCallback)(int socket);
++ (void)startServer:(NSString *_Nonnull)address callback:(SimpleCallback)callback;
+@end
+
+@interface SimpleHTTP: SimpleService
++ (void)startServer:(NSString *_Nonnull)address callback:(NSData *_Nullable (^_Nonnull)(char *_Nonnull header))callback;
+@end

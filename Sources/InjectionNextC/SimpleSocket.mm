@@ -521,4 +521,55 @@ struct multicast_socket_packet {
 }
 
 @end
+
+@implementation SimpleService
+
+static NSMutableDictionary<NSString *,SimpleCallback> *callbacks;
+
++ (void)startServer:(NSString *_Nonnull)address callback:(SimpleCallback)callback {
+    if (!callbacks)
+        callbacks = [NSMutableDictionary new];
+    callbacks[address] = callback;
+    [super startServer:address];
+}
+
+- (void)runInBackground {
+    sockaddr_union addr;
+    socklen_t len = sizeof addr;
+    if (getsockname(clientSocket, &addr.addr, &len) < 0)
+        [[self class] error:@"getsockname failed %s"];
+
+    NSString *address = [NSString stringWithFormat:@"*:%d", ntohs(addr.ip4.sin_port)];
+    if (SimpleCallback callback = callbacks[address])
+        callback(clientSocket);
+    else
+        [[self class] error:@"Missing callback"];
+}
+@end
+
+@implementation SimpleHTTP
++ (void)startServer:(NSString *_Nonnull)address callback:(NSData *_Nullable (^_Nonnull)(char *_Nonnull header))callback {
+    [super startServer:address callback:^(int socket) {
+        FILE *stream = fdopen(socket, "r+");
+        size_t bsize = 1000, length;
+        char *header = (char *)malloc(bsize), *hptr = header;
+
+        while ((length = strlen(fgets(hptr, (int)(bsize - (hptr-header)),
+                    stream)?:"")) > 2 || (length && strcmp(hptr-2, "\r\n\r\n")))
+            if ((hptr += length)-header == bsize-1) {
+                char *newbuff = (char *)realloc(header, bsize *= 2);
+                hptr = newbuff + (hptr - header);
+                header = newbuff;
+            }
+
+        NSData *body = callback(header) ?: [NSData new];
+
+        fprintf(stream, "HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n"
+                "Content-Length: %ld\r\n\r\n", body.length);
+        fwrite(body.bytes, body.length, 1, stream);
+        fclose(stream);
+        free(header);
+    }];
+}
+@end
 #endif
