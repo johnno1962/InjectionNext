@@ -25,7 +25,9 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
-    InjectionServer.currentClient?.sendCommand(.log, with: msg)
+    for client in InjectionServer.currentClients {
+        client?.sendCommand(.log, with: msg)
+    }
     return true
 }
 
@@ -84,9 +86,8 @@ class NextCompiler {
         }
     }
 
-    func prepare(source: String)
+    func prepare(source: String, connected: InjectionServer?)
         -> (dylib: String, dylibName: String, platform: String, Bool)? {
-                let connected = InjectionServer.currentClient
                 connected?.injectionNumber += 1
                 AppDelegate.ui.setMenuIcon(.busy)
                 compileNumber += 1
@@ -128,15 +129,16 @@ class NextCompiler {
     func inject(source: String) -> Bool {
         do {
             return try Fortify.protect { () -> Bool in
+                for client in InjectionServer.currentClients {
                 guard let (dylib, dylibName, platform, useFilesystem)
-                        = prepare(source: source),
+                        = prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     AppDelegate.ui.setMenuIcon(.error)
                     return error("Injection failed. Was your app connected?")
                 }
 
                 InjectionServer.clientQueue.sync {
-                    guard let client = InjectionServer.currentClient else {
+                    guard let client = client else {
                         AppDelegate.ui.setMenuIcon(.ready)
                         return
                     }
@@ -152,6 +154,7 @@ class NextCompiler {
                         client.write(data)
                     }
                     unsupported(source: source, dylib: dylib, client: client)
+                }
                 }
                 Self.lastSource = source
                 return true

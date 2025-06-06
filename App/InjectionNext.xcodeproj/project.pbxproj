@@ -1048,7 +1048,7 @@
 			repositoryURL = "https://github.com/johnno1962/Popen";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.7;
+				minimumVersion = 2.1.8;
 			};
 		};
 		BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */ = {
