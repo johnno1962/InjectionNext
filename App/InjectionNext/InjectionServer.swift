@@ -19,10 +19,16 @@ import Popen
 
 class InjectionServer: SimpleSocket {
 
+    struct ClientConnection {
+        weak var connection: InjectionServer?
+    }
+
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
+    static var connected = [ClientConnection]()
     /// Current connection to client app. There can be only one.
-    static weak var currentClient: InjectionServer?
+    static var currentClient: InjectionServer? {
+        connected.last { $0.connection != nil }?.connection }
 
     /// Sorted last symbols exported by source.
     var exports = [String: [String]]()
@@ -124,6 +130,9 @@ class InjectionServer: SimpleSocket {
             self.error("\(self) error \(error)")
         }
         Self.clientQueue.sync {} // flush messages
+        Self.clientQueue.async {
+            Self.connected.removeAll { $0.connection == nil }
+        }
     }
 
     func processResponses() {
@@ -165,7 +174,7 @@ class InjectionServer: SimpleSocket {
                     print("Tmp path: "+tmpPath)
                     self.tmpPath = tmpPath
                     if !tmpPath.contains("/Xcode/UserData/Previews/") {
-                        Self.currentClient = self
+                        Self.connected.append(ClientConnection(connection: self))
                     }
                 } else {
                     error("**** Bad tmp ****")
