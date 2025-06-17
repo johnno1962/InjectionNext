@@ -98,6 +98,7 @@ class HybridCompiler: NextCompiler {
     var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
-        return liteRecompiler.recompile(source: source, dylink: false)
+        return liteRecompiler.recompile(source: source, platformFilter:
+                                            "SDKs/"+platform, dylink: false)
     }
 }

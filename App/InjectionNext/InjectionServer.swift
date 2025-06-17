@@ -19,10 +19,19 @@ import Popen
 
 class InjectionServer: SimpleSocket {
 
+    struct ClientConnection {
+        weak var connection: InjectionServer?
+    }
+
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
+    static private var connected = [ClientConnection]()
+    static var currentClients: [InjectionServer?] {
+        connected.removeAll { $0.connection == nil }
+        return connected.isEmpty ? [nil] : connected.map { $0.connection }
+    }
     /// Current connection to client app. There can be only one.
-    static weak var currentClient: InjectionServer?
+    static var currentClient: InjectionServer? { currentClients.last ?? nil }
 
     /// Sorted last symbols exported by source.
     var exports = [String: [String]]()
@@ -165,7 +174,9 @@ class InjectionServer: SimpleSocket {
                     print("Tmp path: "+tmpPath)
                     self.tmpPath = tmpPath
                     if !tmpPath.contains("/Xcode/UserData/Previews/") {
-                        Self.currentClient = self
+                        NextCompiler.compileQueue.async {
+                            Self.connected.append(ClientConnection(connection: self))
+                        }
                     }
                 } else {
                     error("**** Bad tmp ****")
@@ -175,7 +186,7 @@ class InjectionServer: SimpleSocket {
             case .failed:
                 AppDelegate.ui.setMenuIcon(.error)
             case .unhide:
-                log("Injection failed to load. If this was due to a default " +
+                log("Injection could not load. If this was due to a default " +
                     "argument. Select the app's menu item \"Unhide Symbols\".")
             case .exit:
                 log("**** client disconnected ****")

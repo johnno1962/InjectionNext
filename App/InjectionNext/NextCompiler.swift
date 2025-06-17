@@ -25,7 +25,9 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
-    InjectionServer.currentClient?.sendCommand(.log, with: msg)
+    for client in InjectionServer.currentClients {
+        client?.sendCommand(.log, with: msg)
+    }
     return true
 }
 
@@ -84,59 +86,20 @@ class NextCompiler {
         }
     }
 
-    func prepare(source: String)
-        -> (dylib: String, dylibName: String, platform: String, Bool)? {
-                let connected = InjectionServer.currentClient
-                connected?.injectionNumber += 1
-                AppDelegate.ui.setMenuIcon(.busy)
-                compileNumber += 1
-                Self.lastError = nil
-
-                // Support for https://github.com/johnno1962/Compilertron
-                let isCompilertron = connected == nil && source.hasSuffix(".cpp")
-                let compilerTmp = "/tmp/compilertron_patches"
-                let compilerPlatform = "MacOSX"
-                let compilerArch = "arm64"
-
-                let tmpPath = connected?.tmpPath ?? compilerTmp
-                let platform = connected?.platform ?? compilerPlatform
-                let sourceName = URL(fileURLWithPath: source)
-                    .deletingPathExtension().lastPathComponent
-                if isCompilertron, let previous = prepared[sourceName] {
-                    unlink(previous)
-                }
-
-                let dylibName = DYLIB_PREFIX + sourceName +
-                    "_\(connected?.injectionNumber ?? compileNumber).dylib"
-                let useFilesystem = connected?.isLocalClient != false
-                #if INJECTION_III_APP
-                let dylibPath = (true ? tmpPath : "/tmp") + dylibName
-                #else
-                let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
-                #endif
-                guard let object = recompile(source: source, platform: platform),
-                   tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
-                   let dylib = link(object: object, dylib: dylibPath, platform:
-                    platform, arch: connected?.arch ?? compilerArch) else { return nil }
-
-                prepared[sourceName] = dylib
-                print("Prepared dylib: "+dylib)
-                return (dylib, dylibName, platform, useFilesystem)
-   }
-
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
         do {
             return try Fortify.protect { () -> Bool in
+                for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
-                        = prepare(source: source),
+                        = prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     AppDelegate.ui.setMenuIcon(.error)
                     return error("Injection failed. Was your app connected?")
                 }
 
                 InjectionServer.clientQueue.sync {
-                    guard let client = InjectionServer.currentClient else {
+                    guard let client = client else {
                         AppDelegate.ui.setMenuIcon(.ready)
                         return
                     }
@@ -152,6 +115,7 @@ class NextCompiler {
                         client.write(data)
                     }
                     unsupported(source: source, dylib: dylib, client: client)
+                }
                 }
                 Self.lastSource = source
                 return true
@@ -184,6 +148,45 @@ class NextCompiler {
         #endif
     }
 
+    func prepare(source: String, connected: InjectionServer?)
+        -> (dylib: String, dylibName: String, platform: String, Bool)? {
+        connected?.injectionNumber += 1
+        AppDelegate.ui.setMenuIcon(.busy)
+        compileNumber += 1
+        Self.lastError = nil
+
+        // Support for https://github.com/johnno1962/Compilertron
+        let isCompilertron = connected == nil && source.hasSuffix(".cpp")
+        let compilerTmp = "/tmp/compilertron_patches"
+        let compilerPlatform = "MacOSX"
+        let compilerArch = "arm64"
+
+        let tmpPath = connected?.tmpPath ?? compilerTmp
+        let platform = connected?.platform ?? compilerPlatform
+        let sourceName = URL(fileURLWithPath: source)
+            .deletingPathExtension().lastPathComponent
+        if isCompilertron, let previous = prepared[sourceName] {
+            unlink(previous)
+        }
+
+        let dylibName = DYLIB_PREFIX + sourceName +
+            "_\(connected?.injectionNumber ?? compileNumber).dylib"
+        let useFilesystem = connected?.isLocalClient != false
+        #if INJECTION_III_APP
+        let dylibPath = (true ? tmpPath : "/tmp") + dylibName
+        #else
+        let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
+        #endif
+        guard let object = recompile(source: source, platform: platform),
+           tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
+           let dylib = link(object: object, dylib: dylibPath, platform:
+            platform, arch: connected?.arch ?? compilerArch) else { return nil }
+
+        prepared[sourceName] = dylib
+        print("Prepared dylib: "+dylib)
+        return (dylib, dylibName, platform, useFilesystem)
+    }
+
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
@@ -201,8 +204,8 @@ class NextCompiler {
 
         unlink(object)
         unlink(filesfile)
-        try? stored.swiftFiles.write(toFile: filesfile, atomically: false,
-                                   encoding: .utf8)
+        try? stored.swiftFiles.write(toFile: filesfile,
+                                     atomically: false, encoding: .utf8)
 
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
@@ -215,7 +218,7 @@ class NextCompiler {
         let baseOptionsToAdd = ["-o", object, "-DDEBUG", "-DINJECTING"]
         let languageSpecific = (isSwift ?
             ["-c", "-filelist", filesfile, "-primary-file", source,
-             "-warn-long-expression-type-checking=150",
+             Reloader.typeCheckLimit,
              "-external-plugin-path",
              platformUsr+"lib/swift/host/plugins#" +
              platformUsr+"bin/swift-plugin-server",
@@ -232,8 +235,7 @@ class NextCompiler {
                cd: stored.workingDir)
         var errors = ""
         while let line = compile.readLine() {
-            if let slow: String = line[
-                #"(?<=/)\w+\.swift:\d+:\d+: warning: expression took \d+ms to type-check.*"#] {
+            if let slow: String = line[Reloader.typeCheckRegex] {
                 log(slow)
             }
             errors += line+"\n"
