@@ -129,7 +129,7 @@ class NextCompiler {
     func inject(source: String) -> Bool {
         do {
             return try Fortify.protect { () -> Bool in
-                for client in InjectionServer.currentClients {
+                for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
                         = prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
