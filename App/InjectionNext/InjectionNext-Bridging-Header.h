@@ -3,4 +3,5 @@
 //
 
 #import "SimpleSocket.h"
+#import "InjectionImplC.h"
 #import "InjectionClient.h"
