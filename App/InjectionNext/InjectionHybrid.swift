@@ -38,6 +38,7 @@ extension AppDelegate {
                NSHomeDirectory()+"/Library/Developer,"+path, 1)
         Self.watchers[path] = InjectionHybrid()
         Self.lastWatched = path
+        GitIgnoreParser.monitor(directory: path)
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {
@@ -85,7 +86,9 @@ class InjectionHybrid: InjectionBase {
         if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
             recompiler = FrontendServer.frontendRecompiler()
         }
-        if !recompiler.inject(source: source) {
+        if let why = GitIgnoreParser.shouldExclude(file: source) {
+            log("Excluded \(source) as \(why)")
+        } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
         } else if !(recompiler === liteRecompiler) {
             FrontendServer.writeCache()
