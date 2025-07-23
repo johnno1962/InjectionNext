@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h> // Xcode 16.3??
 
 #import "SimpleSocket.h"
+#import "InjectionImplC.h"
 #import "InjectionClient.h"
 
 // InjectionBundle only
