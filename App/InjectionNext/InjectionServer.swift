@@ -181,6 +181,15 @@ class InjectionServer: SimpleSocket {
                 } else {
                     error("**** Bad tmp ****")
                 }
+            case .projectRoot:
+                if let projectRoot = readString() {
+                    log("Auto-watching project: \(projectRoot)")
+                    DispatchQueue.main.async {
+                        AppDelegate.ui.watch(path: projectRoot)
+                    }
+                } else {
+                    error("**** Bad root ****")
+                }
             case .injected:
                 AppDelegate.ui.setMenuIcon(.ok)
             case .failed:

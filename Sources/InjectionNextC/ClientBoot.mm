@@ -30,7 +30,7 @@ static dispatch_once_t onlyOneClient;
 
 /// Attempt to connect to InjectionNext.app
 + (void)connectToInjection:(Class)clientClass {
-    const char *hostip = getenv("INJECTION_HOST") ?: "127.0.0.1";
+    const char *hostip = getenv(INJECTION_HOST) ?: "127.0.0.1";
 
     // Do we need to use broadcasts to find devlepers Mac on the network
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
@@ -57,7 +57,7 @@ static dispatch_once_t onlyOneClient;
 
     #if TARGET_IPHONE_SIMULATOR || TARGET_OS_MAC
     // If InjectionLite class present, start it up.
-    if (getenv("INJECTION_STANDALONE_INHIBIT")) return;
+    if (getenv(INJECTION_STANDALONE_INHIBIT)) return;
     if (Class InjectionLite = objc_getClass("InjectionLite")) {
         printf(APP_PREFIX"Unable to connect to app, running standalone... "
                "Set env var INJECTION_STANDALONE_INHIBIT to avoid this.\n");
