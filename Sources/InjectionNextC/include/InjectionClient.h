@@ -53,6 +53,7 @@ typedef NS_ENUM(int, InjectionResponse) {
     InjectionFailed,
     InjectionTmpPath,
     InjectionUnhide,
+    InjectionProjectRoot,
 
     InjectionExit = ~0
 };

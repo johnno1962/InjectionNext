@@ -34,7 +34,8 @@ extension AppDelegate {
     }
     
     func watch(path: String) {
-        setenv("INJECTION_DIRECTORIES",
+        guard Self.watchers[path] == nil else { return }
+        setenv(INJECTION_DIRECTORIES,
                NSHomeDirectory()+"/Library/Developer,"+path, 1)
         Self.watchers[path] = InjectionHybrid()
         Self.lastWatched = path
