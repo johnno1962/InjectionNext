@@ -63,11 +63,11 @@ open class InjectionNext: SimpleSocket {
         // Let server side know the platform and architecture
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
-        writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
         if let projectRoot = getenv(INJECTION_PROJECT_ROOT) {
             writeCommand(InjectionResponse.projectRoot.rawValue,
                          with: String(cString: projectRoot))
         }
+        writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
 
         log("\(platform) connection to app established, waiting for commands.")
         processCommandsFromApp()

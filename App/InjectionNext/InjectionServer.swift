@@ -136,22 +136,8 @@ class InjectionServer: SimpleSocket {
     }
 
     func processResponses() {
-        if MonitorXcode.runningXcode == nil &&
-            AppDelegate.watchers.isEmpty &&
-            AppDelegate.ui.updatePatchUnpatch() == .unpatched {
-            error("""
-                Xcode not launched via app. Injection will not be possible \ 
-                unless you file-watch a project and Xcode logs are available \
-                or use the "Intercept Compiler" menu item.
-                """)
-        }
-
         sendCommand(.xcodePath, with: Defaults.xcodePath)
         AppDelegate.restartLastWatcher()
-        if !AppDelegate.watchers.isEmpty {
-            log("Watching directory: " +
-                AppDelegate.watchers.keys.joined(separator: ", "))
-        }
 
         while true {
             let responseInt = readInt()
@@ -181,10 +167,23 @@ class InjectionServer: SimpleSocket {
                 } else {
                     error("**** Bad tmp ****")
                 }
+                if MonitorXcode.runningXcode == nil &&
+                    AppDelegate.watchers.isEmpty &&
+                    AppDelegate.ui.updatePatchUnpatch() == .unpatched {
+                    error("""
+                        Xcode not launched via app. Injection will not be possible \ 
+                        unless you file-watch a project and Xcode logs are available \
+                        or use the "Intercept Compiler" menu item.
+                        """)
+                }
+                if !AppDelegate.watchers.isEmpty {
+                    log("Watching directory: " +
+                        AppDelegate.watchers.keys.joined(separator: ", "))
+                }
             case .projectRoot:
                 if let projectRoot = readString() {
                     log("Auto-watching project: \(projectRoot)")
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.sync {
                         AppDelegate.ui.watch(path: projectRoot)
                     }
                 } else {

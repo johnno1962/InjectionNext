@@ -34,12 +34,12 @@ extension AppDelegate {
     }
     
     func watch(path: String) {
-        guard Self.watchers[path] == nil else { return }
+        guard Self.alreadyWatching(path) == nil else { return }
+        GitIgnoreParser.monitor(directory: path)
         setenv(INJECTION_DIRECTORIES,
                NSHomeDirectory()+"/Library/Developer,"+path, 1)
         Self.watchers[path] = InjectionHybrid()
         Self.lastWatched = path
-        GitIgnoreParser.monitor(directory: path)
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {
