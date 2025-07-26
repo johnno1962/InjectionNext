@@ -105,7 +105,7 @@ class InjectionServer: SimpleSocket {
     func validateConnection() -> Bool {
         guard readInt() == INJECTION_VERSION,
               let injectionKey = readString() else { return false }
-        guard injectionKey.hasPrefix(NSHomeDirectory()) else {
+        guard !injectionKey.isEmpty else {
             error("Invalid INJECTION_KEY: "+injectionKey)
             return false
         }
