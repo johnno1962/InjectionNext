@@ -25,6 +25,11 @@ extern NSString *INJECTION_KEY;
 #define APP_PREFIX "🔥 "
 #define DYLIB_PREFIX "/eval_injection_" // Was expected by DLKit
 
+#define INJECTION_HOST "INJECTION_HOST"
+#define INJECTION_DIRECTORIES "INJECTION_DIRECTORIES"
+#define INJECTION_PROJECT_ROOT "BUILD_WORKSPACE_DIRECTORY"
+#define INJECTION_STANDALONE_INHIBIT "INJECTION_STANDALONE_INHIBIT"
+
 @interface NSObject(HotReloading)
 + (void)runXCTestCase:(Class)aTestCase;
 @end
