@@ -67,6 +67,8 @@ open class InjectionNext: SimpleSocket {
         if let projectRoot = getenv(INJECTION_PROJECT_ROOT) {
             writeCommand(InjectionResponse.projectRoot.rawValue,
                          with: String(cString: projectRoot))
+        } else {
+            log("Couldn't find \(INJECTION_PROJECT_ROOT) in environment. Add one for auto dir watch.")
         }
 
         log("\(platform) connection to app established, waiting for commands.")
