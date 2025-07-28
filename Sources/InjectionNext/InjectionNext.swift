@@ -64,7 +64,8 @@ open class InjectionNext: SimpleSocket {
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
         writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
-        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) {
+        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
+                        getenv(BUILD_WORKSPACE_DIRECTORY) {
             writeCommand(InjectionResponse.projectRoot.rawValue,
                          with: String(cString: projectRoot))
         } else {
