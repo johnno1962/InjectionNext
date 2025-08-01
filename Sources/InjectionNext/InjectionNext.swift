@@ -63,7 +63,8 @@ open class InjectionNext: SimpleSocket {
         // Let server side know the platform and architecture
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
-        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) {
+        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
+                         getenv("BUILD_WORKSPACE_DIRECTORY") {
             writeCommand(InjectionResponse.projectRoot.rawValue,
                          with: String(cString: projectRoot))
         }

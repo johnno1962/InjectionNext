@@ -175,8 +175,7 @@ class MonitorXcode {
                             of: indexBuild, with: "/Build/")]
                             // alternate fix of Defaults problem
                             // hopefully without causing unhides
-                        if InjectionServer.currentClient?
-                            .platform.hasPrefix("AppleTV") != true {
+                        if !arg.hasPrefix("-fmodule-map-file") {
                             change += (arg.hasPrefix("-") ? [arg] :
                                         option.hasPrefix("-") ? [option, arg] :
                                         [])
