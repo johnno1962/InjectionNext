@@ -175,7 +175,7 @@ class MonitorXcode {
                             of: indexBuild, with: "/Build/")]
                             // alternate fix of Defaults problem
                             // hopefully without causing unhides
-                        if !arg.hasPrefix("-fmodule-map-file") {
+                        if !arg[#"-I.+/Build/Products/.+?-\w+/include"#] {
                             change += (arg.hasPrefix("-") ? [arg] :
                                         option.hasPrefix("-") ? [option, arg] :
                                         [])
