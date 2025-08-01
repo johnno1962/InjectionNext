@@ -64,6 +64,13 @@ open class InjectionNext: SimpleSocket {
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
         writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
+        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
+                        getenv(BUILD_WORKSPACE_DIRECTORY) {
+            writeCommand(InjectionResponse.projectRoot.rawValue,
+                         with: String(cString: projectRoot))
+        } else {
+            log("Couldn't find \(INJECTION_PROJECT_ROOT) in environment. Add one for auto dir watch.")
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
         processCommandsFromApp()

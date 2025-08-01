@@ -207,7 +207,8 @@ class NextCompiler {
         try? stored.swiftFiles.write(toFile: filesfile,
                                      atomically: false, encoding: .utf8)
 
-        log("Recompiling: "+source)
+        let fileName = URL(fileURLWithPath: source).lastPathComponent
+        log("🔄 [\(fileName)] Recompiling (\(platform))")
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
         let compiler = (isSwift ? FrontendServer.loggedFrontend : nil) ??
@@ -229,7 +230,8 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
-        // Call compiler process
+        // Call compiler process with timing
+        let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
                arguments: stored.arguments + languageSpecific,
                cd: stored.workingDir)
@@ -243,16 +245,21 @@ class NextCompiler {
         if errors.contains(" error: ") {
             print(([compiler] + stored.arguments +
                    languageSpecific).joined(separator: " "))
-            _ = error("Recompile failed for: \(source)\n"+errors)
+            _ = error("❌ Compilation failed for: \(source)\n"+errors)
             Self.lastError = errors
             return nil
         }
+        
+        // Log successful compilation with timing
+        let compilationDuration = Date.timeIntervalSinceReferenceDate - compilationStartTime
+        log(String(format: "⚡ Compiled in %.0fms", compilationDuration * 1000))
 
         return object
     }
 
     /// Link and object file to create a dynamic library
     func link(object: String, dylib: String, platform: String, arch: String) -> String? {
+        let linkStartTime = Date.timeIntervalSinceReferenceDate
         let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
         let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
 
@@ -307,11 +314,15 @@ class NextCompiler {
             """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
 
         if let errors = Popen.system(linkCommand, errors: true) {
-            _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            _ = error("❌ Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             Self.lastError = errors
             return nil
         }
 
+        // Log successful linking with timing
+        let linkDuration = Date.timeIntervalSinceReferenceDate - linkStartTime
+        log(String(format: "🔗 Linked in %.0fms", linkDuration * 1000))
+        
         return dylib
     }
 
