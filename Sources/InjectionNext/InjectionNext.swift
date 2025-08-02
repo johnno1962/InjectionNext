@@ -28,7 +28,11 @@ open class InjectionNext: SimpleSocket {
     /// Connection from client app opened in ClientBoot.mm arrives here
     open override func runInBackground() {
         super.write(INJECTION_VERSION)
+        #if targetEnvironment(simulator) || os(macOS)
+        super.write(NSHomeDirectory())
+        #else
         super.write(INJECTION_KEY)
+        #endif
 
         // Find client platform
         #if os(macOS) || targetEnvironment(macCatalyst)
