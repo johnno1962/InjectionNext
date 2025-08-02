@@ -22,6 +22,7 @@
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
 		BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E12CDED9CF00704C7A /* FileWatcher.swift */; };
 		BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E22CDED9CF00704C7A /* InjectionBase.swift */; };
+		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423C2DAD02C60085C9B9 /* LogParser.swift */; };
 		BB2D41A82DAD145A0073C203 /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
@@ -151,6 +152,7 @@
 		BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InjectionLite.swift; path = ../InjectionLite/Sources/InjectionLite/InjectionLite.swift; sourceTree = SOURCE_ROOT; };
 		BB1E423C2DAD02C60085C9B9 /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogParser.swift; path = ../InjectionLite/Sources/InjectionLite/LogParser.swift; sourceTree = SOURCE_ROOT; };
 		BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
+		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB4654802C257F110080EC40 /* NextCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextCompiler.swift; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
 		BB5155DF2CDED8C600704C7A /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
@@ -261,6 +263,7 @@
 			isa = PBXGroup;
 			children = (
 				BB037DF41FAD80D0004B267C /* LICENSE */,
+				BB2A66352E3E753B001EDD38 /* BAZEL.md */,
 				BBF6572D2DAFF00200638170 /* QUICK.md */,
 				BBF6572C2DAFF00200638170 /* NIMBLE.md */,
 				BB037DF31FAD808B004B267C /* README.md */,
@@ -513,6 +516,7 @@
 				BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */,
 				BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */,
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
+				BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
 				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
 				BBCA02591FB112F500E45F0F /* App.icns in Resources */,
@@ -876,7 +880,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -899,7 +903,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";

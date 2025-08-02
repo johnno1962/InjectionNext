@@ -57,7 +57,7 @@ static dispatch_once_t onlyOneClient;
 
     #if TARGET_IPHONE_SIMULATOR || TARGET_OS_MAC
     // If InjectionLite class present, start it up.
-    if (getenv(INJECTION_STANDALONE_INHIBIT)) return;
+    if (getenv(INJECTION_NOSTANDALONE)) return;
     if (Class InjectionLite = objc_getClass("InjectionLite")) {
         printf(APP_PREFIX"Unable to connect to app, running standalone... "
                "Set env var INJECTION_STANDALONE_INHIBIT to avoid this.\n");
