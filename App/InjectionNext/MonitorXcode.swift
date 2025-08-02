@@ -169,18 +169,21 @@ class MonitorXcode {
                                    arg.hasPrefix("-fmodule-map-file="))) &&*/
                         arg.contains(indexBuild) &&
                             !arg.contains("/Intermediates.noindex/"),
-                        let option = args.last {
+                        let _ = args.last {
                         // expands out default argument generators
-                        var change = [arg.replacingOccurrences(
-                            of: indexBuild, with: "/Build/")]
-                            // alternate fix of Defaults problem
-                            // hopefully without causing unhides
-                        if !arg[#"-I.+/Build/Products/.+?-\w+/include"#] {
-                            change += (arg.hasPrefix("-") ? [arg] :
-                                        option.hasPrefix("-") ? [option, arg] :
-                                        [])
+                        let alt = arg.replacingOccurrences(
+                            of: indexBuild, with: "/Build/")
+                        var change = [alt]
+                        // alternate fix of Defaults problem
+                        // hopefully without causing unhides
+                        // johnno1962/InjectionNext/issues/40
+                        if !FileManager.default.fileExists(atPath: alt) {
+//                            change += (arg.hasPrefix("-") ? [arg] :
+//                                        option.hasPrefix("-") ? [option, arg] :
+//                                        [])
+                            change = [arg]
                         }
-//                        debug(change)
+//                        debug("CHANGE", change)
                         args += change
                     } else if !(arg == "-F" && args.last == "-F") &&
                         arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
