@@ -176,8 +176,9 @@ class MonitorXcode {
                         var change = [alt]
                         // alternate fix of Defaults problem
                         // hopefully without causing unhides
-                        // johnno1962/InjectionNext/issues/40
-                        if !FileManager.default.fileExists(atPath: alt) {
+                        // InjectionNext/issues/#40 c.f. #78
+                        if let path: String = alt[#"(?:-I)?(.*)"#],
+                           !FileManager.default.fileExists(atPath: path) {
 //                            change += (arg.hasPrefix("-") ? [arg] :
 //                                        option.hasPrefix("-") ? [option, arg] :
 //                                        [])
