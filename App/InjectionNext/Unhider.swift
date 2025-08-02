@@ -29,13 +29,14 @@ open class Unhider {
 
     /// Entry point for user initiated or perhaps one day automatic unhiding.
     open class func startUnhide() {
-        guard var derivedData = packageFrameworks.flatMap({
-            URL(fileURLWithPath: $0) }) else {
+        guard var derivedData = (packageFrameworks ??
+                                 Recompiler.packageFrameworks)
+            .flatMap({ URL(fileURLWithPath: $0) }) else {
             log("⚠️ packageFrameworks not set, view a Swift source.")
             return
         }
-        for _ in 1...5 {
-            derivedData = derivedData.deletingLastPathComponent()
+        for _ in 1...(packageFrameworks != nil ? 5 : 4) {
+            derivedData.deleteLastPathComponent()
         }
         unhideQueue.async {
             do {
@@ -53,7 +54,7 @@ open class Unhider {
     open class func unhideAllObjects(intermediates: URL) throws {
         var patched = [String](), files = 0, project = intermediates.path
         var configs = unhiddens[project] ?? [String: [String: String]]()
-        log("Starting \"unhide\" for "+project+"...")
+        log("Starting \"unhide\" for \(project)...")
 
         // Foreach module and platform.
         for module in try FileManager.default

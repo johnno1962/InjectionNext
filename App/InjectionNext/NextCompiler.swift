@@ -141,7 +141,9 @@ class NextCompiler {
                previous.count != symbols.count {
                 log("ℹ️ Symbols altered, this may not be supported." +
                       " \(symbols.count) c.f. \(previous.count)")
-                print(symbols.difference(from: previous))
+                if #available(macOS 15.0, *) {
+                    print(symbols.difference(from: previous))
+                }
             }
             client.exports[source] = symbols
         }
