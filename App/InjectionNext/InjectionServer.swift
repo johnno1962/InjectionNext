@@ -189,6 +189,10 @@ class InjectionServer: SimpleSocket {
                 } else {
                     error("**** Bad root ****")
                 }
+            case .detail:
+                if let detail = readString() {
+                    setenv(INJECTION_DETAIL, detail, 1)
+                }
             case .injected:
                 AppDelegate.ui.setMenuIcon(.ok)
             case .failed:
@@ -200,7 +204,7 @@ class InjectionServer: SimpleSocket {
                 log("**** client disconnected ****")
                 return
             @unknown default:
-                error("**** @unknown case \(responseInt) ****")
+                Self.error("**** @unknown response case \(responseInt) ****")
                 return
             }
         }

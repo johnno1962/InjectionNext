@@ -232,7 +232,8 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
-        // Call compiler process
+        // Call compiler process with timing
+        let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
                arguments: stored.arguments + languageSpecific,
                cd: stored.workingDir)
@@ -250,6 +251,11 @@ class NextCompiler {
             Self.lastError = errors
             return nil
         }
+
+        // Log successful compilation with timing
+        let now = Date.timeIntervalSinceReferenceDate
+        detail(String(format: "⚡ Compiled in %.0fms",
+                      (now - compilationStartTime) * 1000))
 
         return object
     }

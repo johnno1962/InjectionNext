@@ -77,6 +77,10 @@ open class InjectionNext: SimpleSocket {
                          with: String(cString: projectRoot))
         }
         writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
+        if let detail = getenv(INJECTION_DETAIL) {
+            writeCommand(InjectionResponse.detail.rawValue,
+                         with: String(cString: detail))
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
         processCommandsFromApp()
