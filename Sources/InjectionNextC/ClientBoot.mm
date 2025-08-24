@@ -16,7 +16,7 @@
 @interface InjectionNext : SimpleSocket
 @end
 
-@implementation NSObject(InjectionNext)
+@implementation InjectionNext(Boot)
 
 static SimpleSocket *injectionClient;
 static dispatch_once_t onlyOneClient;
@@ -24,8 +24,13 @@ static dispatch_once_t onlyOneClient;
 /// Called on load of image containing this code
 + (void)load {
     if (![InjectionNext InjectionBoot_inPreview])
+        #if TARGET_OS_OSX
         [self performSelectorInBackground:@selector(connectToInjection:)
-                               withObject:[InjectionNext self]];
+                               withObject:self];
+        #else
+        [self performSelectorOnMainThread:@selector(connectToInjection:)
+                               withObject:self waitUntilDone:NO];
+        #endif
 }
 
 /// Attempt to connect to InjectionNext.app
@@ -34,7 +39,7 @@ static dispatch_once_t onlyOneClient;
 
     // Do we need to use broadcasts to find devlepers Mac on the network
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
-    if (!(@available(iOS 14.0, *) && [NSProcessInfo processInfo].isiOSAppOnMac)) {
+    if (@available(iOS 14.0, *)) if (![NSProcessInfo processInfo].isiOSAppOnMac) {
         printf(APP_PREFIX APP_NAME": Locating developer's Mac. Have you selected \"Enable Devices\"?\n");
         hostip = [SimpleSocket getMulticastService:HOTRELOADING_MULTICAST port:HOTRELOADING_PORT
                                            message:APP_PREFIX"Connecting to %s (%s)...\n"].UTF8String;
