@@ -8,6 +8,7 @@
 
 FIXED_XCODE_DEVELOPER_PATH=/Applications/Xcode.app/Contents/Developer
 export SWIFT_ACTIVE_COMPILATION_CONDITIONS=""
+BUILD=`/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" $CODESIGNING_FOLDER_PATH/Contents/Info.plist`
 
 function build_bundle () {
     FAMILY=$1
@@ -34,16 +35,20 @@ function build_bundle () {
     "$DEVELOPER_BIN_DIR"/xcodebuild SYMROOT=$SYMROOT ARCHS="$ARCHS" $APP_SANDBOXED PRODUCT_NAME="${FAMILY}Injection" LD_RUNPATH_SEARCH_PATHS="@loader_path/Frameworks @loader_path/${FAMILY}Injection.bundle/Frameworks $SWIFT_DYLIBS_PATH $CONCURRENCY_DYLIBS $XCTEST_FRAMEWORK_PATH $XCTEST_SUPPORT_PATH $XCCORE_FRAMEWORK_PATH" $ADD_INSTALL_NAME PLATFORM_DIR="$DEVELOPER_DIR/Platforms/$PLATFORM.platform" -sdk $SDK -config $BUNDLE_CONFIG -target InjectionBundle &&
     
     rsync -au $SYMROOT/$BUNDLE_CONFIG-$SDK/*.bundle "$CODESIGNING_FOLDER_PATH/Contents/Resources" &&
+    PLIST="$CODESIGNING_FOLDER_PATH/Contents/Resources/${FAMILY}Injection.bundle/Info.plist" &&
+    (/usr/libexec/PlistBuddy -c "Delete :CFBundleVersion" "$PLIST" || echo -n) &&
+    /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD" "$PLIST" &&
     ln -sf "${FAMILY}Injection.bundle/${FAMILY}Injection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/lib${SDK}Injection.dylib"
 }
 
 ln -sf "macOSInjection.bundle/Contents/MacOS/macOSInjection" "$CODESIGNING_FOLDER_PATH/Contents/Resources/libmacosxInjection.dylib" &&
 
 build_bundle iOS iPhoneSimulator iphonesimulator &&
-build_bundle tvOS AppleTVSimulator appletvsimulator &&
-build_bundle xrOS XRSimulator xrsimulator &&
-build_bundle iOSDev iPhoneOS iphoneos &&
-build_bundle tvOSDev AppleTVOS appletvos &&
-build_bundle xrOSDev XROS xros &&
-
+if [[ "$ACTION" = "install" ]]; then
+    build_bundle tvOS AppleTVSimulator appletvsimulator &&
+    build_bundle xrOS XRSimulator xrsimulator &&
+    build_bundle iOSDev iPhoneOS iphoneos &&
+    build_bundle tvOSDev AppleTVOS appletvos &&
+    build_bundle xrOSDev XROS xros
+fi &&
 exit 0

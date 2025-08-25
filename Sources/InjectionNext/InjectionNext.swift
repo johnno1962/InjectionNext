@@ -83,6 +83,12 @@ open class InjectionNext: SimpleSocket {
         }
 
         log("\(platform) connection to app established, waiting for commands.")
+        #if !SWIFT_PACKAGE
+        if let build = Bundle(for: Self.self)
+            .infoDictionary?["CFBundleVersion"] as? String {
+            detail("Bundle build #"+build)
+        }
+        #endif
         processCommandsFromApp()
         log("Connection lost, disconnecting.")
     }

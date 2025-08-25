@@ -159,6 +159,7 @@ class InjectionServer: SimpleSocket {
                 if let tmpPath = readString() {
                     print("Tmp path: "+tmpPath)
                     self.tmpPath = tmpPath
+                    self.tmpPath[#"/$"#] = "" // strip trailing slash
                     if !tmpPath.contains("/Xcode/UserData/Previews/") {
                         NextCompiler.compileQueue.async {
                             Self.connected.append(ClientConnection(connection: self))
