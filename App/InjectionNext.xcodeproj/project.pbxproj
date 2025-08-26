@@ -1067,7 +1067,7 @@
 			repositoryURL = "https://github.com/johnno1962/DLKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.4.11;
+				minimumVersion = 3.5.3;
 			};
 		};
 		BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */ = {
