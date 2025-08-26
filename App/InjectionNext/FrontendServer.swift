@@ -181,7 +181,7 @@ extension AppDelegate {
         let fm = FileManager.default
         do {
             let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
-                "swift-api-digester", "swift-cache-tool", "swift-api-extract"]
+                               "swift-api-digester", "swift-cache-tool"]
             if updatePatchUnpatch() == .unpatched {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main

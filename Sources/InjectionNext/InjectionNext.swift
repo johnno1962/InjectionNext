@@ -28,7 +28,15 @@ open class InjectionNext: SimpleSocket {
     /// Connection from client app opened in ClientBoot.mm arrives here
     open override func runInBackground() {
         super.write(INJECTION_VERSION)
-        super.write(INJECTION_KEY)
+        #if targetEnvironment(simulator) || os(macOS)
+        super.write(NSHomeDirectory())
+        #else
+        if let bazelWorkspace = getenv(BUILD_WORKSPACE_DIRECTORY) {
+            super.write(String(cString: bazelWorkspace))
+        } else {
+            super.write(INJECTION_KEY)
+        }
+        #endif
 
         // Find client platform
         #if os(macOS) || targetEnvironment(macCatalyst)
@@ -63,9 +71,24 @@ open class InjectionNext: SimpleSocket {
         // Let server side know the platform and architecture
         writeCommand(InjectionResponse.platform.rawValue, with: platform)
         super.write(arch)
+        if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
+                           getenv(BUILD_WORKSPACE_DIRECTORY) {
+            writeCommand(InjectionResponse.projectRoot.rawValue,
+                         with: String(cString: projectRoot))
+        }
         writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
+        if let detail = getenv(INJECTION_DETAIL) {
+            writeCommand(InjectionResponse.detail.rawValue,
+                         with: String(cString: detail))
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
+        #if !SWIFT_PACKAGE
+        if let build = Bundle(for: Self.self)
+            .infoDictionary?["CFBundleVersion"] as? String {
+            detail("Bundle build #"+build)
+        }
+        #endif
         processCommandsFromApp()
         log("Connection lost, disconnecting.")
     }

@@ -16,25 +16,30 @@
 @interface InjectionNext : SimpleSocket
 @end
 
-@implementation NSObject(InjectionNext)
+@implementation InjectionNext(Boot)
 
 static SimpleSocket *injectionClient;
 static dispatch_once_t onlyOneClient;
 
 /// Called on load of image containing this code
 + (void)load {
-    if (![InjectionNext InjectionBoot_inPreview])
-        [self performSelectorInBackground:@selector(connectToInjection:)
-                               withObject:[InjectionNext self]];
+    if ([InjectionNext InjectionBoot_inPreview]) return;
+    #if TARGET_OS_OSX
+    [self performSelectorInBackground:@selector(connectToInjection:)
+                           withObject:self];
+    #else
+    [self performSelectorOnMainThread:@selector(connectToInjection:)
+                           withObject:self waitUntilDone:NO];
+    #endif
 }
 
 /// Attempt to connect to InjectionNext.app
 + (void)connectToInjection:(Class)clientClass {
-    const char *hostip = getenv("INJECTION_HOST") ?: "127.0.0.1";
+    const char *hostip = getenv(INJECTION_HOST) ?: "127.0.0.1";
 
     // Do we need to use broadcasts to find devlepers Mac on the network
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
-    if (!(@available(iOS 14.0, *) && [NSProcessInfo processInfo].isiOSAppOnMac)) {
+    if (@available(iOS 14.0, *)) if (![NSProcessInfo processInfo].isiOSAppOnMac) {
         printf(APP_PREFIX APP_NAME": Locating developer's Mac. Have you selected \"Enable Devices\"?\n");
         hostip = [SimpleSocket getMulticastService:HOTRELOADING_MULTICAST port:HOTRELOADING_PORT
                                            message:APP_PREFIX"Connecting to %s (%s)...\n"].UTF8String;
@@ -57,10 +62,10 @@ static dispatch_once_t onlyOneClient;
 
     #if TARGET_IPHONE_SIMULATOR || TARGET_OS_MAC
     // If InjectionLite class present, start it up.
-    if (getenv("INJECTION_STANDALONE_INHIBIT")) return;
+    if (getenv(INJECTION_NOSTANDALONE)) return;
     if (Class InjectionLite = objc_getClass("InjectionLite")) {
         printf(APP_PREFIX"Unable to connect to app, running standalone... "
-               "Set env var INJECTION_STANDALONE_INHIBIT to avoid this.\n");
+               "Set env var " INJECTION_NOSTANDALONE " to avoid this.\n");
         static NSObject *singleton;
         singleton = [[InjectionLite alloc] init];
     }
