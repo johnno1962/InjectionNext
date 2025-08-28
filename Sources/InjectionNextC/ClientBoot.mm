@@ -25,12 +25,16 @@ static dispatch_once_t onlyOneClient;
 + (void)load {
     if ([InjectionNext InjectionBoot_inPreview]) return;
     #if TARGET_OS_OSX
-    [self performSelectorInBackground:@selector(connectToInjection:)
-                           withObject:self];
+    [self connectInBackground:self];
     #else
-    [self performSelectorOnMainThread:@selector(connectToInjection:)
+    [self performSelectorOnMainThread:@selector(connectInBackground:)
                            withObject:self waitUntilDone:NO];
     #endif
+}
+
++ (void)connectInBackground:(Class)clientClass {
+    [self performSelectorInBackground:@selector(connectToInjection:)
+                           withObject:self];
 }
 
 /// Attempt to connect to InjectionNext.app
