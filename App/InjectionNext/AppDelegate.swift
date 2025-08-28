@@ -60,6 +60,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
         Self.ui = self
+        
+//        #if DEBUG
+//        if let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),
+//           let bundle = Bundle(path: path),
+//           bundle.load() {
+//        }
+//        #endif
 
         let appName = "InjectionNext"
         let statusBar = NSStatusBar.system

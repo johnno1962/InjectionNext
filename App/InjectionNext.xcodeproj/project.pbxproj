@@ -721,6 +721,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				EMIT_FRONTEND_COMMAND_LINES = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = $PLATFORM_DIR/Developer/Library/Frameworks;
@@ -788,6 +789,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 9V5A8WE85E;
+				EMIT_FRONTEND_COMMAND_LINES = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = $PLATFORM_DIR/Developer/Library/Frameworks;
@@ -881,7 +883,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -904,7 +906,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -938,7 +940,8 @@
 				LD_DYLIB_INSTALL_NAME = "/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					$PLATFORM_DIR/Developer/usr/lib,
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib,
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks,
 				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
@@ -982,7 +985,8 @@
 				LD_DYLIB_INSTALL_NAME = "/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					$PLATFORM_DIR/Developer/usr/lib,
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib,
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks,
 				);
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
