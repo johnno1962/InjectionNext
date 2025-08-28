@@ -16,7 +16,7 @@
 @interface InjectionNext : SimpleSocket
 @end
 
-@implementation InjectionNext(Boot)
+@implementation NSObject(InjectionNext)
 
 static SimpleSocket *injectionClient;
 static dispatch_once_t onlyOneClient;
@@ -25,16 +25,16 @@ static dispatch_once_t onlyOneClient;
 + (void)load {
     if ([InjectionNext InjectionBoot_inPreview]) return;
     #if TARGET_OS_OSX
-    [self connectInBackground:self];
+    [self connectInBackground:[InjectionNext self]];
     #else
     [self performSelectorOnMainThread:@selector(connectInBackground:)
-                           withObject:self waitUntilDone:NO];
+                           withObject:[InjectionNext self] waitUntilDone:NO];
     #endif
 }
 
 + (void)connectInBackground:(Class)clientClass {
     [self performSelectorInBackground:@selector(connectToInjection:)
-                           withObject:self];
+                           withObject:clientClass];
 }
 
 /// Attempt to connect to InjectionNext.app
