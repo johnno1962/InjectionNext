@@ -24,17 +24,15 @@ static dispatch_once_t onlyOneClient;
 /// Called on load of image containing this code
 + (void)load {
     if ([InjectionNext InjectionBoot_inPreview]) return;
-    #if TARGET_OS_OSX
-    [self connectInBackground:[InjectionNext self]];
-    #else
-    [self performSelectorOnMainThread:@selector(connectInBackground:)
-                           withObject:[InjectionNext self] waitUntilDone:NO];
-    #endif
+    #if !TARGET_OS_MAC
+    [self performSelectorOnMainThread:@selector(connectInBackground)
+                           withObject:nil waitUntilDone:NO];
 }
 
-+ (void)connectInBackground:(Class)clientClass {
++ (void)connectInBackground {
+    #endif
     [self performSelectorInBackground:@selector(connectToInjection:)
-                           withObject:clientClass];
+                           withObject:[InjectionNext self]];
 }
 
 /// Attempt to connect to InjectionNext.app

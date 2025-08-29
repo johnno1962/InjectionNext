@@ -60,13 +60,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
         Self.ui = self
-        
-//        #if DEBUG
-//        if let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),
-//           let bundle = Bundle(path: path),
-//           bundle.load() {
-//        }
-//        #endif
 
         let appName = "InjectionNext"
         let statusBar = NSStatusBar.system
@@ -119,6 +112,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath
+        
+//        #if DEBUG
+//        if NSHomeDirectory() == "/Users/johnholdsworth",
+//           let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),
+//           let bundle = Bundle(path: path),
+//           bundle.load() {
+//        }
+//        #endif
 
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")

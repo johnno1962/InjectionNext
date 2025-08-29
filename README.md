@@ -113,9 +113,11 @@ built your app in Xcode at some point in the past for the logs
 to be available. You should build using the same version as that 
 selected by `xcode-select`. With Xcode 16.3+, for this log parsing
 mode to continue working you'll need to add a custom build setting
-EMIT_FRONTEND_COMMAND_LINES.
+EMIT_FRONTEND_COMMAND_LINES. If you'd like the InjectionNext.app to
+automatically file watch your project, add the following environment
+variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`.
 
-### New compiler "proxy" mode.
+### New compiler "proxy" mode (Not normally used).
 
 It is also possible to intercept swift compilation commands as a new proof of
 concept for when at some point in the future these are no longer captured in 
@@ -130,8 +132,8 @@ So, InjectionNext now has three ways which it can operate. The original mode
 of operation launching Xcode inside the app takes precedence and, if you have
 selected a file watcher and are intercepting the compiler commands this "proxy
 mode" is the next preference followed by the log parsing fallback using
-the [InjectionLite](https://github.com/johnno1962/InjectionLite) package which 
-essentially works as InjectionIII did when the logs are available.
+the [InjectionLite](https://github.com/johnno1962/InjectionLite) package
+which essentially works as InjectionIII did when the logs are available.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
 or for the bigger picture see [this swift evolution post](https://forums.swift.org/t/weve-been-doing-it-wrong-all-this-time/72015).
