@@ -16,6 +16,23 @@ import DLKit
 /// bring in injectingXCTest()
 struct Reloader {}
 
+/// Tracks timing metrics for injection process
+struct InjectionMetricsTracker: Codable {
+    var processingTimeMs: Double = 0
+    var compilationTimeMs: Double = 0
+    var linkingTimeMs: Double = 0
+    var totalTimeMs: Double = 0
+    var sourcePath: String
+    var success: Bool = false
+    var notificationName: String = "INJECTION_METRICS_NOTIFICATION"
+    let startTime: Double
+
+    init(sourcePath: String) {
+        self.sourcePath = sourcePath
+        self.startTime = Date.timeIntervalSinceReferenceDate
+    }
+}
+
 @discardableResult
 public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
     var msg = what.map {"\($0)"}.joined(separator: separator)
@@ -47,6 +64,8 @@ class NextCompiler {
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
     static var lastError: String?, lastSource: String?
+    /// Current metrics being tracked
+    static var currentMetrics: InjectionMetricsTracker?
 
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
@@ -89,8 +108,11 @@ class NextCompiler {
 
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
+        // Start tracking metrics
+        Self.currentMetrics = InjectionMetricsTracker(sourcePath: source)
+
         do {
-            return try Fortify.protect { () -> Bool in
+            let result = try Fortify.protect { () -> Bool in
                 for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
                         = prepare(source: source, connected: client),
@@ -121,8 +143,36 @@ class NextCompiler {
                 Self.lastSource = source
                 return true
             }
+
+            // Calculate total time and send metrics
+            if let metrics = Self.currentMetrics {
+                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+                metrics.success = result
+                sendMetrics(metrics)
+            }
+
+            return result
         } catch {
+            // Send failure metrics
+            if let metrics = Self.currentMetrics {
+                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+                metrics.success = false
+                sendMetrics(metrics)
+            }
             return self.error(error)
+        }
+    }
+
+    /// Send metrics to all connected clients
+    func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let jsonData = try? encoder.encode(metrics),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return
+        }
+        for client in InjectionServer.currentClients {
+            client?.sendCommand(.metrics, with: jsonString)
         }
     }
 
@@ -182,8 +232,10 @@ class NextCompiler {
         #endif
         guard let object = recompile(source: source, platform: platform),
            tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
-           let dylib = link(object: object, dylib: dylibPath, platform:
+           let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath, platform:
             platform, arch: connected?.arch ?? compilerArch) else { return nil }
+
+        Self.currentMetrics?.linkingTimeMs = linkingTimeMs
 
         prepared[sourceName] = dylib
         print("Prepared dylib: "+dylib)
@@ -232,6 +284,11 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
+        // Track processing time (time from inject start to compilation start)
+        if let metrics = Self.currentMetrics {
+            metrics.processingTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+        }
+
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
@@ -254,14 +311,16 @@ class NextCompiler {
 
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
-        detail(String(format: "⚡ Compiled in %.0fms",
-                      (now - compilationStartTime) * 1000))
+        let compilationTimeMs = (now - compilationStartTime) * 1000
+        Self.currentMetrics?.compilationTimeMs = compilationTimeMs
+        detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
         return object
     }
 
     /// Link and object file to create a dynamic library
-    func link(object: String, dylib: String, platform: String, arch: String) -> String? {
+    func link(object: String, dylib: String, platform: String, arch: String) -> (String, Double)? {
+        let linkingStartTime = Date.timeIntervalSinceReferenceDate
         let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
         let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
 
@@ -321,7 +380,8 @@ class NextCompiler {
             return nil
         }
 
-        return dylib
+        let linkingTimeMs = (Date.timeIntervalSinceReferenceDate - linkingStartTime) * 1000
+        return (dylib, linkingTimeMs)
     }
 
     /// Codesign a dynamic library
