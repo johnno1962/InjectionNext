@@ -145,7 +145,7 @@ class NextCompiler {
             }
 
             // Calculate total time and send metrics
-            if let metrics = Self.currentMetrics {
+            if var metrics = Self.currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = result
                 sendMetrics(metrics)
@@ -154,7 +154,7 @@ class NextCompiler {
             return result
         } catch {
             // Send failure metrics
-            if let metrics = Self.currentMetrics {
+            if var metrics = Self.currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = false
                 sendMetrics(metrics)
@@ -285,7 +285,7 @@ class NextCompiler {
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
         // Track processing time (time from inject start to compilation start)
-        if let metrics = Self.currentMetrics {
+        if var metrics = Self.currentMetrics {
             metrics.processingTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
         }
 
@@ -315,39 +315,15 @@ class NextCompiler {
         Self.currentMetrics?.compilationTimeMs = compilationTimeMs
         detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
+        Recompiler.linkerParams(from: stored.arguments
+            .map { $0[#"[ $()]"#, "\\\\"] }.joined())
         return object
     }
 
     /// Link and object file to create a dynamic library
     func link(object: String, dylib: String, platform: String, arch: String) -> (String, Double)? {
         let linkingStartTime = Date.timeIntervalSinceReferenceDate
-        let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
-        let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
-
-        var osSpecific = ""
-        switch platform {
-        case "iPhoneSimulator":
-            osSpecific = "-mios-simulator-version-min=9.0"
-        case "iPhoneOS":
-            osSpecific = "-miphoneos-version-min=9.0"
-        case "AppleTVSimulator":
-            osSpecific = "-mtvos-simulator-version-min=9.0"
-        case "AppleTVOS":
-            osSpecific = "-mtvos-version-min=9.0"
-        case "MacOSX":
-            let target = "" /*compileCommand
-                .replacingOccurrences(of: #"^.*( -target \S+).*$"#,
-                                      with: "$1", options: .regularExpression)*/
-            osSpecific = "-mmacosx-version-min=10.11"+target
-        case "WatchSimulator": fallthrough case "WatchOS":
-        fallthrough case "XRSimulator": fallthrough case "XROS":
-            osSpecific = ""
-        default:
-            _ = error("Invalid platform \(platform)")
-            // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
-        }
-
-        let toolchain = xcodeDev+"/Toolchains/XcodeDefault.xctoolchain"
+        let toolchain = Reloader.xcodeDev+"/Toolchains/XcodeDefault.xctoolchain"
         let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
         var testingOptions = ""
         if DispatchQueue.main.sync(execute: {
@@ -355,7 +331,7 @@ class NextCompiler {
             let otherOptions = DispatchQueue.main.sync(execute: { () -> String in
                 AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
                 return Defaults.deviceLibraries })
-            let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
+            let platformDev = "\(Reloader.xcodeDev)/Platforms/\(platform).platform/Developer"
             testingOptions = """
                 -F /tmp/InjectionNext.Products \
                 -F "\(platformDev)/Library/Frameworks" \
@@ -365,14 +341,14 @@ class NextCompiler {
 
         let linkCommand = """
             "\(toolchain)/usr/bin/clang" -arch "\(arch)" \
-                -Xlinker -dylib -isysroot "__PLATFORM__" \
-                -L"\(toolchain)/usr/lib/swift/\(platform.lowercased())" \(osSpecific) \
+                -Xlinker -dylib -isysroot "__PLATFORM__" \(Reloader.osSpecific) \
+                -L"\(toolchain)/usr/lib/swift/\(platform.lowercased())" \
                 -undefined dynamic_lookup -dead_strip -Xlinker -objc_abi_version \
                 -Xlinker 2 -Xlinker -interposable -fobjc-arc \(testingOptions) \
                 -fprofile-instr-generate \(object) -L "\(frameworks)" -F "\(frameworks)" \
                 -rpath "\(frameworks)" -o \"\(dylib)\" -rpath /usr/lib/swift \
                 -rpath "\(toolchain)/usr/lib/swift-5.5/\(platform.lowercased())"
-            """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
+            """.replacingOccurrences(of: "__PLATFORM__", with: Reloader.sysroot)
 
         if let errors = Popen.system(linkCommand, errors: true) {
             _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
