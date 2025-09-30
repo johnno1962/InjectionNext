@@ -24,7 +24,7 @@ struct InjectionMetricsTracker: Codable {
     var totalTimeMs: Double = 0
     var sourcePath: String
     var success: Bool = false
-    var notificationName: String = "INJECTION_METRICS_NOTIFICATION"
+    var notificationName: String = INJECTION_METRICS_NOTIFICATION
     let startTime: Double
 
     init(sourcePath: String) {
