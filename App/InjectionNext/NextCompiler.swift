@@ -16,23 +16,6 @@ import DLKit
 /// bring in injectingXCTest()
 struct Reloader {}
 
-/// Tracks timing metrics for injection process
-struct InjectionMetricsTracker: Codable {
-    var processingTimeMs: Double = 0
-    var compilationTimeMs: Double = 0
-    var linkingTimeMs: Double = 0
-    var totalTimeMs: Double = 0
-    var sourcePath: String
-    var success: Bool = false
-    var notificationName: String = INJECTION_METRICS_NOTIFICATION
-    let startTime: Double
-
-    init(sourcePath: String) {
-        self.sourcePath = sourcePath
-        self.startTime = Date.timeIntervalSinceReferenceDate
-    }
-}
-
 @discardableResult
 public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String = " ") -> Bool {
     var msg = what.map {"\($0)"}.joined(separator: separator)
@@ -64,8 +47,26 @@ class NextCompiler {
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
     static var lastError: String?, lastSource: String?
+
+    /// Tracks timing metrics for injection process
+    struct InjectionMetricsTracker: Codable {
+        var processingTimeMs: Double = 0
+        var compilationTimeMs: Double = 0
+        var linkingTimeMs: Double = 0
+        var totalTimeMs: Double = 0
+        var sourcePath: String
+        var success: Bool = false
+        var notificationName: String = INJECTION_METRICS_NOTIFICATION
+        let startTime: Double
+
+        init(sourcePath: String) {
+            self.sourcePath = sourcePath
+            self.startTime = Date.timeIntervalSinceReferenceDate
+        }
+    }
+
     /// Current metrics being tracked
-    static var currentMetrics: InjectionMetricsTracker?
+    var currentMetrics: InjectionMetricsTracker?
 
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
@@ -109,7 +110,7 @@ class NextCompiler {
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
         // Start tracking metrics
-        Self.currentMetrics = InjectionMetricsTracker(sourcePath: source)
+        currentMetrics = InjectionMetricsTracker(sourcePath: source)
 
         do {
             let result = try Fortify.protect { () -> Bool in
@@ -145,7 +146,7 @@ class NextCompiler {
             }
 
             // Calculate total time and send metrics
-            if var metrics = Self.currentMetrics {
+            if var metrics = currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = result
                 sendMetrics(metrics)
@@ -154,7 +155,7 @@ class NextCompiler {
             return result
         } catch {
             // Send failure metrics
-            if var metrics = Self.currentMetrics {
+            if var metrics = currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = false
                 sendMetrics(metrics)
@@ -232,10 +233,10 @@ class NextCompiler {
         #endif
         guard let object = recompile(source: source, platform: platform),
            tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
-           let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath, platform:
-            platform, arch: connected?.arch ?? compilerArch) else { return nil }
+           let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
+                    arch: connected?.arch ?? compilerArch) else { return nil }
 
-        Self.currentMetrics?.linkingTimeMs = linkingTimeMs
+        currentMetrics?.linkingTimeMs = linkingTimeMs
 
         prepared[sourceName] = dylib
         print("Prepared dylib: "+dylib)
@@ -285,8 +286,9 @@ class NextCompiler {
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
         // Track processing time (time from inject start to compilation start)
-        if var metrics = Self.currentMetrics {
-            metrics.processingTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+        if var metrics = currentMetrics {
+            metrics.processingTimeMs =
+                (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
         }
 
         // Call compiler process with timing
@@ -312,43 +314,31 @@ class NextCompiler {
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
         let compilationTimeMs = (now - compilationStartTime) * 1000
-        Self.currentMetrics?.compilationTimeMs = compilationTimeMs
+        currentMetrics?.compilationTimeMs = compilationTimeMs
         detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
-        Recompiler.linkerParams(from: stored.arguments
-            .map { $0[#"[ $()]"#, "\\\\"] }.joined())
+        let compilationCommand = (stored.arguments + languageSpecific)
+            .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")
+        Recompiler.extractLinkCommand(from: compilationCommand)
         return object
     }
 
     /// Link and object file to create a dynamic library
-    func link(object: String, dylib: String, platform: String, arch: String) -> (String, Double)? {
+    func link(object: String, dylib: String, arch: String) -> (String, Double)? {
         let linkingStartTime = Date.timeIntervalSinceReferenceDate
-        let toolchain = Reloader.xcodeDev+"/Toolchains/XcodeDefault.xctoolchain"
-        let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
-        var testingOptions = ""
+        var linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
         if DispatchQueue.main.sync(execute: {
             AppDelegate.ui.deviceTesting?.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync(execute: { () -> String in
+            let otherOptions = DispatchQueue.main.sync { () -> String in
                 AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
-                return Defaults.deviceLibraries })
-            let platformDev = "\(Reloader.xcodeDev)/Platforms/\(platform).platform/Developer"
-            testingOptions = """
+                return Defaults.deviceLibraries }
+            let platformDev = "\(Reloader.xcodeDev)/Platforms/\(Reloader.platform).platform/Developer"
+            linkCommand += """
                 -F /tmp/InjectionNext.Products \
                 -F "\(platformDev)/Library/Frameworks" \
                 -L "\(platformDev)/usr/lib" \(otherOptions)
-                """
+                """.replacingOccurrences(of: "__PLATFORM__", with: Reloader.sysroot)
         }
-
-        let linkCommand = """
-            "\(toolchain)/usr/bin/clang" -arch "\(arch)" \
-                -Xlinker -dylib -isysroot "__PLATFORM__" \(Reloader.osSpecific) \
-                -L"\(toolchain)/usr/lib/swift/\(platform.lowercased())" \
-                -undefined dynamic_lookup -dead_strip -Xlinker -objc_abi_version \
-                -Xlinker 2 -Xlinker -interposable -fobjc-arc \(testingOptions) \
-                -fprofile-instr-generate \(object) -L "\(frameworks)" -F "\(frameworks)" \
-                -rpath "\(frameworks)" -o \"\(dylib)\" -rpath /usr/lib/swift \
-                -rpath "\(toolchain)/usr/lib/swift-5.5/\(platform.lowercased())"
-            """.replacingOccurrences(of: "__PLATFORM__", with: Reloader.sysroot)
 
         if let errors = Popen.system(linkCommand, errors: true) {
             _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)

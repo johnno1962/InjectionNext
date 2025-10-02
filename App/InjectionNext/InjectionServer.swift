@@ -150,6 +150,7 @@ class InjectionServer: SimpleSocket {
                 if let platform = readString(), let arch = readString() {
                     log("Platform connected: "+platform)
                     self.platform = platform
+                    Reloader.arch = arch
                     self.arch = arch
                 } else {
                     error("**** Bad platform ****")
