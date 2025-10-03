@@ -55,6 +55,7 @@ class NextCompiler {
         var linkingTimeMs: Double = 0
         var totalTimeMs: Double = 0
         var sourcePath: String
+        var bazelTarget: String?
         var success: Bool = false
         var notificationName: String = INJECTION_METRICS_NOTIFICATION
         let startTime: Double
@@ -164,11 +165,43 @@ class NextCompiler {
         }
     }
 
+    /// Enrich metrics with Bazel target and normalize source path
+    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        let sourcePath = metrics.sourcePath
+
+        // Find workspace root to normalize the path
+        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
+            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
+            let fullPath = (sourcePath as NSString).standardizingPath
+
+            // Normalize sourcePath to workspace-relative (in place)
+            if fullPath.hasPrefix(workspaceRootPath + "/") {
+                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
+            } else {
+                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
+            }
+
+            // Try to discover the Bazel app target
+            do {
+                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
+                if let appTarget = try? queryHandler.discoverAppTarget(for: sourcePath) {
+                    metrics.bazelTarget = appTarget
+                }
+            } catch {
+                // Bazel discovery failed, metrics will have nil bazelTarget
+                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+            }
+        }
+    }
+
     /// Send metrics to all connected clients
     func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        var enrichedMetrics = metrics
+        enrichMetrics(&enrichedMetrics)
+
         let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
-        guard let jsonData = try? encoder.encode(metrics),
+        guard let jsonData = try? encoder.encode(enrichedMetrics),
               let jsonString = String(data: jsonData, encoding: .utf8) else {
             return
         }
