@@ -187,6 +187,9 @@ class InjectionServer: SimpleSocket {
                     log("Auto-watching project: \(projectRoot)")
                     DispatchQueue.main.sync {
                         AppDelegate.ui.watch(path: projectRoot)
+                        AppDelegate.ui.launchAlert?
+                            .buttons.last?.performClick(self)
+                        AppDelegate.ui.launchAlert = nil
                     }
                 } else {
                     error("**** Bad root ****")
