@@ -41,6 +41,7 @@ class InjectionServer: SimpleSocket {
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
+    var bazelTarget: String?
 
     /// Pops up an alert panel for networking
     @discardableResult
@@ -197,6 +198,15 @@ class InjectionServer: SimpleSocket {
             case .detail:
                 if let detail = readString() {
                     setenv(INJECTION_DETAIL, detail, 1)
+                }
+            case .bazelTarget:
+                if let target = readString() {
+                    log("Received Bazel target: \(target)")
+                    self.bazelTarget = target
+                    // Set environment variable so Bazel parsers can use this target
+                    setenv(INJECTION_BAZEL_TARGET, target, 1)
+                } else {
+                    error("**** Bad Bazel target ****")
                 }
             case .injected:
                 AppDelegate.ui.setMenuIcon(.ok)

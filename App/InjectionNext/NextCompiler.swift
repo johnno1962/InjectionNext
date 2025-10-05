@@ -49,12 +49,12 @@ class NextCompiler {
     static var lastError: String?, lastSource: String?
 
     /// Tracks timing metrics for injection process
-    struct InjectionMetricsTracker: Codable {
-        var processingTimeMs: Double = 0
+    final class InjectionMetricsTracker: Codable {
         var compilationTimeMs: Double = 0
         var linkingTimeMs: Double = 0
         var totalTimeMs: Double = 0
         var sourcePath: String
+        var bazelTarget: String?
         var success: Bool = false
         var notificationName: String = INJECTION_METRICS_NOTIFICATION
         let startTime: Double
@@ -146,7 +146,7 @@ class NextCompiler {
             }
 
             // Calculate total time and send metrics
-            if var metrics = currentMetrics {
+            if let metrics = currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = result
                 sendMetrics(metrics)
@@ -155,7 +155,7 @@ class NextCompiler {
             return result
         } catch {
             // Send failure metrics
-            if var metrics = currentMetrics {
+            if let metrics = currentMetrics {
                 metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = false
                 sendMetrics(metrics)
@@ -164,11 +164,42 @@ class NextCompiler {
         }
     }
 
+    /// Enrich metrics with Bazel target and normalize source path
+    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        let sourcePath = metrics.sourcePath
+
+        // Find workspace root to normalize the path
+        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
+            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
+            let fullPath = (sourcePath as NSString).standardizingPath
+
+            // Normalize sourcePath to workspace-relative (in place)
+            if fullPath.hasPrefix(workspaceRootPath + "/") {
+                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
+            } else {
+                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
+            }
+
+            // Try to discover the Bazel app target
+            do {
+                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
+                queryHandler.autoDiscoverAppTarget(for: sourcePath)
+                metrics.bazelTarget = queryHandler.getAppTarget()
+            } catch {
+                // Bazel discovery failed, metrics will have nil bazelTarget
+                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+            }
+        }
+    }
+
     /// Send metrics to all connected clients
     func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        var enrichedMetrics = metrics
+        enrichMetrics(&enrichedMetrics)
+
         let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
-        guard let jsonData = try? encoder.encode(metrics),
+        guard let jsonData = try? encoder.encode(enrichedMetrics),
               let jsonString = String(data: jsonData, encoding: .utf8) else {
             return
         }
@@ -231,8 +262,13 @@ class NextCompiler {
         #else
         let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
         #endif
-        guard let object = recompile(source: source, platform: platform),
-           tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
+        guard let object = recompile(source: source, platform: platform) else { return nil }
+        // Track compilation time
+        if let startTime = currentMetrics?.startTime {
+            currentMetrics?.compilationTimeMs =
+                (Date.timeIntervalSinceReferenceDate - startTime) * 1000
+        }
+        guard tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
            let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
                     arch: connected?.arch ?? compilerArch) else { return nil }
 
@@ -285,12 +321,6 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
 
-        // Track processing time (time from inject start to compilation start)
-        if var metrics = currentMetrics {
-            metrics.processingTimeMs =
-                (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
-        }
-
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
@@ -314,7 +344,6 @@ class NextCompiler {
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
         let compilationTimeMs = (now - compilationStartTime) * 1000
-        currentMetrics?.compilationTimeMs = compilationTimeMs
         detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
         let compilationCommand = (stored.arguments + languageSpecific)

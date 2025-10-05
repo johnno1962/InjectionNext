@@ -81,6 +81,10 @@ open class InjectionNext: SimpleSocket {
             writeCommand(InjectionResponse.detail.rawValue,
                          with: String(cString: detail))
         }
+        if let bazelTarget = getenv(INJECTION_BAZEL_TARGET) {
+            writeCommand(InjectionResponse.bazelTarget.rawValue,
+                         with: String(cString: bazelTarget))
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
         #if !SWIFT_PACKAGE
