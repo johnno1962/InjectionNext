@@ -124,6 +124,13 @@ class InjectionServer: SimpleSocket {
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingFilesChanged.removeAll()
                 }
+                // Reset repository locked state on app reconnect (rebuild)
+                NextCompiler.compileQueue.async {
+                    if NextCompiler.isRepositoryLocked {
+                        NextCompiler.isRepositoryLocked = false
+                        log("Repository lock cleared - injection resumed")
+                    }
+                }
                 AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
                 AppDelegate.ui.setMenuIcon(MonitorXcode
