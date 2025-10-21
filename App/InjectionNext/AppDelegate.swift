@@ -50,6 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc let defaults = Defaults.userDefaults
 
     @IBOutlet weak var codeSignBox: NSComboBox!
+    var launchAlert: NSAlert?
 
     /// Code signing ID as parsed from the code signing box. If the content of the box is not
     /// parsable as SHA1 code signing ID, an empty string.
@@ -87,6 +88,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        librariesField.stringValue = Defaults.deviceLibraries
+        let enableDevicesSticky = false
+        if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
+            enableDevicesItem.state = .on
+        }
+        deviceEnable(nil)
         if let xcodePath = NSRunningApplication
             .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
             .first?.bundleURL?.path {
@@ -95,20 +102,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             selectXcodeItem.toolTip = Defaults.xcodePath
             if updatePatchUnpatch() == .unpatched {
-                InjectionServer.error("""
+                launchAlert = NSAlert()
+                launchAlert?.messageText = """
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
-                    """)
+                    """
+                launchAlert?.addButton(withTitle: "OK")
+                launchAlert?.runModal()
             }
         }
  
-        librariesField.stringValue = Defaults.deviceLibraries
-        let enableDevicesSticky = false
-        if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
-            enableDevicesItem.state = .on
-        }
-        deviceEnable(nil)
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath

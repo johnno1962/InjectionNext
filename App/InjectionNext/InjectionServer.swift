@@ -150,6 +150,7 @@ class InjectionServer: SimpleSocket {
                 if let platform = readString(), let arch = readString() {
                     log("Platform connected: "+platform)
                     self.platform = platform
+                    Reloader.arch = arch
                     self.arch = arch
                 } else {
                     error("**** Bad platform ****")
@@ -186,6 +187,9 @@ class InjectionServer: SimpleSocket {
                     log("Auto-watching project: \(projectRoot)")
                     DispatchQueue.main.sync {
                         AppDelegate.ui.watch(path: projectRoot)
+                        AppDelegate.ui.launchAlert?
+                            .buttons.last?.performClick(self)
+                        AppDelegate.ui.launchAlert = nil
                     }
                 } else {
                     error("**** Bad root ****")
@@ -193,6 +197,15 @@ class InjectionServer: SimpleSocket {
             case .detail:
                 if let detail = readString() {
                     setenv(INJECTION_DETAIL, detail, 1)
+                }
+            case .bazelTarget:
+                if let target = readString() {
+                    log("Received Bazel target: \(target)")
+                    BazelActionQueryHandler.cachedAppTarget = target
+                    // Set environment variable so Bazel parsers can use this target
+                    setenv(INJECTION_BAZEL_TARGET, target, 1)
+                } else {
+                    error("**** Bad Bazel target ****")
                 }
             case .injected:
                 AppDelegate.ui.setMenuIcon(.ok)

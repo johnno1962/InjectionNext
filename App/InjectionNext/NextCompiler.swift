@@ -48,6 +48,26 @@ class NextCompiler {
     /// Last build error.
     static var lastError: String?, lastSource: String?
 
+    /// Tracks timing metrics for injection process
+    final class InjectionMetricsTracker: Codable {
+        var compilationTimeMs: Double = 0
+        var linkingTimeMs: Double = 0
+        var totalTimeMs: Double = 0
+        var sourcePath: String
+        var bazelTarget: String?
+        var success: Bool = false
+        var notificationName: String = INJECTION_METRICS_NOTIFICATION
+        let startTime: Double
+
+        init(sourcePath: String) {
+            self.sourcePath = sourcePath
+            self.startTime = Date.timeIntervalSinceReferenceDate
+        }
+    }
+
+    /// Current metrics being tracked
+    var currentMetrics: InjectionMetricsTracker?
+
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available
@@ -89,8 +109,11 @@ class NextCompiler {
 
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
+        // Start tracking metrics
+        currentMetrics = InjectionMetricsTracker(sourcePath: source)
+
         do {
-            return try Fortify.protect { () -> Bool in
+            let result = try Fortify.protect { () -> Bool in
                 for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
                         = prepare(source: source, connected: client),
@@ -121,8 +144,67 @@ class NextCompiler {
                 Self.lastSource = source
                 return true
             }
+
+            // Calculate total time and send metrics
+            if let metrics = currentMetrics {
+                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+                metrics.success = result
+                sendMetrics(metrics)
+            }
+
+            return result
         } catch {
+            // Send failure metrics
+            if let metrics = currentMetrics {
+                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
+                metrics.success = false
+                sendMetrics(metrics)
+            }
             return self.error(error)
+        }
+    }
+
+    /// Enrich metrics with Bazel target and normalize source path
+    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        let sourcePath = metrics.sourcePath
+
+        // Find workspace root to normalize the path
+        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
+            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
+            let fullPath = (sourcePath as NSString).standardizingPath
+
+            // Normalize sourcePath to workspace-relative (in place)
+            if fullPath.hasPrefix(workspaceRootPath + "/") {
+                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
+            } else {
+                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
+            }
+
+            // Try to discover the Bazel app target
+            do {
+                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
+                queryHandler.autoDiscoverAppTarget(for: sourcePath)
+                metrics.bazelTarget = queryHandler.getAppTarget()
+            } catch {
+                // Bazel discovery failed, metrics will have nil bazelTarget
+                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+            }
+        }
+    }
+
+    /// Send metrics to all connected clients
+    func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        var enrichedMetrics = metrics
+        enrichMetrics(&enrichedMetrics)
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let jsonData = try? encoder.encode(enrichedMetrics),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return
+        }
+        for client in InjectionServer.currentClients {
+            client?.sendCommand(.metrics, with: jsonString)
         }
     }
 
@@ -180,10 +262,17 @@ class NextCompiler {
         #else
         let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
         #endif
-        guard let object = recompile(source: source, platform: platform),
-           tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
-           let dylib = link(object: object, dylib: dylibPath, platform:
-            platform, arch: connected?.arch ?? compilerArch) else { return nil }
+        guard let object = recompile(source: source, platform: platform) else { return nil }
+        // Track compilation time
+        if let startTime = currentMetrics?.startTime {
+            currentMetrics?.compilationTimeMs =
+                (Date.timeIntervalSinceReferenceDate - startTime) * 1000
+        }
+        guard tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
+           let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
+                    arch: connected?.arch ?? compilerArch) else { return nil }
+
+        currentMetrics?.linkingTimeMs = linkingTimeMs
 
         prepared[sourceName] = dylib
         print("Prepared dylib: "+dylib)
@@ -254,66 +343,31 @@ class NextCompiler {
 
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
-        detail(String(format: "⚡ Compiled in %.0fms",
-                      (now - compilationStartTime) * 1000))
+        let compilationTimeMs = (now - compilationStartTime) * 1000
+        detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
+        let compilationCommand = (stored.arguments + languageSpecific)
+            .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")
+        Recompiler.extractLinkCommand(from: compilationCommand)
         return object
     }
 
     /// Link and object file to create a dynamic library
-    func link(object: String, dylib: String, platform: String, arch: String) -> String? {
-        let xcodeDev = Defaults.xcodePath+"/Contents/Developer"
-        let sdk = "\(xcodeDev)/Platforms/\(platform).platform/Developer/SDKs/\(platform).sdk"
-
-        var osSpecific = ""
-        switch platform {
-        case "iPhoneSimulator":
-            osSpecific = "-mios-simulator-version-min=9.0"
-        case "iPhoneOS":
-            osSpecific = "-miphoneos-version-min=9.0"
-        case "AppleTVSimulator":
-            osSpecific = "-mtvos-simulator-version-min=9.0"
-        case "AppleTVOS":
-            osSpecific = "-mtvos-version-min=9.0"
-        case "MacOSX":
-            let target = "" /*compileCommand
-                .replacingOccurrences(of: #"^.*( -target \S+).*$"#,
-                                      with: "$1", options: .regularExpression)*/
-            osSpecific = "-mmacosx-version-min=10.11"+target
-        case "WatchSimulator": fallthrough case "WatchOS":
-        fallthrough case "XRSimulator": fallthrough case "XROS":
-            osSpecific = ""
-        default:
-            _ = error("Invalid platform \(platform)")
-            // -Xlinker -bundle_loader -Xlinker \"\(Bundle.main.executablePath!)\""
-        }
-
-        let toolchain = xcodeDev+"/Toolchains/XcodeDefault.xctoolchain"
-        let frameworks = Bundle.main.privateFrameworksPath ?? "/tmp"
-        var testingOptions = ""
+    func link(object: String, dylib: String, arch: String) -> (String, Double)? {
+        let linkingStartTime = Date.timeIntervalSinceReferenceDate
+        var linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
         if DispatchQueue.main.sync(execute: {
             AppDelegate.ui.deviceTesting?.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync(execute: { () -> String in
+            let otherOptions = DispatchQueue.main.sync { () -> String in
                 AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
-                return Defaults.deviceLibraries })
-            let platformDev = "\(xcodeDev)/Platforms/\(platform).platform/Developer"
-            testingOptions = """
+                return Defaults.deviceLibraries }
+            let platformDev = "\(Reloader.xcodeDev)/Platforms/\(Reloader.platform).platform/Developer"
+            linkCommand += """
                 -F /tmp/InjectionNext.Products \
                 -F "\(platformDev)/Library/Frameworks" \
                 -L "\(platformDev)/usr/lib" \(otherOptions)
-                """
+                """.replacingOccurrences(of: "__PLATFORM__", with: Reloader.sysroot)
         }
-
-        let linkCommand = """
-            "\(toolchain)/usr/bin/clang" -arch "\(arch)" \
-                -Xlinker -dylib -isysroot "__PLATFORM__" \
-                -L"\(toolchain)/usr/lib/swift/\(platform.lowercased())" \(osSpecific) \
-                -undefined dynamic_lookup -dead_strip -Xlinker -objc_abi_version \
-                -Xlinker 2 -Xlinker -interposable -fobjc-arc \(testingOptions) \
-                -fprofile-instr-generate \(object) -L "\(frameworks)" -F "\(frameworks)" \
-                -rpath "\(frameworks)" -o \"\(dylib)\" -rpath /usr/lib/swift \
-                -rpath "\(toolchain)/usr/lib/swift-5.5/\(platform.lowercased())"
-            """.replacingOccurrences(of: "__PLATFORM__", with: sdk)
 
         if let errors = Popen.system(linkCommand, errors: true) {
             _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
@@ -321,7 +375,8 @@ class NextCompiler {
             return nil
         }
 
-        return dylib
+        let linkingTimeMs = (Date.timeIntervalSinceReferenceDate - linkingStartTime) * 1000
+        return (dylib, linkingTimeMs)
     }
 
     /// Codesign a dynamic library

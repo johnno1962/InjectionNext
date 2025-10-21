@@ -81,6 +81,10 @@ open class InjectionNext: SimpleSocket {
             writeCommand(InjectionResponse.detail.rawValue,
                          with: String(cString: detail))
         }
+        if let bazelTarget = getenv(INJECTION_BAZEL_TARGET) {
+            writeCommand(InjectionResponse.bazelTarget.rawValue,
+                         with: String(cString: bazelTarget))
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
         #if !SWIFT_PACKAGE
@@ -148,6 +152,19 @@ open class InjectionNext: SimpleSocket {
                 let dylib = NSTemporaryDirectory() + dylibName
                 try! data.write(to: URL(fileURLWithPath: dylib))
                 injectAndSweep(dylib)
+            case .metrics:
+                guard let metricsJSON = readString() else {
+                    return error("Unable to read metrics JSON")
+                }
+                if let data = metricsJSON.data(using: .utf8),
+                   let metricsDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let notificationName = metricsDict["notification_name"] as? String {
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name(notificationName),
+                        object: nil,
+                        userInfo: metricsDict
+                    )
+                }
             case .EOF:
                 return
             default:

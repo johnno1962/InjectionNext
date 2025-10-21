@@ -40,6 +40,7 @@ typedef NS_ENUM(int, InjectionCommand) {
     InjectionInject,
     InjectionXcodePath,
     InjectionSendFile,
+    InjectionMetrics,
 
     InjectionInvalid = 1000,
 
@@ -55,6 +56,7 @@ typedef NS_ENUM(int, InjectionResponse) {
     InjectionUnhide,
     InjectionProjectRoot,
     InjectionDetail,
+    InjectionBazelTarget,
 
     InjectionExit = ~0
 };
