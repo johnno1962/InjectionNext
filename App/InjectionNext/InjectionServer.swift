@@ -126,7 +126,8 @@ class InjectionServer: SimpleSocket {
                     // Reset repository locked state on app reconnect (relaunch)
                     if InjectionHybrid.isRepositoryLocked {
                         InjectionHybrid.isRepositoryLocked = false
-                        log("Repository lock cleared - injection resumed")
+                        InjectionHybrid.gitLockPath = nil
+                        self.log("Repository lock cleared - injection resumed")
                     }
                 }
                 AppDelegate.ui.setMenuIcon(.ok)

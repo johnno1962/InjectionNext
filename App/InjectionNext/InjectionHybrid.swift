@@ -54,6 +54,8 @@ class InjectionHybrid: InjectionBase {
     static var pendingFilesChanged = [String]()
     /// Repository locked state - stops processing until app reconnects
     static var isRepositoryLocked = false
+    /// Path to detected git lock file - used to check if git operation still active
+    static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
     var liteRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
@@ -68,25 +70,38 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        // Detect git lock files
+        // Detect git lock files - record path for later checking
         if source.hasSuffix(".lock") &&
            source.contains("/.git/") {
-            Self.isRepositoryLocked = true
-            Self.pendingFilesChanged.removeAll()
-            log("""
-                Git repository locked (branch switch/merge/rebase detected). \
-                File processing stopped. Please relaunch your app to resume injection.
-                """)
+            Self.gitLockPath = source
             return
         }
 
-        // Skip processing if repository is locked
+        // Skip processing if repository is already locked
         if Self.isRepositoryLocked {
             log("""
                 File processing stopped due to git lock. \
                 Please relaunch your app to resume injection.
                 """)
             return
+        }
+
+        // Check if source file is changing while git lock still exists
+        if let lockPath = Self.gitLockPath {
+            if FileManager.default.fileExists(atPath: lockPath) {
+                // Source files changing while git lock exists = branch switch/merge/rebase
+                Self.isRepositoryLocked = true
+                Self.pendingFilesChanged.removeAll()
+                Self.gitLockPath = nil
+                log("""
+                    Git operation in progress (branch switch/merge/rebase detected). \
+                    File processing stopped. Please relaunch your app to resume injection.
+                    """)
+                return
+            } else {
+                // Lock file is gone - was probably just a commit
+                Self.gitLockPath = nil
+            }
         }
 
         guard !AppDelegate.watchers.isEmpty,
