@@ -47,8 +47,6 @@ class NextCompiler {
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
     static var lastError: String?, lastSource: String?
-    /// Repository locked state - stops processing until app reconnects
-    static var isRepositoryLocked = false
 
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
@@ -74,42 +72,7 @@ class NextCompiler {
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
-
-    /// Check if the repository containing the source file has a git lock
-    private func checkGitLock(for source: String) -> Bool {
-        let fm = FileManager.default
-        var currentPath = URL(fileURLWithPath: source)
-            .deletingLastPathComponent().path
-
-        // Walk up directory tree looking for .git directory
-        while currentPath != "/" {
-            let gitDir = currentPath + "/.git"
-
-            if fm.fileExists(atPath: gitDir) {
-                // Check for common git lock files
-                let lockFiles = [
-                    gitDir + "/index.lock",
-                    gitDir + "/HEAD.lock",
-                    gitDir + "/config.lock"
-                ]
-
-                for lockFile in lockFiles {
-                    if fm.fileExists(atPath: lockFile) {
-                        return true
-                    }
-                }
-                // Found .git directory, no locks present
-                return false
-            }
-
-            currentPath = URL(fileURLWithPath: currentPath)
-                .deletingLastPathComponent().path
-        }
-
-        // No .git directory found
-        return false
-    }
-
+    
     func store(compilation: Compilation, for source: String) {
         if lastCompilation != compilation {
             lastCompilation = compilation
@@ -125,24 +88,6 @@ class NextCompiler {
 
     /// Main entry point called by MonitorXcode
     func inject(source: String) -> Bool {
-        // If repository is already locked, reject all processing
-        if Self.isRepositoryLocked {
-            return false
-        }
-
-        // Check for git locks before processing
-        if checkGitLock(for: source) {
-            Self.isRepositoryLocked = true
-            // Clear pending files queue
-            DispatchQueue.main.async {
-                InjectionHybrid.pendingFilesChanged.removeAll()
-            }
-            return error("""
-                Git repository locked (branch switch/merge/rebase detected). \
-                File processing stopped. Please rebuild your app to resume injection.
-                """)
-        }
-
         do {
             return try Fortify.protect { () -> Bool in
                 for client in InjectionServer.currentClients.reversed() {
