@@ -75,13 +75,17 @@ class InjectionHybrid: InjectionBase {
             Self.pendingFilesChanged.removeAll()
             log("""
                 Git repository locked (branch switch/merge/rebase detected). \
-                File processing stopped. Please rebuild your app to resume injection.
+                File processing stopped. Please relaunch your app to resume injection.
                 """)
             return
         }
 
         // Skip processing if repository is locked
         if Self.isRepositoryLocked {
+            log("""
+                File processing stopped due to git lock. \
+                Please relaunch your app to resume injection.
+                """)
             return
         }
 

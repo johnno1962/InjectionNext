@@ -123,7 +123,7 @@ class InjectionServer: SimpleSocket {
                 }
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingFilesChanged.removeAll()
-                    // Reset repository locked state on app reconnect (rebuild)
+                    // Reset repository locked state on app reconnect (relaunch)
                     if InjectionHybrid.isRepositoryLocked {
                         InjectionHybrid.isRepositoryLocked = false
                         log("Repository lock cleared - injection resumed")
