@@ -123,6 +123,12 @@ class InjectionServer: SimpleSocket {
                 }
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingFilesChanged.removeAll()
+                    // Reset repository locked state on app reconnect (relaunch)
+                    if InjectionHybrid.isRepositoryLocked {
+                        InjectionHybrid.isRepositoryLocked = false
+                        InjectionHybrid.gitLockPath = nil
+                        self.log("Repository lock cleared - injection resumed")
+                    }
                 }
                 AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
