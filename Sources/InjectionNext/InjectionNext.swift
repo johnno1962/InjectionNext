@@ -85,6 +85,19 @@ open class InjectionNext: SimpleSocket {
             writeCommand(InjectionResponse.bazelTarget.rawValue,
                          with: String(cString: bazelTarget))
         }
+        
+        if getenv(INJECTION_TRACE) != nil {
+            #if canImport(Nimble)
+            SwiftTrace.typeLookup = getenv(INJECTION_DECORATE) != nil
+            Reloader.traceHook = { (injected, name) in
+                let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
+                detail("SwiftTracing \(name)")
+                return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
+            }
+            #else
+            error("Tracing is only available when using copy_bundle.sh.")
+            #endif
+        }
 
         log("\(platform) connection to app established, waiting for commands.")
         #if !SWIFT_PACKAGE

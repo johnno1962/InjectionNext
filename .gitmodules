@@ -10,3 +10,6 @@
 [submodule "SwiftRegex5"]
 	path = SwiftRegex5
 	url = https://github.com/johnno1962/SwiftRegex5
+[submodule "SwiftTrace"]
+	path = SwiftTrace
+	url = https://github.com/johnno1962/SwiftTrace

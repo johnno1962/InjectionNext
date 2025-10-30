@@ -68,7 +68,6 @@
 		BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841C2C4FE802000F3124 /* Interposing.swift */; };
 		BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841D2C4FE802000F3124 /* Iterators.swift */; };
 		BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */; };
-		BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84382C4FE880000F3124 /* fishhook.c */; };
 		BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84302C4FE849000F3124 /* DLKitC.c */; };
 		BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84312C4FE849000F3124 /* trie_dladdr.mm */; };
 		BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84322C4FE849000F3124 /* trie_dlops.mm */; };
@@ -80,6 +79,27 @@
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
+		BBF6E13D2EB3C58C0021C02D /* SwiftLifetime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1362EB3C58C0021C02D /* SwiftLifetime.swift */; };
+		BBF6E13E2EB3C58C0021C02D /* SwiftTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E13C2EB3C58C0021C02D /* SwiftTrace.swift */; };
+		BBF6E13F2EB3C58C0021C02D /* SwiftMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1372EB3C58C0021C02D /* SwiftMeta.swift */; };
+		BBF6E1402EB3C58C0021C02D /* StringIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1312EB3C58C0021C02D /* StringIndex.swift */; };
+		BBF6E1412EB3C58C0021C02D /* SwiftInvoke.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1352EB3C58C0021C02D /* SwiftInvoke.swift */; };
+		BBF6E1422EB3C58C0021C02D /* SwiftStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1382EB3C58C0021C02D /* SwiftStack.swift */; };
+		BBF6E1432EB3C58C0021C02D /* SwiftSwizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E13A2EB3C58C0021C02D /* SwiftSwizzle.swift */; };
+		BBF6E1442EB3C58C0021C02D /* SwiftInterpose.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1342EB3C58C0021C02D /* SwiftInterpose.swift */; };
+		BBF6E1452EB3C58C0021C02D /* EasyPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1302EB3C58C0021C02D /* EasyPointer.swift */; };
+		BBF6E1462EB3C58C0021C02D /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1332EB3C58C0021C02D /* SwiftAspects.swift */; };
+		BBF6E1472EB3C58C0021C02D /* SwiftArgs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1322EB3C58C0021C02D /* SwiftArgs.swift */; };
+		BBF6E1482EB3C58C0021C02D /* SwiftStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1392EB3C58C0021C02D /* SwiftStats.swift */; };
+		BBF6E1532EB3C5C80021C02D /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E14A2EB3C5C80021C02D /* fishhook.c */; };
+		BBF6E1542EB3C5C80021C02D /* SwiftTrace.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E14C2EB3C5C80021C02D /* SwiftTrace.mm */; };
+		BBF6E1552EB3C5C80021C02D /* fast_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1492EB3C5C80021C02D /* fast_dladdr.mm */; };
+		BBF6E1562EB3C5C80021C02D /* xt_forwarding_trampoline_arm64.s in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1502EB3C5C80021C02D /* xt_forwarding_trampoline_arm64.s */; };
+		BBF6E1572EB3C5C80021C02D /* ObjCBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E14B2EB3C5C80021C02D /* ObjCBridge.mm */; };
+		BBF6E1582EB3C5C80021C02D /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1522EB3C5C80021C02D /* xt_forwarding_trampoline_x86.s */; };
+		BBF6E1592EB3C5C80021C02D /* xt_forwarding_trampoline_arm7.s in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E14F2EB3C5C80021C02D /* xt_forwarding_trampoline_arm7.s */; };
+		BBF6E15A2EB3C5C80021C02D /* xt_forwarding_trampoline_x64.s in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E1512EB3C5C80021C02D /* xt_forwarding_trampoline_x64.s */; };
+		BBF6E15B2EB3C5C80021C02D /* Trampolines.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF6E14E2EB3C5C80021C02D /* Trampolines.mm */; };
 		BBFAC35E2E3156B100F86DE6 /* BazelInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */; };
 		BBFAC35F2E3156B100F86DE6 /* BazelAQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */; };
 		BBFAC3602E3156B100F86DE6 /* FilenameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35C2E3156B100F86DE6 /* FilenameMatcher.swift */; };
@@ -198,8 +218,6 @@
 		BBDD84312C4FE849000F3124 /* trie_dladdr.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dladdr.mm; path = ../../DLKit/Sources/DLKitC/trie_dladdr.mm; sourceTree = "<group>"; };
 		BBDD84322C4FE849000F3124 /* trie_dlops.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dlops.mm; path = ../../DLKit/Sources/DLKitC/trie_dlops.mm; sourceTree = "<group>"; };
 		BBDD84362C4FE863000F3124 /* DLKitC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLKitC.h; path = ../../DLKit/Sources/DLKitC/include/DLKitC.h; sourceTree = "<group>"; };
-		BBDD84372C4FE880000F3124 /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fishhook.h; path = ../../fishhook/fishhook.h; sourceTree = "<group>"; };
-		BBDD84382C4FE880000F3124 /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fishhook.c; path = ../../fishhook/fishhook.c; sourceTree = "<group>"; };
 		BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionBoot.mm; path = ../../InjectionLite/Sources/InjectionImplC/InjectionBoot.mm; sourceTree = "<group>"; };
 		BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionImplC.h; path = ../../InjectionLite/Sources/InjectionImplC/include/InjectionImplC.h; sourceTree = "<group>"; };
 		BBDD84532C4FEB16000F3124 /* TupleRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TupleRegex.swift; path = ../../SwiftRegex5/SwiftRegex5.playground/Sources/TupleRegex.swift; sourceTree = "<group>"; };
@@ -211,6 +229,30 @@
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
+		BBF6E1302EB3C58C0021C02D /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EasyPointer.swift; path = ../SwiftTrace/SwiftTrace/EasyPointer.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1312EB3C58C0021C02D /* StringIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StringIndex.swift; path = ../SwiftTrace/SwiftTrace/StringIndex.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1322EB3C58C0021C02D /* SwiftArgs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftArgs.swift; path = ../SwiftTrace/SwiftTrace/SwiftArgs.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1332EB3C58C0021C02D /* SwiftAspects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftAspects.swift; path = ../SwiftTrace/SwiftTrace/SwiftAspects.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1342EB3C58C0021C02D /* SwiftInterpose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftInterpose.swift; path = ../SwiftTrace/SwiftTrace/SwiftInterpose.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1352EB3C58C0021C02D /* SwiftInvoke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftInvoke.swift; path = ../SwiftTrace/SwiftTrace/SwiftInvoke.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1362EB3C58C0021C02D /* SwiftLifetime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftLifetime.swift; path = ../SwiftTrace/SwiftTrace/SwiftLifetime.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1372EB3C58C0021C02D /* SwiftMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftMeta.swift; path = ../SwiftTrace/SwiftTrace/SwiftMeta.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1382EB3C58C0021C02D /* SwiftStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftStack.swift; path = ../SwiftTrace/SwiftTrace/SwiftStack.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1392EB3C58C0021C02D /* SwiftStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftStats.swift; path = ../SwiftTrace/SwiftTrace/SwiftStats.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E13A2EB3C58C0021C02D /* SwiftSwizzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftSwizzle.swift; path = ../SwiftTrace/SwiftTrace/SwiftSwizzle.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E13B2EB3C58C0021C02D /* SwiftTrace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SwiftTrace.h; path = ../SwiftTrace/SwiftTraceGuts/include/SwiftTrace.h; sourceTree = SOURCE_ROOT; };
+		BBF6E13C2EB3C58C0021C02D /* SwiftTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SwiftTrace.swift; path = ../SwiftTrace/SwiftTrace/SwiftTrace.swift; sourceTree = SOURCE_ROOT; };
+		BBF6E1492EB3C5C80021C02D /* fast_dladdr.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = fast_dladdr.mm; path = ../SwiftTrace/SwiftTraceGuts/fast_dladdr.mm; sourceTree = SOURCE_ROOT; };
+		BBF6E14A2EB3C5C80021C02D /* fishhook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = fishhook.c; path = ../SwiftTrace/SwiftTraceGuts/fishhook.c; sourceTree = SOURCE_ROOT; };
+		BBF6E14B2EB3C5C80021C02D /* ObjCBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = ObjCBridge.mm; path = ../SwiftTrace/SwiftTraceGuts/ObjCBridge.mm; sourceTree = SOURCE_ROOT; };
+		BBF6E14C2EB3C5C80021C02D /* SwiftTrace.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SwiftTrace.mm; path = ../SwiftTrace/SwiftTraceGuts/SwiftTrace.mm; sourceTree = SOURCE_ROOT; };
+		BBF6E14D2EB3C5C80021C02D /* SwiftTrace-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "SwiftTrace-Swift.h"; path = "../SwiftTrace/SwiftTraceGuts/SwiftTrace-Swift.h"; sourceTree = SOURCE_ROOT; };
+		BBF6E14E2EB3C5C80021C02D /* Trampolines.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = Trampolines.mm; path = ../SwiftTrace/SwiftTraceGuts/Trampolines.mm; sourceTree = SOURCE_ROOT; };
+		BBF6E14F2EB3C5C80021C02D /* xt_forwarding_trampoline_arm7.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; name = xt_forwarding_trampoline_arm7.s; path = ../SwiftTrace/SwiftTraceGuts/xt_forwarding_trampoline_arm7.s; sourceTree = SOURCE_ROOT; };
+		BBF6E1502EB3C5C80021C02D /* xt_forwarding_trampoline_arm64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; name = xt_forwarding_trampoline_arm64.s; path = ../SwiftTrace/SwiftTraceGuts/xt_forwarding_trampoline_arm64.s; sourceTree = SOURCE_ROOT; };
+		BBF6E1512EB3C5C80021C02D /* xt_forwarding_trampoline_x64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; name = xt_forwarding_trampoline_x64.s; path = ../SwiftTrace/SwiftTraceGuts/xt_forwarding_trampoline_x64.s; sourceTree = SOURCE_ROOT; };
+		BBF6E1522EB3C5C80021C02D /* xt_forwarding_trampoline_x86.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; name = xt_forwarding_trampoline_x86.s; path = ../SwiftTrace/SwiftTraceGuts/xt_forwarding_trampoline_x86.s; sourceTree = SOURCE_ROOT; };
+		BBF6E15C2EB3C68E0021C02D /* fishhook.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fishhook.h; path = ../SwiftTrace/SwiftTraceGuts/include/fishhook.h; sourceTree = SOURCE_ROOT; };
 		BBFAC3592E3156B100F86DE6 /* BazelActionQueryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelActionQueryHandler.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelActionQueryHandler.swift; sourceTree = SOURCE_ROOT; };
 		BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelAQueryParser.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelAQueryParser.swift; sourceTree = SOURCE_ROOT; };
 		BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelInterface.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelInterface.swift; sourceTree = SOURCE_ROOT; };
@@ -366,12 +408,34 @@
 				BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */,
 				BB1E423C2DAD02C60085C9B9 /* LogParser.swift */,
 				BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */,
-				BBDD84382C4FE880000F3124 /* fishhook.c */,
-				BBDD84372C4FE880000F3124 /* fishhook.h */,
 				BBDD84302C4FE849000F3124 /* DLKitC.c */,
 				BBDD84362C4FE863000F3124 /* DLKitC.h */,
 				BBDD84312C4FE849000F3124 /* trie_dladdr.mm */,
 				BBDD84322C4FE849000F3124 /* trie_dlops.mm */,
+				BBF6E1302EB3C58C0021C02D /* EasyPointer.swift */,
+				BBF6E1312EB3C58C0021C02D /* StringIndex.swift */,
+				BBF6E1322EB3C58C0021C02D /* SwiftArgs.swift */,
+				BBF6E1332EB3C58C0021C02D /* SwiftAspects.swift */,
+				BBF6E1342EB3C58C0021C02D /* SwiftInterpose.swift */,
+				BBF6E1352EB3C58C0021C02D /* SwiftInvoke.swift */,
+				BBF6E1362EB3C58C0021C02D /* SwiftLifetime.swift */,
+				BBF6E1372EB3C58C0021C02D /* SwiftMeta.swift */,
+				BBF6E1382EB3C58C0021C02D /* SwiftStack.swift */,
+				BBF6E1392EB3C58C0021C02D /* SwiftStats.swift */,
+				BBF6E13A2EB3C58C0021C02D /* SwiftSwizzle.swift */,
+				BBF6E13B2EB3C58C0021C02D /* SwiftTrace.h */,
+				BBF6E13C2EB3C58C0021C02D /* SwiftTrace.swift */,
+				BBF6E1492EB3C5C80021C02D /* fast_dladdr.mm */,
+				BBF6E15C2EB3C68E0021C02D /* fishhook.h */,
+				BBF6E14A2EB3C5C80021C02D /* fishhook.c */,
+				BBF6E14B2EB3C5C80021C02D /* ObjCBridge.mm */,
+				BBF6E14C2EB3C5C80021C02D /* SwiftTrace.mm */,
+				BBF6E14D2EB3C5C80021C02D /* SwiftTrace-Swift.h */,
+				BBF6E14E2EB3C5C80021C02D /* Trampolines.mm */,
+				BBF6E14F2EB3C5C80021C02D /* xt_forwarding_trampoline_arm7.s */,
+				BBF6E1502EB3C5C80021C02D /* xt_forwarding_trampoline_arm64.s */,
+				BBF6E1512EB3C5C80021C02D /* xt_forwarding_trampoline_x64.s */,
+				BBF6E1522EB3C5C80021C02D /* xt_forwarding_trampoline_x86.s */,
 				BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */,
 			);
 			path = InjectionBundle;
@@ -623,7 +687,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */,
-				BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */,
 				BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */,
 				BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */,
 				BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */,
@@ -649,10 +712,31 @@
 				BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */,
 				BB2D41BE2DAD1BBB0073C203 /* InjectionLite.swift in Sources */,
 				BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */,
+				BBF6E13D2EB3C58C0021C02D /* SwiftLifetime.swift in Sources */,
+				BBF6E13E2EB3C58C0021C02D /* SwiftTrace.swift in Sources */,
+				BBF6E13F2EB3C58C0021C02D /* SwiftMeta.swift in Sources */,
+				BBF6E1402EB3C58C0021C02D /* StringIndex.swift in Sources */,
+				BBF6E1412EB3C58C0021C02D /* SwiftInvoke.swift in Sources */,
+				BBF6E1422EB3C58C0021C02D /* SwiftStack.swift in Sources */,
+				BBF6E1432EB3C58C0021C02D /* SwiftSwizzle.swift in Sources */,
+				BBF6E1442EB3C58C0021C02D /* SwiftInterpose.swift in Sources */,
+				BBF6E1452EB3C58C0021C02D /* EasyPointer.swift in Sources */,
+				BBF6E1462EB3C58C0021C02D /* SwiftAspects.swift in Sources */,
+				BBF6E1472EB3C58C0021C02D /* SwiftArgs.swift in Sources */,
+				BBF6E1482EB3C58C0021C02D /* SwiftStats.swift in Sources */,
 				BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */,
 				BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */,
 				BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */,
 				BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */,
+				BBF6E1532EB3C5C80021C02D /* fishhook.c in Sources */,
+				BBF6E1542EB3C5C80021C02D /* SwiftTrace.mm in Sources */,
+				BBF6E1552EB3C5C80021C02D /* fast_dladdr.mm in Sources */,
+				BBF6E1562EB3C5C80021C02D /* xt_forwarding_trampoline_arm64.s in Sources */,
+				BBF6E1572EB3C5C80021C02D /* ObjCBridge.mm in Sources */,
+				BBF6E1582EB3C5C80021C02D /* xt_forwarding_trampoline_x86.s in Sources */,
+				BBF6E1592EB3C5C80021C02D /* xt_forwarding_trampoline_arm7.s in Sources */,
+				BBF6E15A2EB3C5C80021C02D /* xt_forwarding_trampoline_x64.s in Sources */,
+				BBF6E15B2EB3C5C80021C02D /* Trampolines.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
