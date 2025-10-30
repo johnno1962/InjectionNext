@@ -63,13 +63,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Self.ui = self
 
         let appName = "InjectionNext"
-        let statusBar = NSStatusBar.system
-        statusItem = statusBar.statusItem(withLength: statusBar.thickness)
-        statusItem.highlightMode = true
-        statusItem.menu = statusMenu
-        statusItem.isEnabled = true
-        statusItem.title = appName
-        setMenuIcon(.idle)
+        
+        if Bundle.main.infoDictionary?["LSUIElement"] as? Bool != true {
+            NSApp.mainMenu?.item(withTitle: "File")?.submenu = statusMenu
+        } else {
+            let statusBar = NSStatusBar.system
+            statusItem = statusBar.statusItem(withLength: statusBar.thickness)
+            statusItem.highlightMode = true
+            statusItem.menu = statusMenu
+            statusItem.isEnabled = true
+            statusItem.title = appName
+            setMenuIcon(.idle)
+        }
 
         signal(SIGPIPE, { which in
             print(APP_PREFIX+"⚠️ SIGPIPE #\(which)\n" +
