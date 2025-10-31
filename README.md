@@ -101,7 +101,16 @@ do this, the command mentioned above will be inserted into the clipboard
 which you should paste into your project as a "Run Script" "Build Phase" 
 of the main target to copy the required libraries into the app bundle.
 
-### Cursor/VSCode mode.
+### Scheme environment variable INJECTION_TRACE
+
+If you add an environment variable INJECTION_TRACE to your scheme,
+logging aspects will be added to all functions in a file when you inject 
+it so you can see they are being called and as an aid to debugging. This 
+means you can turn on detailed logging for any file just by injecting it.
+For a full list of all environment variable that can be specified consult
+[this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h).
+
+### Cursor/VSCode/File-watcher mode.
 
 If you would like to use InjectionNext with the Cursor code editor,
 you can have it fall back to InjectionIII-style log parsing using
@@ -117,7 +126,7 @@ EMIT_FRONTEND_COMMAND_LINES. If you'd like the InjectionNext.app to
 automatically file watch your project, add the following environment
 variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`.
 
-### New compiler "proxy" mode (Not normally used).
+### Fallback compiler "proxy" mode (Not normally used).
 
 It is also possible to intercept swift compilation commands as a new proof of
 concept for when at some point in the future these are no longer captured in 

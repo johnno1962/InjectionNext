@@ -87,7 +87,7 @@ open class InjectionNext: SimpleSocket {
         }
         
         if getenv(INJECTION_TRACE) != nil {
-            #if canImport(Nimble)
+            #if canImport(Nimble) || canImport(InjectionNextC)
             SwiftTrace.typeLookup = getenv(INJECTION_DECORATE) != nil
             Reloader.traceHook = { (injected, name) in
                 let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
