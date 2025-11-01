@@ -25,7 +25,6 @@ extension AppDelegate {
         // open.showsHiddenFiles = TRUE;
         if open.runModal() == .OK, let url = open.url {
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
-            Reloader.injectionQueue = .main
             watch(path: url.path)
         } else {
             Self.watchers.removeAll()
@@ -36,6 +35,7 @@ extension AppDelegate {
     func watch(path: String) {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
+        Reloader.injectionQueue = .main
         setenv(INJECTION_DIRECTORIES,
                NSHomeDirectory()+"/Library/Developer,"+path, 1)
         Self.watchers[path] = InjectionHybrid()
