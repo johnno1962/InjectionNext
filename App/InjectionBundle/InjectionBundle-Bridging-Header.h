@@ -12,4 +12,4 @@
 #import "fishhook.h"
 #import "DLKitC.h"
 
-#import "../../SwiftTrace/SwiftTrace/SwiftTrace.h"
+#import "SwiftTrace.h"

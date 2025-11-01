@@ -50,7 +50,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc let defaults = Defaults.userDefaults
 
     @IBOutlet weak var codeSignBox: NSComboBox!
-    var launchAlert: NSAlert?
 
     /// Code signing ID as parsed from the code signing box. If the content of the box is not
     /// parsable as SHA1 code signing ID, an empty string.
@@ -107,14 +106,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             selectXcodeItem.toolTip = Defaults.xcodePath
             if updatePatchUnpatch() == .unpatched {
-                launchAlert = NSAlert()
-                launchAlert?.messageText = """
+                InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
-                    """
-                launchAlert?.addButton(withTitle: "OK")
-                launchAlert?.runModal()
+                    """)
             }
         }
  
