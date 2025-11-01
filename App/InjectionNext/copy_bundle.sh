@@ -41,7 +41,7 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     fi
 
     mkdir -p "$CODESIGNING_FOLDER_PATH/Frameworks" &&
-    
+
     # copy frameworks used for testing into app's bundle/Frameworks
     ln -sf "../iOSInjection.bundle/$BUNDLE" "$CODESIGNING_FOLDER_PATH/Frameworks/lib${PLATFORM_NAME}Injection.dylib" &&
     if [[ "$BUNDLE" =~ Dev ]]; then

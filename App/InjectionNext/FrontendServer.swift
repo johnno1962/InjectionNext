@@ -94,7 +94,7 @@ class FrontendServer: SimpleSocket {
             Self.error("Feed error: \(error)")
         }
     }
-    
+
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard let projectRoot = feed.readString(),
               let frontendPath = feed.readString(),

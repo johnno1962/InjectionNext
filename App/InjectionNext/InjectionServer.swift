@@ -42,7 +42,7 @@ class InjectionServer: SimpleSocket {
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
-    
+
     class func alert(_ msg: String) {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
         lastAlert = NSAlert()
@@ -52,7 +52,7 @@ class InjectionServer: SimpleSocket {
         lastAlert?.addButton(withTitle: "OK")
         _ = lastAlert?.runModal()
     }
-    
+
     /// Pops up an alert panel for networking
     @discardableResult
     override public class func error(_ message: String) -> Int32 {

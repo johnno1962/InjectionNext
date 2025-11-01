@@ -92,7 +92,7 @@ class NextCompiler {
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
-    
+
     func store(compilation: Compilation, for source: String) {
         Self.lastSource = source
         if lastCompilation != compilation {

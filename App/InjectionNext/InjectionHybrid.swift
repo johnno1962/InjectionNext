@@ -31,7 +31,7 @@ extension AppDelegate {
             Self.lastWatched = nil
         }
     }
-    
+
     func watch(path: String) {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)

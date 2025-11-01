@@ -62,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Self.ui = self
 
         let appName = "InjectionNext"
-        
+
         if Bundle.main.infoDictionary?["LSUIElement"] as? Bool != true {
             NSApp.mainMenu?.item(withTitle: "File")?.submenu = statusMenu
         } else {
@@ -117,7 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath
-        
+
 //        #if DEBUG
 //        if NSHomeDirectory() == "/Users/johnholdsworth",
 //           let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),

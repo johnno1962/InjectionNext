@@ -85,7 +85,7 @@ open class InjectionNext: SimpleSocket {
             writeCommand(InjectionResponse.bazelTarget.rawValue,
                          with: String(cString: bazelTarget))
         }
-        
+
         if getenv(INJECTION_TRACE) != nil {
             #if canImport(Nimble) || canImport(InjectionNextC)
             SwiftTrace.typeLookup = getenv(INJECTION_DECORATE) != nil
