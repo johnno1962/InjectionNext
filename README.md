@@ -106,7 +106,7 @@ of the main target to copy the required libraries into the app bundle.
 If you add an environment variable INJECTION_TRACE to your scheme,
 logging aspects will be added to all functions in a file when you inject 
 it so you can see they are being called and as an aid to debugging. This 
-means you can turn on detailed logging for any file just by injecting it.
+means you can turn on detailed logging for a file just by injecting it.
 For a full list of all environment variable that can be specified consult
 [this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h).
 
