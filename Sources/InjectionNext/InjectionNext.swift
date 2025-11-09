@@ -119,6 +119,17 @@ open class InjectionNext: SimpleSocket {
                 .sync(execute: { loader.loadAndPatch(in: dylib) }) {
                 loader.sweeper.sweepAndRunTests(image: image, classes: classes)
                 succeeded = true
+
+                let countKey = "__injectionsPerformed", howOften = 100
+                let count = UserDefaults.standard.integer(forKey: countKey)+1
+                UserDefaults.standard.set(count, forKey: countKey)
+                if count % howOften == 0 && getenv("INJECTION_SKINT") == nil {
+                    log("Seems like you're using injection quite a bit. " +
+                        "Have you considered sponsoring the project at " +
+                        "https://github.com/johnno1962/\(APP_NAME) or " +
+                        "asking your boss if they should? (This messsage " +
+                        "prints every \(howOften) injections.)")
+                }
             } else {
                 writeCommand(InjectionResponse.unhide.rawValue, with: nil)
             }
