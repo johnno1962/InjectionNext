@@ -92,7 +92,7 @@ class NextCompiler {
     func error(_ err: Error) -> Bool {
         error("Internal app error: \(err)")
     }
-    
+
     func store(compilation: Compilation, for source: String) {
         Self.lastSource = source
         if lastCompilation != compilation {
@@ -166,6 +166,7 @@ class NextCompiler {
 
     /// Enrich metrics with Bazel target and normalize source path
     func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        #if canImport(InjectionBazel)
         let sourcePath = metrics.sourcePath
 
         // Find workspace root to normalize the path
@@ -190,10 +191,12 @@ class NextCompiler {
                 print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
             }
         }
+        #endif
     }
 
     /// Send metrics to all connected clients
     func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        #if canImport(InjectionBazel)
         var enrichedMetrics = metrics
         enrichMetrics(&enrichedMetrics)
 
@@ -206,6 +209,7 @@ class NextCompiler {
         for client in InjectionServer.currentClients {
             client?.sendCommand(.metrics, with: jsonString)
         }
+        #endif
     }
 
     /// Seek to highlight potentially unsupported injections.
@@ -262,13 +266,15 @@ class NextCompiler {
         #else
         let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
         #endif
-        guard let object = recompile(source: source, platform: platform) else { return nil }
-        // Track compilation time
-        if let startTime = currentMetrics?.startTime {
-            currentMetrics?.compilationTimeMs =
-                (Date.timeIntervalSinceReferenceDate - startTime) * 1000
-        }
-        guard tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
+        guard let object = recompile(source: source, platform: platform), {
+                // Track compilation time
+                if let startTime = currentMetrics?.startTime {
+                    currentMetrics?.compilationTimeMs =
+                    (Date.timeIntervalSinceReferenceDate - startTime) * 1000
+                }
+                return true
+            }(),
+           tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
            let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
                     arch: connected?.arch ?? compilerArch) else { return nil }
 
@@ -348,7 +354,7 @@ class NextCompiler {
 
         let compilationCommand = (stored.arguments + languageSpecific)
             .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")
-        Recompiler.extractLinkCommand(from: compilationCommand)
+        Reloader.extractLinkCommand(from: compilationCommand)
         return object
     }
 

@@ -11,3 +11,5 @@
 // InjectionBundle only
 #import "fishhook.h"
 #import "DLKitC.h"
+
+#import "SwiftTrace.h"

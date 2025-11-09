@@ -32,6 +32,7 @@ class InjectionServer: SimpleSocket {
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
+    static var lastAlert: NSAlert?
 
     /// Sorted last symbols exported by source.
     var exports = [String: [String]]()
@@ -42,20 +43,21 @@ class InjectionServer: SimpleSocket {
     var arch = "arm64"
     var tmpPath = "/unset"
 
+    class func alert(_ msg: String) {
+        NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
+        lastAlert = NSAlert()
+        lastAlert?.messageText = "\(self)"
+        lastAlert?.informativeText = msg
+        lastAlert?.alertStyle = .warning
+        lastAlert?.addButton(withTitle: "OK")
+        _ = lastAlert?.runModal()
+    }
+
     /// Pops up an alert panel for networking
     @discardableResult
     override public class func error(_ message: String) -> Int32 {
-        let saveno = errno
-        let msg = String(format:message, strerror(saveno))
-        NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
-        DispatchQueue.main.async {
-            let alert = NSAlert()
-            alert.messageText = "\(self)"
-            alert.informativeText = msg
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            _ = alert.runModal()
-        }
+        let msg = String(format:message, strerror(errno))
+        DispatchQueue.main.async { alert(msg) }
         return -1
     }
 
@@ -123,6 +125,12 @@ class InjectionServer: SimpleSocket {
                 }
                 DispatchQueue.main.async {
                     InjectionHybrid.pendingFilesChanged.removeAll()
+                    // Reset repository locked state on app reconnect (relaunch)
+                    if InjectionHybrid.isRepositoryLocked {
+                        InjectionHybrid.isRepositoryLocked = false
+                        InjectionHybrid.gitLockPath = nil
+                        self.log("Repository lock cleared - injection resumed")
+                    }
                 }
                 AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
@@ -187,9 +195,8 @@ class InjectionServer: SimpleSocket {
                     log("Auto-watching project: \(projectRoot)")
                     DispatchQueue.main.sync {
                         AppDelegate.ui.watch(path: projectRoot)
-                        AppDelegate.ui.launchAlert?
-                            .buttons.last?.performClick(self)
-                        AppDelegate.ui.launchAlert = nil
+                        Self.lastAlert?.buttons.last?.performClick(self)
+                        Self.lastAlert = nil
                     }
                 } else {
                     error("**** Bad root ****")

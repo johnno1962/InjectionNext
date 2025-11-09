@@ -50,7 +50,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc let defaults = Defaults.userDefaults
 
     @IBOutlet weak var codeSignBox: NSComboBox!
-    var launchAlert: NSAlert?
 
     /// Code signing ID as parsed from the code signing box. If the content of the box is not
     /// parsable as SHA1 code signing ID, an empty string.
@@ -63,13 +62,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Self.ui = self
 
         let appName = "InjectionNext"
-        let statusBar = NSStatusBar.system
-        statusItem = statusBar.statusItem(withLength: statusBar.thickness)
-        statusItem.highlightMode = true
-        statusItem.menu = statusMenu
-        statusItem.isEnabled = true
-        statusItem.title = appName
-        setMenuIcon(.idle)
+
+        if Bundle.main.infoDictionary?["LSUIElement"] as? Bool != true {
+            NSApp.mainMenu?.item(withTitle: "File")?.submenu = statusMenu
+        } else {
+            let statusBar = NSStatusBar.system
+            statusItem = statusBar.statusItem(withLength: statusBar.thickness)
+            statusItem.highlightMode = true
+            statusItem.menu = statusMenu
+            statusItem.isEnabled = true
+            statusItem.title = appName
+            setMenuIcon(.idle)
+        }
 
         signal(SIGPIPE, { which in
             print(APP_PREFIX+"⚠️ SIGPIPE #\(which)\n" +
@@ -102,21 +106,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             selectXcodeItem.toolTip = Defaults.xcodePath
             if updatePatchUnpatch() == .unpatched {
-                launchAlert = NSAlert()
-                launchAlert?.messageText = """
+                InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
-                    """
-                launchAlert?.addButton(withTitle: "OK")
-                launchAlert?.runModal()
+                    """)
             }
         }
  
         setupCodeSigningComboBox()
         restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
         selectXcodeItem.toolTip = Defaults.xcodePath
-        
+
 //        #if DEBUG
 //        if NSHomeDirectory() == "/Users/johnholdsworth",
 //           let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),

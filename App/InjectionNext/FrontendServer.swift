@@ -94,7 +94,7 @@ class FrontendServer: SimpleSocket {
             Self.error("Feed error: \(error)")
         }
     }
-    
+
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard let projectRoot = feed.readString(),
               let frontendPath = feed.readString(),
@@ -255,15 +255,15 @@ extension AppDelegate {
 
         var patched = original, before = changes?.pointee
         patched[#"""
+            $2#if DEBUG
+            $2@ObserveInjection var forceRedraw
+            $2#endif
+
             ^((\s+)(public )?(var body:|func body\([^)]*\) -\>) some View \{\n\#
             (\2(?!    (if|switch|ForEach) )\s+(?!\.enableInjection)\S.*\n|(\s*|#.+)\n)+)(?<!#endif\n)\2\}\n
             """#.anchorsMatchLines, count: changes] = """
             $1$2    .enableInjection()
             $2}
-
-            $2#if DEBUG
-            $2@ObserveInjection var forceRedraw
-            $2#endif
 
             """
         if changes?.pointee != before {

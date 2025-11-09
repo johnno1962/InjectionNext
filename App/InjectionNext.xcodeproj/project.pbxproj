@@ -16,32 +16,78 @@
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
-		BB03AFA12E2818CF00EFBF21 /* Generics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB03AFA02E2818CF00EFBF21 /* Generics.swift */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
-		BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E12CDED9CF00704C7A /* FileWatcher.swift */; };
-		BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E22CDED9CF00704C7A /* InjectionBase.swift */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
-		BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423C2DAD02C60085C9B9 /* LogParser.swift */; };
-		BB2D41A82DAD145A0073C203 /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
-		BB2D41BE2DAD1BBB0073C203 /* InjectionLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */; };
+		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
+		BB42F8E22EB626F100FDBBCC /* SwiftInterpose.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D72EB626F100FDBBCC /* SwiftInterpose.swift */; };
+		BB42F8E32EB626F100FDBBCC /* SwiftTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8DF2EB626F100FDBBCC /* SwiftTrace.swift */; };
+		BB42F8E42EB626F100FDBBCC /* SwiftSwizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8DD2EB626F100FDBBCC /* SwiftSwizzle.swift */; };
+		BB42F8E52EB626F100FDBBCC /* SwiftArgs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D52EB626F100FDBBCC /* SwiftArgs.swift */; };
+		BB42F8E62EB626F100FDBBCC /* SwiftInvoke.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D82EB626F100FDBBCC /* SwiftInvoke.swift */; };
+		BB42F8E72EB626F100FDBBCC /* EasyPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */; };
+		BB42F8E82EB626F100FDBBCC /* SwiftStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8DB2EB626F100FDBBCC /* SwiftStack.swift */; };
+		BB42F8E92EB626F100FDBBCC /* SwiftStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8DC2EB626F100FDBBCC /* SwiftStats.swift */; };
+		BB42F8EA2EB626F100FDBBCC /* StringIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D42EB626F100FDBBCC /* StringIndex.swift */; };
+		BB42F8EB2EB626F100FDBBCC /* SwiftLifetime.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D92EB626F100FDBBCC /* SwiftLifetime.swift */; };
+		BB42F8EC2EB626F100FDBBCC /* SwiftMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8DA2EB626F100FDBBCC /* SwiftMeta.swift */; };
+		BB42F9212EB639D100FDBBCC /* DLKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91B2EB639D100FDBBCC /* DLKit.swift */; };
+		BB42F9222EB639D100FDBBCC /* Iterators.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91F2EB639D100FDBBCC /* Iterators.swift */; };
+		BB42F9232EB639D100FDBBCC /* Interposing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91E2EB639D100FDBBCC /* Interposing.swift */; };
+		BB42F9242EB639D100FDBBCC /* ImageSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91D2EB639D100FDBBCC /* ImageSymbols.swift */; };
+		BB42F9252EB639D100FDBBCC /* Demangling.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91A2EB639D100FDBBCC /* Demangling.swift */; };
+		BB42F9262EB639D100FDBBCC /* FileSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F91C2EB639D100FDBBCC /* FileSymbols.swift */; };
+		BB42F92D2EB639E500FDBBCC /* DLKitC.c in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9292EB639E500FDBBCC /* DLKitC.c */; };
+		BB42F92E2EB639E500FDBBCC /* trie_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB42F92A2EB639E500FDBBCC /* trie_dladdr.mm */; };
+		BB42F92F2EB639E500FDBBCC /* trie_dlops.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB42F92B2EB639E500FDBBCC /* trie_dlops.mm */; };
+		BB42F9382EB63C2900FDBBCC /* KeyPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9332EB63C2900FDBBCC /* KeyPaths.swift */; };
+		BB42F9392EB63C2900FDBBCC /* Reloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9352EB63C2900FDBBCC /* Reloader.swift */; };
+		BB42F93A2EB63C2900FDBBCC /* Generics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9322EB63C2900FDBBCC /* Generics.swift */; };
+		BB42F93B2EB63C2900FDBBCC /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9342EB63C2900FDBBCC /* Metadata.swift */; };
+		BB42F93C2EB63C2900FDBBCC /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9312EB63C2900FDBBCC /* Common.swift */; };
+		BB42F93D2EB63C2900FDBBCC /* Sweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9362EB63C2900FDBBCC /* Sweeper.swift */; };
+		BB42F93F2EB63CD800FDBBCC /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9312EB63C2900FDBBCC /* Common.swift */; };
+		BB42F9462EB63E3400FDBBCC /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9412EB63E3400FDBBCC /* InjectionBase.swift */; };
+		BB42F9472EB63E3400FDBBCC /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9442EB63E3400FDBBCC /* Recompiler.swift */; };
+		BB42F9482EB63E3400FDBBCC /* InjectionLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9422EB63E3400FDBBCC /* InjectionLite.swift */; };
+		BB42F9492EB63E3400FDBBCC /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9432EB63E3400FDBBCC /* LogParser.swift */; };
+		BB42F94A2EB63E3400FDBBCC /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9402EB63E3400FDBBCC /* FileWatcher.swift */; };
+		BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9402EB63E3400FDBBCC /* FileWatcher.swift */; };
+		BB42F94C2EB63E4F00FDBBCC /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9432EB63E3400FDBBCC /* LogParser.swift */; };
+		BB42F94D2EB63E5600FDBBCC /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9442EB63E3400FDBBCC /* Recompiler.swift */; };
+		BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9412EB63E3400FDBBCC /* InjectionBase.swift */; };
+		BB42F9552EB63EFF00FDBBCC /* BazelInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9512EB63EFF00FDBBCC /* BazelInterface.swift */; };
+		BB42F9562EB63EFF00FDBBCC /* GitIgnoreParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9532EB63EFF00FDBBCC /* GitIgnoreParser.swift */; };
+		BB42F9572EB63EFF00FDBBCC /* BazelActionQueryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F94F2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift */; };
+		BB42F9582EB63EFF00FDBBCC /* BazelAQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9502EB63EFF00FDBBCC /* BazelAQueryParser.swift */; };
+		BB42F9592EB63EFF00FDBBCC /* FilenameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9522EB63EFF00FDBBCC /* FilenameMatcher.swift */; };
+		BB42F95A2EB63EFF00FDBBCC /* BazelInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9512EB63EFF00FDBBCC /* BazelInterface.swift */; };
+		BB42F95B2EB63EFF00FDBBCC /* GitIgnoreParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9532EB63EFF00FDBBCC /* GitIgnoreParser.swift */; };
+		BB42F95C2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F94F2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift */; };
+		BB42F95D2EB63EFF00FDBBCC /* BazelAQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9502EB63EFF00FDBBCC /* BazelAQueryParser.swift */; };
+		BB42F95E2EB63EFF00FDBBCC /* FilenameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F9522EB63EFF00FDBBCC /* FilenameMatcher.swift */; };
 		BB4654812C257F110080EC40 /* NextCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4654802C257F110080EC40 /* NextCompiler.swift */; };
+		BB4788802EB6B6E700464AB4 /* InjectionBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB47887E2EB6B6E700464AB4 /* InjectionBoot.mm */; };
+		BB4788812EB6B71600464AB4 /* InjectionImplC.h in Resources */ = {isa = PBXBuildFile; fileRef = BB42F9302EB63AAF00FDBBCC /* InjectionImplC.h */; };
+		BB4788902EB6B81A00464AB4 /* fast_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB4788852EB6B81A00464AB4 /* fast_dladdr.mm */; };
+		BB4788912EB6B81A00464AB4 /* xt_forwarding_trampoline_arm64.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888C2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm64.s */; };
+		BB4788922EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */; };
+		BB4788932EB6B81A00464AB4 /* ObjCBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB4788872EB6B81A00464AB4 /* ObjCBridge.mm */; };
+		BB4788942EB6B81A00464AB4 /* Trampolines.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB47888A2EB6B81A00464AB4 /* Trampolines.mm */; };
+		BB4788952EB6B81A00464AB4 /* xt_forwarding_trampoline_arm7.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888B2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm7.s */; };
+		BB4788962EB6B81A00464AB4 /* SwiftTrace.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB4788882EB6B81A00464AB4 /* SwiftTrace.mm */; };
+		BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */; };
+		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
-		BB5155E02CDED8C600704C7A /* Recompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155DF2CDED8C600704C7A /* Recompiler.swift */; };
-		BB5155E32CDED9D000704C7A /* InjectionBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E22CDED9CF00704C7A /* InjectionBase.swift */; };
-		BB5155E42CDED9D000704C7A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E12CDED9CF00704C7A /* FileWatcher.swift */; };
-		BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155E52CDEDAD500704C7A /* LogParser.swift */; };
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
 		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
-		BB8DF4812E8D3E1F00B6FE50 /* InjectionImplC.h in Resources */ = {isa = PBXBuildFile; fileRef = BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */; };
 		BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */; };
 		BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */; };
 		BBB040641FB17A6C007DDD0A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */; };
-		BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
 		BBB64DC51FD450AF0020BE47 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF31FAD808B004B267C /* README.md */; };
 		BBB64DC61FD450B40020BE47 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = BB037DF41FAD80D0004B267C /* LICENSE */; };
 		BBB64DE51FD571310020BE47 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB64DE41FD571300020BE47 /* libz.tbd */; };
@@ -56,22 +102,6 @@
 		BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBBEC42D1FC56522004188B3 /* XCTest.framework */; };
 		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
 		BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */; };
-		BBDD84432C4FEA52000F3124 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84262C4FE827000F3124 /* Common.swift */; };
-		BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD842A2C4FE827000F3124 /* KeyPaths.swift */; };
-		BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84292C4FE827000F3124 /* Metadata.swift */; };
-		BBDD84462C4FEA5C000F3124 /* Reloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84272C4FE827000F3124 /* Reloader.swift */; };
-		BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84282C4FE827000F3124 /* Sweeper.swift */; };
-		BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841F2C4FE802000F3124 /* Demangling.swift */; };
-		BBDD84492C4FEA67000F3124 /* DLKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841A2C4FE802000F3124 /* DLKit.swift */; };
-		BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841B2C4FE802000F3124 /* FileSymbols.swift */; };
-		BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */; };
-		BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841C2C4FE802000F3124 /* Interposing.swift */; };
-		BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD841D2C4FE802000F3124 /* Iterators.swift */; };
-		BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */; };
-		BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84382C4FE880000F3124 /* fishhook.c */; };
-		BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84302C4FE849000F3124 /* DLKitC.c */; };
-		BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84312C4FE849000F3124 /* trie_dladdr.mm */; };
-		BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84322C4FE849000F3124 /* trie_dlops.mm */; };
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
@@ -80,16 +110,6 @@
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
-		BBFAC35E2E3156B100F86DE6 /* BazelInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */; };
-		BBFAC35F2E3156B100F86DE6 /* BazelAQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */; };
-		BBFAC3602E3156B100F86DE6 /* FilenameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35C2E3156B100F86DE6 /* FilenameMatcher.swift */; };
-		BBFAC3612E3156B100F86DE6 /* GitIgnoreParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35D2E3156B100F86DE6 /* GitIgnoreParser.swift */; };
-		BBFAC3622E3156B100F86DE6 /* BazelActionQueryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC3592E3156B100F86DE6 /* BazelActionQueryHandler.swift */; };
-		BBFAC3632E3156BF00F86DE6 /* BazelInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */; };
-		BBFAC3642E3156BF00F86DE6 /* BazelAQueryParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */; };
-		BBFAC3652E3156BF00F86DE6 /* BazelActionQueryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC3592E3156B100F86DE6 /* BazelActionQueryHandler.swift */; };
-		BBFAC3662E3156BF00F86DE6 /* FilenameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35C2E3156B100F86DE6 /* FilenameMatcher.swift */; };
-		BBFAC3672E3156BF00F86DE6 /* GitIgnoreParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFAC35D2E3156B100F86DE6 /* GitIgnoreParser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,18 +168,65 @@
 		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unhider.swift; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		BB03AFA02E2818CF00EFBF21 /* Generics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Generics.swift; path = ../InjectionLite/Sources/InjectionImpl/Generics.swift; sourceTree = SOURCE_ROOT; };
 		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InjectionLite.swift; path = ../InjectionLite/Sources/InjectionLite/InjectionLite.swift; sourceTree = SOURCE_ROOT; };
-		BB1E423C2DAD02C60085C9B9 /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogParser.swift; path = ../InjectionLite/Sources/InjectionLite/LogParser.swift; sourceTree = SOURCE_ROOT; };
-		BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
+		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
+		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB42F8D42EB626F100FDBBCC /* StringIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringIndex.swift; sourceTree = "<group>"; };
+		BB42F8D52EB626F100FDBBCC /* SwiftArgs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftArgs.swift; sourceTree = "<group>"; };
+		BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftAspects.swift; sourceTree = "<group>"; };
+		BB42F8D72EB626F100FDBBCC /* SwiftInterpose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftInterpose.swift; sourceTree = "<group>"; };
+		BB42F8D82EB626F100FDBBCC /* SwiftInvoke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftInvoke.swift; sourceTree = "<group>"; };
+		BB42F8D92EB626F100FDBBCC /* SwiftLifetime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftLifetime.swift; sourceTree = "<group>"; };
+		BB42F8DA2EB626F100FDBBCC /* SwiftMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftMeta.swift; sourceTree = "<group>"; };
+		BB42F8DB2EB626F100FDBBCC /* SwiftStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftStack.swift; sourceTree = "<group>"; };
+		BB42F8DC2EB626F100FDBBCC /* SwiftStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftStats.swift; sourceTree = "<group>"; };
+		BB42F8DD2EB626F100FDBBCC /* SwiftSwizzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSwizzle.swift; sourceTree = "<group>"; };
+		BB42F8DE2EB626F100FDBBCC /* SwiftTrace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftTrace.h; sourceTree = "<group>"; };
+		BB42F8DF2EB626F100FDBBCC /* SwiftTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTrace.swift; sourceTree = "<group>"; };
+		BB42F91A2EB639D100FDBBCC /* Demangling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Demangling.swift; sourceTree = "<group>"; };
+		BB42F91B2EB639D100FDBBCC /* DLKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLKit.swift; sourceTree = "<group>"; };
+		BB42F91C2EB639D100FDBBCC /* FileSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSymbols.swift; sourceTree = "<group>"; };
+		BB42F91D2EB639D100FDBBCC /* ImageSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSymbols.swift; sourceTree = "<group>"; };
+		BB42F91E2EB639D100FDBBCC /* Interposing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interposing.swift; sourceTree = "<group>"; };
+		BB42F91F2EB639D100FDBBCC /* Iterators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Iterators.swift; sourceTree = "<group>"; };
+		BB42F9272EB639E500FDBBCC /* DLKitC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLKitC.h; sourceTree = "<group>"; };
+		BB42F9292EB639E500FDBBCC /* DLKitC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = DLKitC.c; sourceTree = "<group>"; };
+		BB42F92A2EB639E500FDBBCC /* trie_dladdr.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = trie_dladdr.mm; sourceTree = "<group>"; };
+		BB42F92B2EB639E500FDBBCC /* trie_dlops.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = trie_dlops.mm; sourceTree = "<group>"; };
+		BB42F9302EB63AAF00FDBBCC /* InjectionImplC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InjectionImplC.h; path = ../InjectionLite/Sources/InjectionImplC/include/InjectionImplC.h; sourceTree = SOURCE_ROOT; };
+		BB42F9312EB63C2900FDBBCC /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		BB42F9322EB63C2900FDBBCC /* Generics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generics.swift; sourceTree = "<group>"; };
+		BB42F9332EB63C2900FDBBCC /* KeyPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPaths.swift; sourceTree = "<group>"; };
+		BB42F9342EB63C2900FDBBCC /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
+		BB42F9352EB63C2900FDBBCC /* Reloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reloader.swift; sourceTree = "<group>"; };
+		BB42F9362EB63C2900FDBBCC /* Sweeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sweeper.swift; sourceTree = "<group>"; };
+		BB42F9402EB63E3400FDBBCC /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
+		BB42F9412EB63E3400FDBBCC /* InjectionBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionBase.swift; sourceTree = "<group>"; };
+		BB42F9422EB63E3400FDBBCC /* InjectionLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionLite.swift; sourceTree = "<group>"; };
+		BB42F9432EB63E3400FDBBCC /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogParser.swift; sourceTree = "<group>"; };
+		BB42F9442EB63E3400FDBBCC /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recompiler.swift; sourceTree = "<group>"; };
+		BB42F94F2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BazelActionQueryHandler.swift; sourceTree = "<group>"; };
+		BB42F9502EB63EFF00FDBBCC /* BazelAQueryParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BazelAQueryParser.swift; sourceTree = "<group>"; };
+		BB42F9512EB63EFF00FDBBCC /* BazelInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BazelInterface.swift; sourceTree = "<group>"; };
+		BB42F9522EB63EFF00FDBBCC /* FilenameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameMatcher.swift; sourceTree = "<group>"; };
+		BB42F9532EB63EFF00FDBBCC /* GitIgnoreParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitIgnoreParser.swift; sourceTree = "<group>"; };
 		BB4654802C257F110080EC40 /* NextCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextCompiler.swift; sourceTree = "<group>"; };
+		BB47887C2EB6B6E700464AB4 /* InjectionImplC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InjectionImplC.h; sourceTree = "<group>"; };
+		BB47887E2EB6B6E700464AB4 /* InjectionBoot.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = InjectionBoot.mm; sourceTree = "<group>"; };
+		BB4788822EB6B81A00464AB4 /* fishhook.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fishhook.h; sourceTree = "<group>"; };
+		BB4788832EB6B81A00464AB4 /* SwiftTrace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftTrace.h; sourceTree = "<group>"; };
+		BB4788852EB6B81A00464AB4 /* fast_dladdr.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = fast_dladdr.mm; sourceTree = "<group>"; };
+		BB4788862EB6B81A00464AB4 /* fishhook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fishhook.c; sourceTree = "<group>"; };
+		BB4788872EB6B81A00464AB4 /* ObjCBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ObjCBridge.mm; sourceTree = "<group>"; };
+		BB4788882EB6B81A00464AB4 /* SwiftTrace.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SwiftTrace.mm; sourceTree = "<group>"; };
+		BB4788892EB6B81A00464AB4 /* SwiftTrace-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SwiftTrace-Swift.h"; sourceTree = "<group>"; };
+		BB47888A2EB6B81A00464AB4 /* Trampolines.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Trampolines.mm; sourceTree = "<group>"; };
+		BB47888B2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm7.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_arm7.s; sourceTree = "<group>"; };
+		BB47888C2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_arm64.s; sourceTree = "<group>"; };
+		BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x64.s; sourceTree = "<group>"; };
+		BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x86.s; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
-		BB5155DF2CDED8C600704C7A /* Recompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Recompiler.swift; path = ../InjectionLite/Sources/InjectionLite/Recompiler.swift; sourceTree = SOURCE_ROOT; };
-		BB5155E12CDED9CF00704C7A /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileWatcher.swift; path = ../InjectionLite/Sources/InjectionLite/FileWatcher.swift; sourceTree = SOURCE_ROOT; };
-		BB5155E22CDED9CF00704C7A /* InjectionBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InjectionBase.swift; path = ../InjectionLite/Sources/InjectionLite/InjectionBase.swift; sourceTree = SOURCE_ROOT; };
-		BB5155E52CDEDAD500704C7A /* LogParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogParser.swift; path = ../InjectionLite/Sources/InjectionLite/LogParser.swift; sourceTree = SOURCE_ROOT; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
@@ -183,25 +250,7 @@
 		BBCCC3B02C73A6AD00E71F81 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/WatchOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		BBDD84132C4FE749000F3124 /* macOSInjection.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSInjection.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InjectionNext.swift; path = ../../Sources/InjectionNext/InjectionNext.swift; sourceTree = "<group>"; };
-		BBDD841A2C4FE802000F3124 /* DLKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DLKit.swift; path = ../../DLKit/Sources/DLKit/DLKit.swift; sourceTree = "<group>"; };
-		BBDD841B2C4FE802000F3124 /* FileSymbols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSymbols.swift; path = ../../DLKit/Sources/DLKit/FileSymbols.swift; sourceTree = "<group>"; };
-		BBDD841C2C4FE802000F3124 /* Interposing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Interposing.swift; path = ../../DLKit/Sources/DLKit/Interposing.swift; sourceTree = "<group>"; };
-		BBDD841D2C4FE802000F3124 /* Iterators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Iterators.swift; path = ../../DLKit/Sources/DLKit/Iterators.swift; sourceTree = "<group>"; };
-		BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageSymbols.swift; path = ../../DLKit/Sources/DLKit/ImageSymbols.swift; sourceTree = "<group>"; };
-		BBDD841F2C4FE802000F3124 /* Demangling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Demangling.swift; path = ../../DLKit/Sources/DLKit/Demangling.swift; sourceTree = "<group>"; };
-		BBDD84262C4FE827000F3124 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Common.swift; path = ../../InjectionLite/Sources/InjectionImpl/Common.swift; sourceTree = "<group>"; };
-		BBDD84272C4FE827000F3124 /* Reloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Reloader.swift; path = ../../InjectionLite/Sources/InjectionImpl/Reloader.swift; sourceTree = "<group>"; };
-		BBDD84282C4FE827000F3124 /* Sweeper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Sweeper.swift; path = ../../InjectionLite/Sources/InjectionImpl/Sweeper.swift; sourceTree = "<group>"; };
-		BBDD84292C4FE827000F3124 /* Metadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Metadata.swift; path = ../../InjectionLite/Sources/InjectionImpl/Metadata.swift; sourceTree = "<group>"; };
-		BBDD842A2C4FE827000F3124 /* KeyPaths.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KeyPaths.swift; path = ../../InjectionLite/Sources/InjectionImpl/KeyPaths.swift; sourceTree = "<group>"; };
-		BBDD84302C4FE849000F3124 /* DLKitC.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DLKitC.c; path = ../../DLKit/Sources/DLKitC/DLKitC.c; sourceTree = "<group>"; };
-		BBDD84312C4FE849000F3124 /* trie_dladdr.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dladdr.mm; path = ../../DLKit/Sources/DLKitC/trie_dladdr.mm; sourceTree = "<group>"; };
-		BBDD84322C4FE849000F3124 /* trie_dlops.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = trie_dlops.mm; path = ../../DLKit/Sources/DLKitC/trie_dlops.mm; sourceTree = "<group>"; };
-		BBDD84362C4FE863000F3124 /* DLKitC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLKitC.h; path = ../../DLKit/Sources/DLKitC/include/DLKitC.h; sourceTree = "<group>"; };
-		BBDD84372C4FE880000F3124 /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fishhook.h; path = ../../fishhook/fishhook.h; sourceTree = "<group>"; };
-		BBDD84382C4FE880000F3124 /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fishhook.c; path = ../../fishhook/fishhook.c; sourceTree = "<group>"; };
 		BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionBoot.mm; path = ../../InjectionLite/Sources/InjectionImplC/InjectionBoot.mm; sourceTree = "<group>"; };
-		BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionImplC.h; path = ../../InjectionLite/Sources/InjectionImplC/include/InjectionImplC.h; sourceTree = "<group>"; };
 		BBDD84532C4FEB16000F3124 /* TupleRegex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TupleRegex.swift; path = ../../SwiftRegex5/SwiftRegex5.playground/Sources/TupleRegex.swift; sourceTree = "<group>"; };
 		BBDD84562C4FED60000F3124 /* build_bundles.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_bundles.sh; sourceTree = "<group>"; };
 		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
@@ -211,11 +260,6 @@
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
-		BBFAC3592E3156B100F86DE6 /* BazelActionQueryHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelActionQueryHandler.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelActionQueryHandler.swift; sourceTree = SOURCE_ROOT; };
-		BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelAQueryParser.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelAQueryParser.swift; sourceTree = SOURCE_ROOT; };
-		BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BazelInterface.swift; path = ../InjectionLite/Sources/InjectionBazel/BazelInterface.swift; sourceTree = SOURCE_ROOT; };
-		BBFAC35C2E3156B100F86DE6 /* FilenameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FilenameMatcher.swift; path = ../InjectionLite/Sources/InjectionBazel/FilenameMatcher.swift; sourceTree = SOURCE_ROOT; };
-		BBFAC35D2E3156B100F86DE6 /* GitIgnoreParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GitIgnoreParser.swift; path = ../InjectionLite/Sources/InjectionBazel/GitIgnoreParser.swift; sourceTree = SOURCE_ROOT; };
 		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Experimental.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -260,6 +304,105 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BB42F8E02EB626F100FDBBCC /* SwiftTrace */ = {
+			isa = PBXGroup;
+			children = (
+				BB47888F2EB6B81A00464AB4 /* SwiftTraceGuts */,
+				BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */,
+				BB42F8D32EB626F100FDBBCC /* Info.plist */,
+				BB42F8D42EB626F100FDBBCC /* StringIndex.swift */,
+				BB42F8D52EB626F100FDBBCC /* SwiftArgs.swift */,
+				BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */,
+				BB42F8D72EB626F100FDBBCC /* SwiftInterpose.swift */,
+				BB42F8D82EB626F100FDBBCC /* SwiftInvoke.swift */,
+				BB42F8D92EB626F100FDBBCC /* SwiftLifetime.swift */,
+				BB42F8DA2EB626F100FDBBCC /* SwiftMeta.swift */,
+				BB42F8DB2EB626F100FDBBCC /* SwiftStack.swift */,
+				BB42F8DC2EB626F100FDBBCC /* SwiftStats.swift */,
+				BB42F8DD2EB626F100FDBBCC /* SwiftSwizzle.swift */,
+				BB42F8DE2EB626F100FDBBCC /* SwiftTrace.h */,
+				BB42F8DF2EB626F100FDBBCC /* SwiftTrace.swift */,
+			);
+			name = SwiftTrace;
+			path = ../SwiftTrace/SwiftTrace;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB42F9202EB639D100FDBBCC /* DLKit */ = {
+			isa = PBXGroup;
+			children = (
+				BB42F92C2EB639E500FDBBCC /* DLKitC */,
+				BB42F91A2EB639D100FDBBCC /* Demangling.swift */,
+				BB42F91B2EB639D100FDBBCC /* DLKit.swift */,
+				BB42F91C2EB639D100FDBBCC /* FileSymbols.swift */,
+				BB42F91D2EB639D100FDBBCC /* ImageSymbols.swift */,
+				BB42F91E2EB639D100FDBBCC /* Interposing.swift */,
+				BB42F91F2EB639D100FDBBCC /* Iterators.swift */,
+			);
+			name = DLKit;
+			path = ../DLKit/Sources/DLKit;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB42F9282EB639E500FDBBCC /* include */ = {
+			isa = PBXGroup;
+			children = (
+				BB42F9272EB639E500FDBBCC /* DLKitC.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		BB42F92C2EB639E500FDBBCC /* DLKitC */ = {
+			isa = PBXGroup;
+			children = (
+				BB42F9282EB639E500FDBBCC /* include */,
+				BB42F9292EB639E500FDBBCC /* DLKitC.c */,
+				BB42F92A2EB639E500FDBBCC /* trie_dladdr.mm */,
+				BB42F92B2EB639E500FDBBCC /* trie_dlops.mm */,
+			);
+			name = DLKitC;
+			path = ../DLKit/Sources/DLKitC;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB42F9372EB63C2900FDBBCC /* InjectionImpl */ = {
+			isa = PBXGroup;
+			children = (
+				BB47887F2EB6B6E700464AB4 /* InjectionImplC */,
+				BB42F9312EB63C2900FDBBCC /* Common.swift */,
+				BB42F9322EB63C2900FDBBCC /* Generics.swift */,
+				BB42F9332EB63C2900FDBBCC /* KeyPaths.swift */,
+				BB42F9342EB63C2900FDBBCC /* Metadata.swift */,
+				BB42F9352EB63C2900FDBBCC /* Reloader.swift */,
+				BB42F9362EB63C2900FDBBCC /* Sweeper.swift */,
+			);
+			name = InjectionImpl;
+			path = ../InjectionLite/Sources/InjectionImpl;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB42F9452EB63E3400FDBBCC /* InjectionLite */ = {
+			isa = PBXGroup;
+			children = (
+				BB42F9402EB63E3400FDBBCC /* FileWatcher.swift */,
+				BB42F9412EB63E3400FDBBCC /* InjectionBase.swift */,
+				BB42F9422EB63E3400FDBBCC /* InjectionLite.swift */,
+				BB42F9432EB63E3400FDBBCC /* LogParser.swift */,
+				BB42F9442EB63E3400FDBBCC /* Recompiler.swift */,
+			);
+			name = InjectionLite;
+			path = ../InjectionLite/Sources/InjectionLite;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB42F9542EB63EFF00FDBBCC /* InjectionBazel */ = {
+			isa = PBXGroup;
+			children = (
+				BB42F94F2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift */,
+				BB42F9502EB63EFF00FDBBCC /* BazelAQueryParser.swift */,
+				BB42F9512EB63EFF00FDBBCC /* BazelInterface.swift */,
+				BB42F9522EB63EFF00FDBBCC /* FilenameMatcher.swift */,
+				BB42F9532EB63EFF00FDBBCC /* GitIgnoreParser.swift */,
+			);
+			name = InjectionBazel;
+			path = ../InjectionLite/Sources/InjectionBazel;
+			sourceTree = SOURCE_ROOT;
+		};
 		BB439B5C1FABA64300B4F50B = {
 			isa = PBXGroup;
 			children = (
@@ -288,6 +431,52 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		BB47887D2EB6B6E700464AB4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				BB47887C2EB6B6E700464AB4 /* InjectionImplC.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		BB47887F2EB6B6E700464AB4 /* InjectionImplC */ = {
+			isa = PBXGroup;
+			children = (
+				BB47887D2EB6B6E700464AB4 /* include */,
+				BB47887E2EB6B6E700464AB4 /* InjectionBoot.mm */,
+			);
+			name = InjectionImplC;
+			path = ../InjectionLite/Sources/InjectionImplC;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB4788842EB6B81A00464AB4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				BB4788822EB6B81A00464AB4 /* fishhook.h */,
+				BB4788832EB6B81A00464AB4 /* SwiftTrace.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		BB47888F2EB6B81A00464AB4 /* SwiftTraceGuts */ = {
+			isa = PBXGroup;
+			children = (
+				BB4788842EB6B81A00464AB4 /* include */,
+				BB4788852EB6B81A00464AB4 /* fast_dladdr.mm */,
+				BB4788862EB6B81A00464AB4 /* fishhook.c */,
+				BB4788872EB6B81A00464AB4 /* ObjCBridge.mm */,
+				BB4788882EB6B81A00464AB4 /* SwiftTrace.mm */,
+				BB4788892EB6B81A00464AB4 /* SwiftTrace-Swift.h */,
+				BB47888A2EB6B81A00464AB4 /* Trampolines.mm */,
+				BB47888B2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm7.s */,
+				BB47888C2EB6B81A00464AB4 /* xt_forwarding_trampoline_arm64.s */,
+				BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */,
+				BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */,
+			);
+			name = SwiftTraceGuts;
+			path = ../SwiftTrace/SwiftTraceGuts;
+			sourceTree = SOURCE_ROOT;
+		};
 		BBB040621FB1798A007DDD0A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -313,15 +502,6 @@
 				CEC17029253ED117002E823F /* Experimental.swift */,
 				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
-				BB5155E22CDED9CF00704C7A /* InjectionBase.swift */,
-				BB5155E12CDED9CF00704C7A /* FileWatcher.swift */,
-				BB5155DF2CDED8C600704C7A /* Recompiler.swift */,
-				BB5155E52CDEDAD500704C7A /* LogParser.swift */,
-				BBFAC3592E3156B100F86DE6 /* BazelActionQueryHandler.swift */,
-				BBFAC35A2E3156B100F86DE6 /* BazelAQueryParser.swift */,
-				BBFAC35B2E3156B100F86DE6 /* BazelInterface.swift */,
-				BBFAC35C2E3156B100F86DE6 /* FilenameMatcher.swift */,
-				BBFAC35D2E3156B100F86DE6 /* GitIgnoreParser.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -336,6 +516,7 @@
 				BBCA02581FB112F500E45F0F /* App.icns */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
+				BB42F9542EB63EFF00FDBBCC /* InjectionBazel */,
 				BBDD84562C4FED60000F3124 /* build_bundles.sh */,
 				BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */,
 				BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */,
@@ -346,32 +527,15 @@
 		BBDD84172C4FE79E000F3124 /* InjectionBundle */ = {
 			isa = PBXGroup;
 			children = (
+				BB42F9302EB63AAF00FDBBCC /* InjectionImplC.h */,
 				BBDD84592C4FF645000F3124 /* ClientBoot.mm */,
 				BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */,
 				BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */,
-				BBDD84262C4FE827000F3124 /* Common.swift */,
-				BBDD842A2C4FE827000F3124 /* KeyPaths.swift */,
-				BBDD84292C4FE827000F3124 /* Metadata.swift */,
-				BBDD84272C4FE827000F3124 /* Reloader.swift */,
-				BBDD84282C4FE827000F3124 /* Sweeper.swift */,
-				BB03AFA02E2818CF00EFBF21 /* Generics.swift */,
-				BBDD841A2C4FE802000F3124 /* DLKit.swift */,
-				BBDD841F2C4FE802000F3124 /* Demangling.swift */,
-				BBDD841B2C4FE802000F3124 /* FileSymbols.swift */,
-				BBDD841E2C4FE802000F3124 /* ImageSymbols.swift */,
-				BBDD841C2C4FE802000F3124 /* Interposing.swift */,
-				BBDD841D2C4FE802000F3124 /* Iterators.swift */,
 				BBDD84532C4FEB16000F3124 /* TupleRegex.swift */,
-				BB1E423B2DAD02C60085C9B9 /* InjectionLite.swift */,
-				BB1E423D2DAD02C60085C9B9 /* Recompiler.swift */,
-				BB1E423C2DAD02C60085C9B9 /* LogParser.swift */,
-				BBDD843C2C4FE8A9000F3124 /* InjectionImplC.h */,
-				BBDD84382C4FE880000F3124 /* fishhook.c */,
-				BBDD84372C4FE880000F3124 /* fishhook.h */,
-				BBDD84302C4FE849000F3124 /* DLKitC.c */,
-				BBDD84362C4FE863000F3124 /* DLKitC.h */,
-				BBDD84312C4FE849000F3124 /* trie_dladdr.mm */,
-				BBDD84322C4FE849000F3124 /* trie_dlops.mm */,
+				BB42F9452EB63E3400FDBBCC /* InjectionLite */,
+				BB42F9372EB63C2900FDBBCC /* InjectionImpl */,
+				BB42F9202EB639D100FDBBCC /* DLKit */,
+				BB42F8E02EB626F100FDBBCC /* SwiftTrace */,
 				BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */,
 			);
 			path = InjectionBundle;
@@ -512,7 +676,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB8DF4812E8D3E1F00B6FE50 /* InjectionImplC.h in Resources */,
+				BB4788812EB6B71600464AB4 /* InjectionImplC.h in Resources */,
 				BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */,
 				BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */,
 				BBA082382D6BD6CB00FFFB2F /* swift-frontend.sh in Resources */,
@@ -595,25 +759,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
-				BB5155E62CDEDAD500704C7A /* LogParser.swift in Sources */,
-				BBFAC35E2E3156B100F86DE6 /* BazelInterface.swift in Sources */,
-				BBFAC35F2E3156B100F86DE6 /* BazelAQueryParser.swift in Sources */,
-				BBFAC3602E3156B100F86DE6 /* FilenameMatcher.swift in Sources */,
-				BBFAC3612E3156B100F86DE6 /* GitIgnoreParser.swift in Sources */,
-				BBFAC3622E3156B100F86DE6 /* BazelActionQueryHandler.swift in Sources */,
+				BB42F93F2EB63CD800FDBBCC /* Common.swift in Sources */,
+				BB42F94C2EB63E4F00FDBBCC /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
+				BB42F94D2EB63E5600FDBBCC /* Recompiler.swift in Sources */,
 				229127F12C1EEF69005D7625 /* Experimental.swift in Sources */,
 				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
+				BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */,
 				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
-				BB5155E02CDED8C600704C7A /* Recompiler.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
+				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,
 				BB4654812C257F110080EC40 /* NextCompiler.swift in Sources */,
-				BB5155E32CDED9D000704C7A /* InjectionBase.swift in Sources */,
-				BB5155E42CDED9D000704C7A /* FileWatcher.swift in Sources */,
+				BB42F95A2EB63EFF00FDBBCC /* BazelInterface.swift in Sources */,
+				BB42F95B2EB63EFF00FDBBCC /* GitIgnoreParser.swift in Sources */,
+				BB42F95C2EB63EFF00FDBBCC /* BazelActionQueryHandler.swift in Sources */,
+				BB42F95D2EB63EFF00FDBBCC /* BazelAQueryParser.swift in Sources */,
+				BB42F95E2EB63EFF00FDBBCC /* FilenameMatcher.swift in Sources */,
 				224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */,
-				BBB07BC92C7D4CD5009D95CF /* Common.swift in Sources */,
 				22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -623,36 +787,56 @@
 			buildActionMask = 2147483647;
 			files = (
 				BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */,
-				BBDD844F2C4FEA81000F3124 /* fishhook.c in Sources */,
-				BB1E42412DAD02E80085C9B9 /* FileWatcher.swift in Sources */,
-				BBDD844B2C4FEA6D000F3124 /* ImageSymbols.swift in Sources */,
-				BBDD84482C4FEA63000F3124 /* Demangling.swift in Sources */,
-				BBFAC3632E3156BF00F86DE6 /* BazelInterface.swift in Sources */,
-				BBFAC3642E3156BF00F86DE6 /* BazelAQueryParser.swift in Sources */,
-				BBFAC3652E3156BF00F86DE6 /* BazelActionQueryHandler.swift in Sources */,
-				BBFAC3662E3156BF00F86DE6 /* FilenameMatcher.swift in Sources */,
-				BBFAC3672E3156BF00F86DE6 /* GitIgnoreParser.swift in Sources */,
-				BBDD84502C4FEA86000F3124 /* DLKitC.c in Sources */,
-				BBDD844E2C4FEA7D000F3124 /* InjectionBoot.mm in Sources */,
-				BBDD84462C4FEA5C000F3124 /* Reloader.swift in Sources */,
-				BBDD84492C4FEA67000F3124 /* DLKit.swift in Sources */,
+				BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */,
+				BB42F8E22EB626F100FDBBCC /* SwiftInterpose.swift in Sources */,
+				BB42F8E32EB626F100FDBBCC /* SwiftTrace.swift in Sources */,
+				BB42F8E42EB626F100FDBBCC /* SwiftSwizzle.swift in Sources */,
+				BB42F8E52EB626F100FDBBCC /* SwiftArgs.swift in Sources */,
+				BB42F8E62EB626F100FDBBCC /* SwiftInvoke.swift in Sources */,
+				BB42F8E72EB626F100FDBBCC /* EasyPointer.swift in Sources */,
+				BB42F8E82EB626F100FDBBCC /* SwiftStack.swift in Sources */,
+				BB42F9552EB63EFF00FDBBCC /* BazelInterface.swift in Sources */,
+				BB4788902EB6B81A00464AB4 /* fast_dladdr.mm in Sources */,
+				BB4788912EB6B81A00464AB4 /* xt_forwarding_trampoline_arm64.s in Sources */,
+				BB4788922EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s in Sources */,
+				BB4788932EB6B81A00464AB4 /* ObjCBridge.mm in Sources */,
+				BB4788942EB6B81A00464AB4 /* Trampolines.mm in Sources */,
+				BB4788952EB6B81A00464AB4 /* xt_forwarding_trampoline_arm7.s in Sources */,
+				BB4788962EB6B81A00464AB4 /* SwiftTrace.mm in Sources */,
+				BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */,
+				BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */,
+				BB42F9562EB63EFF00FDBBCC /* GitIgnoreParser.swift in Sources */,
+				BB42F9572EB63EFF00FDBBCC /* BazelActionQueryHandler.swift in Sources */,
+				BB42F9582EB63EFF00FDBBCC /* BazelAQueryParser.swift in Sources */,
+				BB42F9592EB63EFF00FDBBCC /* FilenameMatcher.swift in Sources */,
+				BB42F8E92EB626F100FDBBCC /* SwiftStats.swift in Sources */,
+				BB42F9212EB639D100FDBBCC /* DLKit.swift in Sources */,
+				BB42F9222EB639D100FDBBCC /* Iterators.swift in Sources */,
+				BB42F9232EB639D100FDBBCC /* Interposing.swift in Sources */,
+				BB42F9242EB639D100FDBBCC /* ImageSymbols.swift in Sources */,
+				BB42F9252EB639D100FDBBCC /* Demangling.swift in Sources */,
+				BB42F9262EB639D100FDBBCC /* FileSymbols.swift in Sources */,
+				BB42F8EA2EB626F100FDBBCC /* StringIndex.swift in Sources */,
+				BB42F8EB2EB626F100FDBBCC /* SwiftLifetime.swift in Sources */,
+				BB42F9462EB63E3400FDBBCC /* InjectionBase.swift in Sources */,
+				BB42F9472EB63E3400FDBBCC /* Recompiler.swift in Sources */,
+				BB42F9482EB63E3400FDBBCC /* InjectionLite.swift in Sources */,
+				BB42F9492EB63E3400FDBBCC /* LogParser.swift in Sources */,
+				BB42F94A2EB63E3400FDBBCC /* FileWatcher.swift in Sources */,
+				BB42F8EC2EB626F100FDBBCC /* SwiftMeta.swift in Sources */,
+				BB4788802EB6B6E700464AB4 /* InjectionBoot.mm in Sources */,
 				BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */,
-				BBDD844D2C4FEA75000F3124 /* Iterators.swift in Sources */,
-				BBDD84432C4FEA52000F3124 /* Common.swift in Sources */,
-				BBDD84522C4FEA8F000F3124 /* trie_dlops.mm in Sources */,
-				BB2D41A82DAD145A0073C203 /* Recompiler.swift in Sources */,
+				BB42F92D2EB639E500FDBBCC /* DLKitC.c in Sources */,
+				BB42F92E2EB639E500FDBBCC /* trie_dladdr.mm in Sources */,
+				BB42F92F2EB639E500FDBBCC /* trie_dlops.mm in Sources */,
 				BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */,
 				BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */,
-				BBDD844C2C4FEA71000F3124 /* Interposing.swift in Sources */,
-				BB03AFA12E2818CF00EFBF21 /* Generics.swift in Sources */,
-				BBDD84512C4FEA8B000F3124 /* trie_dladdr.mm in Sources */,
-				BB2D41A72DAD142E0073C203 /* LogParser.swift in Sources */,
-				BB2D41BE2DAD1BBB0073C203 /* InjectionLite.swift in Sources */,
-				BBDD84472C4FEA60000F3124 /* Sweeper.swift in Sources */,
-				BBDD84452C4FEA59000F3124 /* Metadata.swift in Sources */,
-				BBDD84442C4FEA55000F3124 /* KeyPaths.swift in Sources */,
-				BB1E42422DAD02F20085C9B9 /* InjectionBase.swift in Sources */,
-				BBDD844A2C4FEA6A000F3124 /* FileSymbols.swift in Sources */,
+				BB42F9382EB63C2900FDBBCC /* KeyPaths.swift in Sources */,
+				BB42F9392EB63C2900FDBBCC /* Reloader.swift in Sources */,
+				BB42F93A2EB63C2900FDBBCC /* Generics.swift in Sources */,
+				BB42F93B2EB63C2900FDBBCC /* Metadata.swift in Sources */,
+				BB42F93C2EB63C2900FDBBCC /* Common.swift in Sources */,
+				BB42F93D2EB63C2900FDBBCC /* Sweeper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -885,7 +1069,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.4.4;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -908,7 +1092,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.4.4;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1059,7 +1243,7 @@
 			repositoryURL = "https://github.com/johnno1962/Fortify";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.10;
+				minimumVersion = 2.1.12;
 			};
 		};
 		224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */ = {
@@ -1075,7 +1259,7 @@
 			repositoryURL = "https://github.com/johnno1962/DLKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.5.3;
+				minimumVersion = 3.5.5;
 			};
 		};
 		BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */ = {

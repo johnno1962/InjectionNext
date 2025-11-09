@@ -25,17 +25,17 @@ extension AppDelegate {
         // open.showsHiddenFiles = TRUE;
         if open.runModal() == .OK, let url = open.url {
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
-            Reloader.injectionQueue = .main
             watch(path: url.path)
         } else {
             Self.watchers.removeAll()
             Self.lastWatched = nil
         }
     }
-    
+
     func watch(path: String) {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
+        Reloader.injectionQueue = .main
         setenv(INJECTION_DIRECTORIES,
                NSHomeDirectory()+"/Library/Developer,"+path, 1)
         Self.watchers[path] = InjectionHybrid()
@@ -54,13 +54,58 @@ extension AppDelegate {
 
 class InjectionHybrid: InjectionBase {
     static var pendingFilesChanged = [String]()
+    /// Repository locked state - stops processing until app reconnects
+    static var isRepositoryLocked = false
+    /// Path to detected git lock file - used to check if git operation still active
+    static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
     var liteRecompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
+    override init() {
+        super.init()
+        // Extend FileWatcher pattern to detect git lock files
+        FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
+            pattern: "[^~]\\.(mm?|cpp|swift|storyboard|xib|lock)$")
+    }
+
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
+        // Detect git lock files - record path for later checking
+        if source.hasSuffix(".lock") &&
+           source.contains("/.git/") {
+            Self.gitLockPath = source
+            return
+        }
+
+        // Skip processing if repository is already locked
+        if Self.isRepositoryLocked {
+            log("""
+                File processing stopped due to git lock. \
+                Please relaunch your app to resume injection.
+                """)
+            return
+        }
+
+        // Check if source file is changing while git lock still exists
+        if let lockPath = Self.gitLockPath {
+            if FileManager.default.fileExists(atPath: lockPath) {
+                // Source files changing while git lock exists = branch switch/merge/rebase
+                Self.isRepositoryLocked = true
+                Self.pendingFilesChanged.removeAll()
+                Self.gitLockPath = nil
+                log("""
+                    Git operation in progress (branch switch/merge/rebase detected). \
+                    File processing stopped. Please relaunch your app to resume injection.
+                    """)
+                return
+            } else {
+                // Lock file is gone - was probably just a commit
+                Self.gitLockPath = nil
+            }
+        }
+
         guard !AppDelegate.watchers.isEmpty,
               Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
                 .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
