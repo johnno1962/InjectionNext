@@ -86,18 +86,58 @@ open class InjectionNext: SimpleSocket {
                          with: String(cString: bazelTarget))
         }
 
+        #if canImport(Nimble) || canImport(InjectionNextC)
+        SwiftTrace.injectableSymbol = Reloader.injectableSymbol
+        SwiftTrace.defaultLookupExclusions += #""#
+        /// Custom type lookup on tracing.
+        if let decorate = getenv(INJECTION_DECORATE) {
+            if decorate[0] == UInt8(ascii: "|") {
+                SwiftTrace.defaultMethodExclusions += String(cString: decorate)
+            }
+            SwiftTrace.typeLookup = true
+        }
+        /// Function and class method tracing on injection.
         if getenv(INJECTION_TRACE) != nil {
-            #if canImport(Nimble) || canImport(InjectionNextC)
-            SwiftTrace.typeLookup = getenv(INJECTION_DECORATE) != nil
             Reloader.traceHook = { (injected, name) in
                 let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
                 detail("SwiftTracing \(name)")
                 return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
             }
-            #else
-            error("Tracing is only available when using copy_bundle.sh.")
-            #endif
         }
+        /// Entire App bundle tracing.
+        if getenv(INJECTION_TRACE_ALL) != nil {
+            SwiftTrace.defaultMethodExclusions += "|InjectionNext"
+            SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
+            DispatchQueue.main.sync {
+                appBundleImages { imageName, _, _ in
+                    if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0 {
+                        self.error("""
+                                Unable to interpose to trace, have you added \
+                                "Other Linker Flags" -Xlinker -interposable
+                                """)
+                    }
+                    SwiftTrace.trace(bundlePath: imageName)
+                }
+            }
+        }
+        /// Trace calls to framework e.g. SwiftUI,SwiftUICore
+        if var trace = getenv(INJECTION_TRACE_FRAMEWORKS)
+            .flatMap({ String(cString: $0) }) {
+            if trace == "" { trace = "SwiftUI,SwiftUICore" }
+            DispatchQueue.main.sync {
+                for frmwk in trace.components(separatedBy: ",") {
+                    if let dylib = DLKit.imageMap[frmwk] {
+                        Self.target = dylib
+                        appBundleImages { path, header, slide in
+                            rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
+                        }
+                    } else {
+                        error("Inavlid trace framework \(frmwk)")
+                    }
+                }
+            }
+        }
+        #endif
 
         log("\(platform) connection to app established, waiting for commands.")
         #if !SWIFT_PACKAGE
@@ -108,6 +148,20 @@ open class InjectionNext: SimpleSocket {
         #endif
         processCommandsFromApp()
         log("Connection lost, disconnecting.")
+    }
+    
+    static var target: ImageSymbols?
+    static var tracer: STTracer = { existing, symname in
+        var traced = existing
+        if SwiftTrace.injectableSymbol(symname),
+           let info = trie_iterator(existing),
+           target?.imageHeader == info.pointee.header,
+           let name = SwiftMeta.demangle(symbol: symname) {
+            detail("Tracing \(name) \(existing)")
+            traced = autoBitCast(SwiftTrace
+                .trace(name: "   "+name, original: existing)) ?? existing
+        }
+        return traced
     }
 
     func processCommandsFromApp() {
