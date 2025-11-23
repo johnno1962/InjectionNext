@@ -86,58 +86,9 @@ open class InjectionNext: SimpleSocket {
                          with: String(cString: bazelTarget))
         }
 
-        #if canImport(Nimble) || canImport(InjectionNextC)
-        SwiftTrace.injectableSymbol = Reloader.injectableSymbol
-        SwiftTrace.defaultLookupExclusions += #""#
-        /// Custom type lookup on tracing.
-        if let decorate = getenv(INJECTION_DECORATE) {
-            if decorate[0] == UInt8(ascii: "|") {
-                SwiftTrace.defaultMethodExclusions += String(cString: decorate)
-            }
-            SwiftTrace.typeLookup = true
+        DispatchQueue.main.sync {
+            tracingOptions()
         }
-        /// Function and class method tracing on injection.
-        if getenv(INJECTION_TRACE) != nil {
-            Reloader.traceHook = { (injected, name) in
-                let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
-                detail("SwiftTracing \(name)")
-                return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
-            }
-        }
-        /// Entire App bundle tracing.
-        if getenv(INJECTION_TRACE_ALL) != nil {
-            SwiftTrace.defaultMethodExclusions += "|InjectionNext"
-            SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
-            DispatchQueue.main.sync {
-                appBundleImages { imageName, _, _ in
-                    if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0 {
-                        self.error("""
-                                Unable to interpose to trace, have you added \
-                                "Other Linker Flags" -Xlinker -interposable
-                                """)
-                    }
-                    SwiftTrace.trace(bundlePath: imageName)
-                }
-            }
-        }
-        /// Trace calls to framework e.g. SwiftUI,SwiftUICore
-        if var trace = getenv(INJECTION_TRACE_FRAMEWORKS)
-            .flatMap({ String(cString: $0) }) {
-            if trace == "" { trace = "SwiftUI,SwiftUICore" }
-            DispatchQueue.main.sync {
-                for frmwk in trace.components(separatedBy: ",") {
-                    if let dylib = DLKit.imageMap[frmwk] {
-                        Self.target = dylib
-                        appBundleImages { path, header, slide in
-                            rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
-                        }
-                    } else {
-                        error("Inavlid trace framework \(frmwk)")
-                    }
-                }
-            }
-        }
-        #endif
 
         log("\(platform) connection to app established, waiting for commands.")
         #if !SWIFT_PACKAGE
@@ -150,6 +101,68 @@ open class InjectionNext: SimpleSocket {
         log("Connection lost, disconnecting.")
     }
     
+    func tracingOptions() {
+        SwiftTrace.injectableSymbol = Reloader.injectableSymbol
+        /// Custom type lookup on tracing.
+        if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
+            if exclude[0] == UInt8(ascii: "|") {
+                SwiftTrace.defaultLookupExclusions += String(cString: exclude)
+            }
+            SwiftTrace.typeLookup = true
+        }
+        if let filter = getenv(INJECTION_TRACE_FILTER) {
+            SwiftTrace.inclusionRegexp =
+                NSRegularExpression(regexp: String(cString: filter))
+        }
+        /// Entire App bundle tracing.
+        if let exclude = getenv(INJECTION_TRACE_ALL) {
+            SwiftTrace.defaultMethodExclusions += "|InjectionNext"
+            if exclude[0] == UInt8(ascii: "|") {
+                SwiftTrace.defaultMethodExclusions += String(cString: exclude)
+            }
+            SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
+            appBundleImages { imageName, _, _ in
+                if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0 {
+                    self.error("""
+                            Unable to interpose to trace, have you added \
+                            "Other Linker Flags" -Xlinker -interposable
+                            """)
+                }
+                SwiftTrace.trace(bundlePath: imageName)
+            }
+        }
+        /// Trace calls to framework e.g. SwiftUI,SwiftUICore
+        if let which = getenv(INJECTION_TRACE_FRAMEWORKS) {
+            var frmwks = String(cString: which)
+            if frmwks == "" { frmwks = "SwiftUI,SwiftUICore" }
+            for frmwk in frmwks.components(separatedBy: ",") {
+                if let dylib = DLKit.imageMap[frmwk] {
+                    Self.target = dylib
+                    appBundleImages { path, header, slide in
+                        rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
+                    }
+                } else {
+                    error("Inavlid trace framework \(frmwk)")
+                }
+            }
+        }
+        // Trace UIKit internallyx
+        if var trace = getenv(INJECTION_TRACE_UIKIT) {
+            if trace[0] == 0, let dflt = DLKit.imageMap["UIKitCore"]?.imageName {
+                trace = autoBitCast(dflt)
+            }
+            SwiftTrace.trace(bundlePath: trace)
+        }
+        /// Function and class method tracing on injection.
+        if getenv(INJECTION_TRACE) != nil {
+            Reloader.traceHook = { (injected, name) in
+                let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
+                detail("SwiftTracing \(name)")
+                return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
+            }
+        }
+    }
+
     static var target: ImageSymbols?
     static var tracer: STTracer = { existing, symname in
         var traced = existing
@@ -177,7 +190,7 @@ open class InjectionNext: SimpleSocket {
                 let countKey = "__injectionsPerformed", howOften = 100
                 let count = UserDefaults.standard.integer(forKey: countKey)+1
                 UserDefaults.standard.set(count, forKey: countKey)
-                if count % howOften == 0 && getenv("INJECTION_SKINT") == nil {
+                if count % howOften == 0 && getenv("INJECTION_PAID") == nil {
                     log("Seems like you're using injection quite a bit. " +
                         "Have you considered sponsoring the project at " +
                         "https://github.com/johnno1962/\(APP_NAME) or " +
