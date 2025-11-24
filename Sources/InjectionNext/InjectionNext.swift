@@ -103,6 +103,7 @@ open class InjectionNext: SimpleSocket {
     
     func tracingOptions() {
         SwiftTrace.injectableSymbol = Reloader.injectableSymbol
+        SwiftTrace.defaultMethodExclusions += #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
         /// Custom type lookup on tracing.
         if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
             if exclude[0] == UInt8(ascii: "|") {
@@ -116,7 +117,6 @@ open class InjectionNext: SimpleSocket {
         }
         /// Entire App bundle tracing.
         if let exclude = getenv(INJECTION_TRACE_ALL) {
-            SwiftTrace.defaultMethodExclusions += "|InjectionNext"
             if exclude[0] == UInt8(ascii: "|") {
                 SwiftTrace.defaultMethodExclusions += String(cString: exclude)
             }
@@ -146,12 +146,17 @@ open class InjectionNext: SimpleSocket {
                 }
             }
         }
-        // Trace UIKit internallyx
-        if var trace = getenv(INJECTION_TRACE_UIKIT) {
-            if trace[0] == 0, let dflt = DLKit.imageMap["UIKitCore"]?.imageName {
-                trace = autoBitCast(dflt)
+        // Trace UIKit internals using swizzling
+        if let which = getenv(INJECTION_TRACE_UIKIT) {
+            var frmwks = String(cString: which)
+            if frmwks == "" { frmwks = "UIKitCore" }
+            for frmwk in frmwks.components(separatedBy: ",") {
+                if let bundle = DLKit.imageMap[frmwk]?.imageName {
+                    SwiftTrace.trace(bundlePath: bundle)
+                } else {
+                    error("Inavlid swizzle framework \(frmwk)")
+                }
             }
-            SwiftTrace.trace(bundlePath: trace)
         }
         /// Function and class method tracing on injection.
         if getenv(INJECTION_TRACE) != nil {
