@@ -108,7 +108,9 @@ logging aspects will be added to all functions in a file when you inject
 it so you can see they are being called and as an aid to debugging. This 
 means you can turn on detailed logging for a file just by injecting it.
 For a full list of all environment variable that can be specified consult
-[this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h).
+[this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h#L45).
+YMMV with global tracing but on a device it will likely be more reliable
+if you use the precompiled bundles with a copy_bundle.sh build phase.
 
 ### Cursor/VSCode/File-watcher mode.
 

@@ -86,7 +86,7 @@ open class InjectionNext: SimpleSocket {
                          with: String(cString: bazelTarget))
         }
 
-        DispatchQueue.main.sync {
+        Reloader.injectionQueue.sync {
             tracingOptions()
         }
 
@@ -104,6 +104,7 @@ open class InjectionNext: SimpleSocket {
     func tracingOptions() {
         SwiftTrace.injectableSymbol = Reloader.injectableSymbol
         SwiftTrace.defaultMethodExclusions += #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
+        SwiftTrace.defaultLookupExclusions += "|ScrollIndicatorVisibility"
         /// Custom type lookup on tracing.
         if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
             if exclude[0] == UInt8(ascii: "|") {
@@ -122,9 +123,11 @@ open class InjectionNext: SimpleSocket {
             }
             SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
             appBundleImages { imageName, _, _ in
-                if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0 {
+                if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0,
+                   strstr(imageName, "XCT") == nil {
                     self.error("""
-                            Unable to interpose to trace, have you added \
+                            Unable to interpose to trace image \
+                            \(String(cString: imageName)), have you added \
                             "Other Linker Flags" -Xlinker -interposable
                             """)
                 }
@@ -195,7 +198,7 @@ open class InjectionNext: SimpleSocket {
                 let countKey = "__injectionsPerformed", howOften = 100
                 let count = UserDefaults.standard.integer(forKey: countKey)+1
                 UserDefaults.standard.set(count, forKey: countKey)
-                if count % howOften == 0 && getenv("INJECTION_PAID") == nil {
+                if count % howOften == 0 && getenv("INJECTION_SPONSOR") == nil {
                     log("Seems like you're using injection quite a bit. " +
                         "Have you considered sponsoring the project at " +
                         "https://github.com/johnno1962/\(APP_NAME) or " +
