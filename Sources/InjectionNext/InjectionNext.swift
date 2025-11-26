@@ -103,8 +103,8 @@ open class InjectionNext: SimpleSocket {
     
     func tracingOptions() {
         SwiftTrace.injectableSymbol = Reloader.injectableSymbol
-        SwiftTrace.defaultMethodExclusions += #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
-        SwiftTrace.defaultLookupExclusions += "|ScrollIndicatorVisibility"
+        SwiftTrace.defaultMethodExclusions += // CoreFoundation
+            #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
         /// Custom type lookup on tracing.
         if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
             if exclude[0] == UInt8(ascii: "|") {
