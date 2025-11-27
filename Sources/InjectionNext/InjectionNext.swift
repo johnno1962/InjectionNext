@@ -199,11 +199,13 @@ open class InjectionNext: SimpleSocket {
                 let count = UserDefaults.standard.integer(forKey: countKey)+1
                 UserDefaults.standard.set(count, forKey: countKey)
                 if count % howOften == 0 && getenv("INJECTION_SPONSOR") == nil {
-                    log("Seems like you're using injection quite a bit. " +
-                        "Have you considered sponsoring the project at " +
-                        "https://github.com/johnno1962/\(APP_NAME) or " +
-                        "asking your boss if they should? (This messsage " +
-                        "prints every \(howOften) injections.)")
+                    log("""
+                        Seems like you're using injection quite a bit. \
+                        Have you considered sponsoring the project at \
+                        https://github.com/johnno1962/\(APP_NAME) or \
+                        asking your boss if they should? (This messsage \
+                        prints every \(howOften) injections.)
+                        """)
                 }
             } else {
                 writeCommand(InjectionResponse.unhide.rawValue, with: nil)

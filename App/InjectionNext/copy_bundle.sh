@@ -73,18 +73,19 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     fi
 
     # Make copy of "PlugIns" directory when testing
-    PLUGINS="/tmp/PlugIns.$PRODUCT_NAME.$PLATFORM_NAME"
-    LAST_PLUGINS="/tmp/InjectionNext.PlugIns"
+    export PLUGINS="/tmp/PlugIns.$PRODUCT_NAME.$PLATFORM_NAME"
+    export LAST_PLUGINS="/tmp/InjectionNext.PlugIns"
     rm -f $LAST_PLUGINS
     if [ -d "$CODESIGNING_FOLDER_PATH/PlugIns" ]; then
      (sleep 5; while
       rsync -va "$CODESIGNING_FOLDER_PATH/PlugIns"/* "$PLUGINS/" |
       grep -v /sec | grep /; do sleep 15; done) 1>/dev/null 2>&1 &
-    else
+    else bash -x <<'CAN_FAIL' 2>/dev/null
       # Xcode 16 deletes PlugIns directory. copy or create link
       rsync -a "$PLUGINS"/* "$CODESIGNING_FOLDER_PATH/PlugIns/" &&
       codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/PlugIns/*.xctest" ||
       ln -s $PLUGINS $LAST_PLUGINS
+CAN_FAIL
     fi
 
     # copy prebuilt bundle into app package and codesign

@@ -101,17 +101,6 @@ do this, the command mentioned above will be inserted into the clipboard
 which you should paste into your project as a "Run Script" "Build Phase" 
 of the main target to copy the required libraries into the app bundle.
 
-### Scheme environment variable INJECTION_TRACE
-
-If you add an environment variable INJECTION_TRACE to your scheme,
-logging aspects will be added to all functions in a file when you inject 
-it so you can see they are being called and as an aid to debugging. This 
-means you can turn on detailed logging for a file just by injecting it.
-For a full list of all environment variable that can be specified consult
-[this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h#L45).
-YMMV with global tracing but on a device it will likely be more reliable
-if you use the precompiled bundles with a copy_bundle.sh build phase.
-
 ### Cursor/VSCode/File-watcher mode.
 
 If you would like to use InjectionNext with the Cursor code editor,
@@ -127,6 +116,21 @@ mode to continue working you'll need to add a custom build setting
 EMIT_FRONTEND_COMMAND_LINES. If you'd like the InjectionNext.app to
 automatically file watch your project, add the following environment
 variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`.
+
+### Scheme environment variable INJECTION_TRACE
+
+If you add an environment variable INJECTION_TRACE to your scheme,
+logging aspects will be added to all functions in a file when you inject 
+it so you can see they are being called and as an aid to debugging. This 
+means you can turn on detailed logging for a file just by injecting it.
+For a full list of all environment variable that can be specified consult
+[this source file](https://github.com/johnno1962/InjectionLite/blob/main/Sources/InjectionImplC/include/InjectionImplC.h#L45).
+YMMV with global tracing but on a device it will likely be more reliable
+if you use the precompiled bundles with a copy_bundle.sh build phase.
+If you still see crashes, this can occur when an argument's type has
+been miscategorised. Add a INJECTION_TRACE_REPAIR schema variable and
+failing methods will be added to a list excluding them from logging
+when you re-run your app.
 
 ### Fallback compiler "proxy" mode (Not normally used).
 
