@@ -86,17 +86,8 @@ open class InjectionNext: SimpleSocket {
                          with: String(cString: bazelTarget))
         }
 
-        if getenv(INJECTION_TRACE) != nil {
-            #if canImport(Nimble) || canImport(InjectionNextC)
-            SwiftTrace.typeLookup = getenv(INJECTION_DECORATE) != nil
-            Reloader.traceHook = { (injected, name) in
-                let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
-                detail("SwiftTracing \(name)")
-                return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
-            }
-            #else
-            error("Tracing is only available when using copy_bundle.sh.")
-            #endif
+        Reloader.injectionQueue.sync {
+            tracingOptions()
         }
 
         log("\(platform) connection to app established, waiting for commands.")
@@ -108,6 +99,90 @@ open class InjectionNext: SimpleSocket {
         #endif
         processCommandsFromApp()
         log("Connection lost, disconnecting.")
+    }
+    
+    func tracingOptions() {
+        SwiftTrace.injectableSymbol = Reloader.injectableSymbol
+        SwiftTrace.defaultMethodExclusions += // CoreFoundation
+            #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
+        /// Custom type lookup on tracing.
+        if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
+            if exclude[0] == UInt8(ascii: "|") {
+                SwiftTrace.defaultLookupExclusions += String(cString: exclude)
+            }
+            SwiftTrace.typeLookup = true
+        }
+        if let filter = getenv(INJECTION_TRACE_FILTER) {
+            SwiftTrace.inclusionRegexp =
+                NSRegularExpression(regexp: String(cString: filter))
+        }
+        /// Entire App bundle tracing.
+        if let exclude = getenv(INJECTION_TRACE_ALL) {
+            if exclude[0] == UInt8(ascii: "|") {
+                SwiftTrace.defaultMethodExclusions += String(cString: exclude)
+            }
+            SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
+            appBundleImages { imageName, _, _ in
+                if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0,
+                   strstr(imageName, "XCT") == nil {
+                    self.error("""
+                            Unable to interpose to trace image \
+                            \(String(cString: imageName)), have you added \
+                            "Other Linker Flags" -Xlinker -interposable
+                            """)
+                }
+                SwiftTrace.trace(bundlePath: imageName)
+            }
+        }
+        /// Trace calls to framework e.g. SwiftUI,SwiftUICore
+        if let which = getenv(INJECTION_TRACE_FRAMEWORKS) {
+            var frmwks = String(cString: which)
+            if frmwks == "" { frmwks = "SwiftUI,SwiftUICore" }
+            for frmwk in frmwks.components(separatedBy: ",") {
+                if let dylib = DLKit.imageMap[frmwk] {
+                    Self.target = dylib
+                    appBundleImages { path, header, slide in
+                        rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
+                    }
+                } else {
+                    error("Inavlid trace framework \(frmwk)")
+                }
+            }
+        }
+        // Trace UIKit internals using swizzling
+        if let which = getenv(INJECTION_TRACE_UIKIT) {
+            var frmwks = String(cString: which)
+            if frmwks == "" { frmwks = "UIKitCore" }
+            for frmwk in frmwks.components(separatedBy: ",") {
+                if let bundle = DLKit.imageMap[frmwk]?.imageName {
+                    SwiftTrace.trace(bundlePath: bundle)
+                } else {
+                    error("Inavlid swizzle framework \(frmwk)")
+                }
+            }
+        }
+        /// Function and class method tracing on injection.
+        if getenv(INJECTION_TRACE) != nil {
+            Reloader.traceHook = { (injected, name) in
+                let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
+                detail("SwiftTracing \(name)")
+                return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
+            }
+        }
+    }
+
+    static var target: ImageSymbols?
+    static var tracer: STTracer = { existing, symname in
+        var traced = existing
+        if SwiftTrace.injectableSymbol(symname),
+           let info = trie_iterator(existing),
+           target?.imageHeader == info.pointee.header,
+           let name = SwiftMeta.demangle(symbol: symname) {
+            detail("Tracing \(name) \(existing)")
+            traced = autoBitCast(SwiftTrace
+                .trace(name: "   "+name, original: existing)) ?? existing
+        }
+        return traced
     }
 
     func processCommandsFromApp() {
@@ -123,12 +198,14 @@ open class InjectionNext: SimpleSocket {
                 let countKey = "__injectionsPerformed", howOften = 100
                 let count = UserDefaults.standard.integer(forKey: countKey)+1
                 UserDefaults.standard.set(count, forKey: countKey)
-                if count % howOften == 0 && getenv("INJECTION_SKINT") == nil {
-                    log("Seems like you're using injection quite a bit. " +
-                        "Have you considered sponsoring the project at " +
-                        "https://github.com/johnno1962/\(APP_NAME) or " +
-                        "asking your boss if they should? (This messsage " +
-                        "prints every \(howOften) injections.)")
+                if count % howOften == 0 && getenv("INJECTION_SPONSOR") == nil {
+                    log("""
+                        Seems like you're using injection quite a bit. \
+                        Have you considered sponsoring the project at \
+                        https://github.com/johnno1962/\(APP_NAME) or \
+                        asking your boss if they should? (This messsage \
+                        prints every \(howOften) injections.)
+                        """)
                 }
             } else {
                 writeCommand(InjectionResponse.unhide.rawValue, with: nil)

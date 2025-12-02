@@ -110,6 +110,7 @@
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
+		BBFE1B422ED7C116004E14EE /* SwiftRefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -260,6 +261,7 @@
 		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
+		BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftRefs.swift; sourceTree = "<group>"; };
 		CEC17029253ED117002E823F /* Experimental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Experimental.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -317,6 +319,7 @@
 				BB42F8D82EB626F100FDBBCC /* SwiftInvoke.swift */,
 				BB42F8D92EB626F100FDBBCC /* SwiftLifetime.swift */,
 				BB42F8DA2EB626F100FDBBCC /* SwiftMeta.swift */,
+				BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */,
 				BB42F8DB2EB626F100FDBBCC /* SwiftStack.swift */,
 				BB42F8DC2EB626F100FDBBCC /* SwiftStats.swift */,
 				BB42F8DD2EB626F100FDBBCC /* SwiftSwizzle.swift */,
@@ -813,6 +816,7 @@
 				BB42F9212EB639D100FDBBCC /* DLKit.swift in Sources */,
 				BB42F9222EB639D100FDBBCC /* Iterators.swift in Sources */,
 				BB42F9232EB639D100FDBBCC /* Interposing.swift in Sources */,
+				BBFE1B422ED7C116004E14EE /* SwiftRefs.swift in Sources */,
 				BB42F9242EB639D100FDBBCC /* ImageSymbols.swift in Sources */,
 				BB42F9252EB639D100FDBBCC /* Demangling.swift in Sources */,
 				BB42F9262EB639D100FDBBCC /* FileSymbols.swift in Sources */,
@@ -1069,7 +1073,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1092,7 +1096,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

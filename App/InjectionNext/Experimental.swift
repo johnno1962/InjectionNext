@@ -26,7 +26,8 @@ extension AppDelegate {
         var changes = 0, edited = 0
         for source in (MonitorXcode.runningXcode?.recompiler ??
                        FrontendServer.frontendRecompiler()).lastCompilation?
-            .swiftFiles.components(separatedBy: "\n").dropLast() ?? [] {
+            .swiftFiles.components(separatedBy: "\n").dropLast() ??
+                       Array(Recompiler.workspaceCache.keys) {
             FrontendServer.frontendRecompiler()
                 .lastInjected[source] = Date().timeIntervalSince1970
             prepareSwiftUI(source: source, changes: &changes)
