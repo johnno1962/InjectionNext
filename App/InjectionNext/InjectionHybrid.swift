@@ -33,7 +33,8 @@ extension AppDelegate {
     }
 
     func watch(path: String) {
-        guard Self.alreadyWatching(path) == nil else { return }
+        guard Self.watchers[path] == nil &&
+              Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
         Reloader.injectionQueue = .main
         setenv(INJECTION_DIRECTORIES,
@@ -43,7 +44,7 @@ extension AppDelegate {
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {
-        return watchers.keys.first { projectRoot.hasPrefix($0) }
+        return watchers.keys.first { projectRoot.hasPrefix($0+"/") }
     }
     static func restartLastWatcher() {
         DispatchQueue.main.async {
@@ -144,10 +145,18 @@ class InjectionHybrid: InjectionBase {
 
 class HybridCompiler: NextCompiler {
     /// Legacy log parsing version of recomilation
-    var liteRecompiler = Recompiler()
+    static var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
-        return liteRecompiler.recompile(source: source, platformFilter:
+        let cacheFile = Reloader.cacheFile
+        Reloader.cacheFile[#"_(\w+)_builds"#, 1] = platform
+        if cacheFile != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
+        return Self.liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
+    }
+
+    override func link(object: String, dylib: String, arch: String) -> (String, Double)? {
+        return super.link(object: object, dylib: dylib, arch: arch) ??
+                                   Self.liteRecompiler.linkingFailed()
     }
 }

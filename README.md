@@ -30,6 +30,14 @@ class methods.
 
 ![Icon](App/interposable.png)
 
+If your app contains local Swift packages, add the following to their targets
+in Package.swift to be able to inject functions inside the package.
+
+    linkerSettings: [
+        .unsafeFlags(["-Xlinker", "-interposable"],
+                     .when(configuration: .debug))
+    ]
+
 **Please note:** you can only inject changes to code inside a function body
 and you cannot add/remove or rename properties with storage or add or 
 reorder methods in a non final class or change function signatures.
