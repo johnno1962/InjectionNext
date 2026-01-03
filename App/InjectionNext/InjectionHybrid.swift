@@ -147,7 +147,15 @@ class HybridCompiler: NextCompiler {
     var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
+        let cacheFile = Reloader.cacheFile
+        Reloader.cacheFile[#"_(\w+)_builds"#, 1] = platform
+        if cacheFile != Reloader.cacheFile { liteRecompiler = Recompiler() }
         return liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
+    }
+
+    override func link(object: String, dylib: String, arch: String) -> (String, Double)? {
+        return super.link(object: object, dylib: dylib, arch: arch) ??
+                                        liteRecompiler.linkingFailed()
     }
 }
