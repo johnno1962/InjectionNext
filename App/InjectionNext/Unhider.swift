@@ -32,7 +32,7 @@ open class Unhider {
         guard var derivedData = (packageFrameworks ??
                                  Recompiler.packageFrameworks)
             .flatMap({ URL(fileURLWithPath: $0) }) else {
-            log("⚠️ packageFrameworks not set, view a Swift source.")
+            log("⚠️ packageFrameworks not set, view/inject a Swift source.")
             return
         }
         for _ in 1...(packageFrameworks != nil ? 5 : 4) {

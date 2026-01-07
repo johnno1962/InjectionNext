@@ -326,11 +326,18 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-
+        var arguments = stored.arguments
+        if let target = InjectionServer.currentClient?.arch,
+           target != "arm64" {
+            // Simulator running in Rosetta.
+            arguments = stored.arguments.map {
+                $0[#"^(\w+)-apple-ios"#, group: 1, target]
+            }
+        }
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
-               arguments: stored.arguments + languageSpecific,
+               arguments: arguments + languageSpecific,
                cd: stored.workingDir)
         var errors = ""
         while let line = compile.readLine() {
@@ -340,8 +347,8 @@ class NextCompiler {
             errors += line+"\n"
         }
         if errors.contains(" error: ") {
-            print(([compiler] + stored.arguments +
-                   languageSpecific).joined(separator: " "))
+            print(([compiler] + arguments + languageSpecific)
+                .joined(separator: " "))
             _ = error("Recompile failed for: \(source)\n"+errors)
             Self.lastError = errors
             return nil
@@ -352,7 +359,7 @@ class NextCompiler {
         let compilationTimeMs = (now - compilationStartTime) * 1000
         detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
-        let compilationCommand = (stored.arguments + languageSpecific)
+        let compilationCommand = (arguments + languageSpecific)
             .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")
         Reloader.extractLinkCommand(from: compilationCommand)
         return object
