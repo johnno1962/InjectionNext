@@ -327,11 +327,10 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
         var arguments = stored.arguments
-        if let target = InjectionServer.currentClient?.arch,
-           target != "arm64" {
+        if let target = InjectionServer.currentClient?.arch, target != "arm64" {
             // Simulator running in Rosetta.
-            arguments = stored.arguments.map {
-                $0[#"^(\w+)-apple-ios"#, group: 1, target]
+            for i in 0..<arguments.count {
+                arguments[i][#"^(\w+)-apple-ios"#] = target
             }
         }
         // Call compiler process with timing

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -1253,7 +1253,7 @@
 			repositoryURL = "https://github.com/johnno1962/SwiftRegex5";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.1.3;
+				minimumVersion = 6.2.1;
 			};
 		};
 		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {
