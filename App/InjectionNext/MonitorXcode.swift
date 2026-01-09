@@ -147,6 +147,7 @@ class MonitorXcode {
                     }
 
                     if arg.hasSuffix(".swift") && args.last != "-F" {
+                        arg[indexBuild] = "/Build/"
                         swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
