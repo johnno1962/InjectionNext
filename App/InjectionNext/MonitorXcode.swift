@@ -150,7 +150,14 @@ class MonitorXcode {
                         swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
-                        _ = xcodeStdout.readLine()
+                        if let object = xcodeStdout.readLine(), arg == "-o",
+                           Unhider.packageFrameworks == nil {
+                            var url = URL(fileURLWithPath: object)
+                            for _ in 0..<4 {
+                                url.deleteLastPathComponent()
+                            }
+                            Unhider.packageFrameworks = url.path
+                        }
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
                            let swork = readQuotedString() {
