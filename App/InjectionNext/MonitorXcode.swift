@@ -57,7 +57,7 @@ class MonitorXcode {
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error
-                        _ = self.recompiler.error(error)
+                        self.recompiler.error(error)
                     }
                 }
             }

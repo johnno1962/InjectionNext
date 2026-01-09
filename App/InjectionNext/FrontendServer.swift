@@ -85,7 +85,7 @@ class FrontendServer: SimpleSocket {
 
     override func runInBackground() {
         guard validateConnection() && readString() == "1.0" else {
-            return _ = Self.frontendRecompiler()
+            return Self.frontendRecompiler()
                 .error("Unpatch then repatch compiler to update script version")
         }
         do {

@@ -83,13 +83,12 @@ class NextCompiler {
     /// Default counter for Compilertron
     var compileNumber = 0
 
-    func error(_ msg: String) -> Bool {
+    func error(_ msg: String) {
         let msg = "⚠️ "+msg
         NSLog(msg)
         log(msg)
-        return false
     }
-    func error(_ err: Error) -> Bool {
+    func error(_ err: Error) {
         error("Internal app error: \(err)")
     }
 
@@ -119,7 +118,8 @@ class NextCompiler {
                         = prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     AppDelegate.ui.setMenuIcon(.error)
-                    return error("Injection failed. Was your app connected?")
+                    error("Injection failed. Was your app connected?")
+                    return false
                 }
 
                 InjectionServer.clientQueue.sync {
@@ -160,7 +160,8 @@ class NextCompiler {
                 metrics.success = false
                 sendMetrics(metrics)
             }
-            return self.error(error)
+            self.error(error)
+            return false
         }
     }
 
@@ -289,7 +290,7 @@ class NextCompiler {
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
-            _ = error("Postponing: \(source) Have you viewed it in Xcode?")
+            error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }
@@ -346,9 +347,9 @@ class NextCompiler {
             errors += line+"\n"
         }
         if errors.contains(" error: ") {
-            print(([compiler] + arguments + languageSpecific)
-                .joined(separator: " "))
-            _ = error("Recompile failed for: \(source)\n"+errors)
+            error("Failed compilation: "+([compiler] + arguments +
+                        languageSpecific).joined(separator: " "))
+            error("Recompile failed for: \(source)\n"+errors)
             Self.lastError = errors
             return nil
         }
@@ -382,7 +383,7 @@ class NextCompiler {
         }
 
         if let errors = Popen.system(linkCommand, errors: true) {
-            _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             Self.lastError = errors
             return nil
         }
@@ -407,7 +408,7 @@ class NextCompiler {
             else exit 1; fi)
             """
         if let errors = Popen.system(codesign, errors: true) {
-            _ = error("Codesign failed \(codesign) errors:\n"+errors)
+            error("Codesign failed \(codesign) errors:\n"+errors)
             Self.lastError = errors
         }
         }
