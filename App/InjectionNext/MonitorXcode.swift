@@ -145,20 +145,23 @@ class MonitorXcode {
                         }
                         #endif
                     }
+                    else if Unhider.packageFrameworks == nil, args.last == "-F",
+                       let platform = InjectionServer.currentClient?.platform,
+                       arg.hasSuffix("-"+platform.lowercased()) {
+                        Unhider.packageFrameworks = arg+"/PackageFrameworks"
+                    }
 
+                    let alt = arg[indexBuild, "/Build/"]
+                    if !arg.hasSuffix(".yaml"), alt != arg,
+                       let path: String = alt[#"(?:-I)?(.*)"#],
+                       FileManager.default.fileExists(atPath: path) {
+                        arg = alt
+                    }
                     if arg.hasSuffix(".swift") && args.last != "-F" {
-                        arg[indexBuild] = "/Build/"
                         swiftFiles += arg+"\n"
                         fileCount += 1
                     } else if arg == "-fsyntax-only" || arg == "-o" {
-                        if let object = xcodeStdout.readLine(), arg == "-o",
-                           Unhider.packageFrameworks == nil {
-                            var url = URL(fileURLWithPath: object)
-                            for _ in 0..<4 {
-                                url.deleteLastPathComponent()
-                            }
-                            Unhider.packageFrameworks = url.path
-                        }
+                        _ = xcodeStdout.readLine()
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
                            let swork = readQuotedString() {
@@ -169,34 +172,34 @@ class MonitorXcode {
                                 arg.contains(indexBuild) {
                         // injecting tests without having run tests
                         args.removeLast()
-                    // Xcode seems to maintain two sets of "build inputs"
-                    // i.e. .swiftmodule, .modulemap etc. files and it
-                    // seems the main build allows you to avoid "unhiding"
-                    // whereas the paths provided to SourceKit are for the
-                    // Index.noindex/Build tree of inputs. Switch them.
-                    } else if /*(args.last == "-I" || args.last == "-F" ||
-                               args.last == "-Xcc" && (arg.hasPrefix("-I") ||
-                                   arg.hasPrefix("-fmodule-map-file="))) &&*/
-                        arg.contains(indexBuild) &&
-                            !arg.contains("/Intermediates.noindex/"),
-                        let _ = args.last {
-                        // expands out default argument generators
-                        let alt = arg.replacingOccurrences(
-                            of: indexBuild, with: "/Build/")
-                        var change = [alt]
-                        // alternate fix of Defaults problem
-                        // hopefully without causing unhides
-                        // InjectionNext/issues/#40 c.f. #78
-                        if let path: String = alt[#"(?:-I)?(.*)"#],
-                           !FileManager.default.fileExists(atPath: path) {
-//                            change += (arg.hasPrefix("-") ? [arg] :
-//                                        option.hasPrefix("-") ? [option, arg] :
-//                                        [])
-                            change = [arg]
-                        }
-//                        debug("CHANGE", change)
-                        args += change
-                    } else if !(arg == "-F" && args.last == "-F") &&
+//                    // Xcode seems to maintain two sets of "build inputs"
+//                    // i.e. .swiftmodule, .modulemap etc. files and it
+//                    // seems the main build allows you to avoid "unhiding"
+//                    // whereas the paths provided to SourceKit are for the
+//                    // Index.noindex/Build tree of inputs. Switch them.
+//                    } else if /*(args.last == "-I" || args.last == "-F" ||
+//                               args.last == "-Xcc" && (arg.hasPrefix("-I") ||
+//                                   arg.hasPrefix("-fmodule-map-file="))) &&*/
+//                        arg.contains(indexBuild) &&
+//                            !arg.contains("/Intermediates.noindex/"),
+//                        let _ = args.last {
+//                        // expands out default argument generators
+//                        let alt = arg.replacingOccurrences(
+//                            of: indexBuild, with: "/Build/")
+//                        var change = [alt]
+//                        // alternate fix of Defaults problem
+//                        // hopefully without causing unhides
+//                        // InjectionNext/issues/#40 c.f. #78
+//                        if let path: String = alt[#"(?:-I)?(.*)"#],
+//                           !FileManager.default.fileExists(atPath: path) {
+////                            change += (arg.hasPrefix("-") ? [arg] :
+////                                        option.hasPrefix("-") ? [option, arg] :
+////                                        [])
+//                            change = [arg]
+//                        }
+////                        debug("CHANGE", change)
+//                        args += change
+                    } else if //!(arg == "-F" && args.last == "-F") &&
                         arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
