@@ -90,7 +90,7 @@ open class InjectionNext: SimpleSocket {
             tracingOptions()
         }
 
-        log("\(platform) connection to app established, waiting for commands.")
+        log("\(arch) \(platform) connectioned to app, waiting for commands.")
         #if !SWIFT_PACKAGE
         if let build = Bundle(for: Self.self)
             .infoDictionary?["CFBundleVersion"] as? String {

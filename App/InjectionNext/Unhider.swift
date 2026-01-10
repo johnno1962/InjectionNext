@@ -32,7 +32,7 @@ open class Unhider {
         guard var derivedData = (packageFrameworks ??
                                  Recompiler.packageFrameworks)
             .flatMap({ URL(fileURLWithPath: $0) }) else {
-            log("⚠️ packageFrameworks not set, view a Swift source.")
+            log("⚠️ packageFrameworks not set, view/inject a Swift source.")
             return
         }
         for _ in 1...(packageFrameworks != nil ? 5 : 4) {
@@ -90,7 +90,8 @@ open class Unhider {
     /// Unhide default argument generators in an object file (avoiding duplicates).
     open class func unhide(object path: String,
                            _ unhidden: inout [String: String]) -> [String] {
-        guard let object = FileSymbols(path: path) else {
+        guard let object = FileSymbols(path: path) ??
+                FileSymbols(path: path, arch: CPU_TYPE_X86_64) else {
             log("⚠️ Could not load "+path)
             return []
         }

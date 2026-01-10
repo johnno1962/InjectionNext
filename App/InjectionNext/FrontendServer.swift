@@ -85,7 +85,7 @@ class FrontendServer: SimpleSocket {
 
     override func runInBackground() {
         guard validateConnection() && readString() == "1.0" else {
-            return _ = Self.frontendRecompiler()
+            return Self.frontendRecompiler()
                 .error("Unpatch then repatch compiler to update script version")
         }
         do {
@@ -119,7 +119,14 @@ class FrontendServer: SimpleSocket {
                     swiftFiles += source+"\n"
                 }
             case "-o":
-                _ = feed.readString()
+                if let object = feed.readString(),
+                   Unhider.packageFrameworks == nil {
+                    var url = URL(fileURLWithPath: object)
+                    for _ in 1...3 {
+                        url.deleteLastPathComponent()
+                    }
+                    Unhider.packageFrameworks = url.path
+                }
             default:
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
