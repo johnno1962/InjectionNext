@@ -119,7 +119,14 @@ class FrontendServer: SimpleSocket {
                     swiftFiles += source+"\n"
                 }
             case "-o":
-                _ = feed.readString()
+                if let object = feed.readString(),
+                   Unhider.packageFrameworks == nil {
+                    var url = URL(fileURLWithPath: object)
+                    for _ in 1...3 {
+                        url.deleteLastPathComponent()
+                    }
+                    Unhider.packageFrameworks = url.path
+                }
             default:
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform

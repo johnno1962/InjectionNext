@@ -146,13 +146,13 @@ class MonitorXcode {
                         #endif
                     }
                     else if Unhider.packageFrameworks == nil, args.last == "-F",
-                       let platform = InjectionServer.currentClient?.platform,
-                       arg.hasSuffix("-"+platform.lowercased()) {
+                       arg.hasSuffix("-"+FrontendServer.clientPlatform.lowercased()) {
                         Unhider.packageFrameworks = arg+"/PackageFrameworks"
                     }
 
                     let alt = arg[indexBuild, "/Build/"]
                     if !arg.hasSuffix(".yaml"), alt != arg,
+                       !arg.contains("/Intermediates.noindex/"),
                        let path: String = alt[#"(?:-I)?(.*)"#],
                        FileManager.default.fileExists(atPath: path) {
                         arg = alt
