@@ -13,6 +13,10 @@
 import Cocoa
 import Popen
 
+#if INJECTION_III_APP
+struct Unhider { static var packageFrameworks: String? }
+#endif
+
 class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"

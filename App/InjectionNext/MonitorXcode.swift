@@ -107,6 +107,7 @@ class MonitorXcode {
         }
 
         let indexBuild = "/Index.noindex/Build/"
+        let productDir = "-"+FrontendServer.clientPlatform.lowercased()
         while let line = xcodeStdout.readLine() {
 //            debug(">>"+line+"<<")
             if line.hasPrefix("  key.request: source.request.") &&
@@ -117,39 +118,29 @@ class MonitorXcode {
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
                 var swiftFiles = "", args = [String](), fileCount = 0,
-                    workingDir = "/tmp", configDirs = Set<String>()
+                    workingDir = "/tmp"
 
                 while var arg = readQuotedString() {
+                    /// Used if injecting the Swift compiler.
                     let llvmIncs = "/llvm-macosx-arm64/lib"
                     if arg.hasPrefix("-I"), arg.contains(llvmIncs) {
                         arg = arg.replacingOccurrences(of: llvmIncs,
                             with: "/../buildbot_osx"+llvmIncs)
                     }
-                    if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
-                        Unhider.packageFrameworks = arg
-                        #if DEFAULTS_PACKAGE_PROBLEM || false
-                        let frameworksURL = URL(fileURLWithPath: arg)
-                        let derivedData = frameworksURL.deletingLastPathComponent()
-                            .deletingLastPathComponent().deletingLastPathComponent()
-                            .deletingLastPathComponent().deletingLastPathComponent()
-                        let productsDir =
-                            derivedData.appendingPathComponent("Build/Products")
-                        let platform = InjectionServer
-                            .currentClient?.platform ?? "iPhoneSimulator"
-                        if let configs = Glob(pattern: productsDir.path +
-                                               "/*-" + platform.lowercased()) {
-                            for other in configs
-                                where configDirs.insert(other).inserted {
-                                args += [other, "-F"]
-                            }
+                    
+                    /// Determine path to DerivedData for "unhiding".
+                    if args.last == "-F" {
+                        if arg.hasSuffix("/PackageFrameworks") {
+                            Unhider.packageFrameworks = arg
                         }
-                        #endif
-                    }
-                    else if Unhider.packageFrameworks == nil, args.last == "-F",
-                       arg.hasSuffix("-"+FrontendServer.clientPlatform.lowercased()) {
-                        Unhider.packageFrameworks = arg+"/PackageFrameworks"
+                        else if Unhider.packageFrameworks == nil,
+                                arg.hasSuffix(productDir) {
+                            Unhider.packageFrameworks = arg+"/PackageFrameworks"
+                        }
                     }
 
+                    /// Arguments received from SourceKit while syntax highlighting the editor
+                    /// have their own "Intermediates" directory. Map it back to the main one.
                     let alt = arg[indexBuild, "/Build/"]
                     if !arg.hasSuffix(".yaml"), alt != arg,
                        !arg.contains("/Intermediates.noindex/"),
@@ -157,6 +148,7 @@ class MonitorXcode {
                        FileManager.default.fileExists(atPath: path) {
                         arg = alt
                     }
+
                     if arg.hasSuffix(".swift") && args.last != "-F" {
                         swiftFiles += arg+"\n"
                         fileCount += 1
@@ -172,35 +164,7 @@ class MonitorXcode {
                                 arg.contains(indexBuild) {
                         // injecting tests without having run tests
                         args.removeLast()
-//                    // Xcode seems to maintain two sets of "build inputs"
-//                    // i.e. .swiftmodule, .modulemap etc. files and it
-//                    // seems the main build allows you to avoid "unhiding"
-//                    // whereas the paths provided to SourceKit are for the
-//                    // Index.noindex/Build tree of inputs. Switch them.
-//                    } else if /*(args.last == "-I" || args.last == "-F" ||
-//                               args.last == "-Xcc" && (arg.hasPrefix("-I") ||
-//                                   arg.hasPrefix("-fmodule-map-file="))) &&*/
-//                        arg.contains(indexBuild) &&
-//                            !arg.contains("/Intermediates.noindex/"),
-//                        let _ = args.last {
-//                        // expands out default argument generators
-//                        let alt = arg.replacingOccurrences(
-//                            of: indexBuild, with: "/Build/")
-//                        var change = [alt]
-//                        // alternate fix of Defaults problem
-//                        // hopefully without causing unhides
-//                        // InjectionNext/issues/#40 c.f. #78
-//                        if let path: String = alt[#"(?:-I)?(.*)"#],
-//                           !FileManager.default.fileExists(atPath: path) {
-////                            change += (arg.hasPrefix("-") ? [arg] :
-////                                        option.hasPrefix("-") ? [option, arg] :
-////                                        [])
-//                            change = [arg]
-//                        }
-////                        debug("CHANGE", change)
-//                        args += change
-                    } else if //!(arg == "-F" && args.last == "-F") &&
-                        arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
+                    } else if arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
                         args.append(arg)
                     }
                 }
