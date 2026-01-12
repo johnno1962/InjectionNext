@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -81,6 +81,7 @@
 		BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */; };
 		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
+		BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
@@ -166,7 +167,7 @@
 		224E57FC2C08BAE200B71C79 /* InjectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionClient.h; path = ../../Sources/InjectionNextC/include/InjectionClient.h; sourceTree = "<group>"; };
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
-		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unhider.swift; sourceTree = "<group>"; };
+		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Unhider.swift; path = ../../InjectionLite/Sources/InjectionImpl/Unhider.swift; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -837,6 +838,7 @@
 				BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */,
 				BB42F9382EB63C2900FDBBCC /* KeyPaths.swift in Sources */,
 				BB42F9392EB63C2900FDBBCC /* Reloader.swift in Sources */,
+				BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */,
 				BB42F93A2EB63C2900FDBBCC /* Generics.swift in Sources */,
 				BB42F93B2EB63C2900FDBBCC /* Metadata.swift in Sources */,
 				BB42F93C2EB63C2900FDBBCC /* Common.swift in Sources */,
@@ -1076,6 +1078,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INJECTION_NEXT_APP";
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
 			};
 			name = Debug;
@@ -1099,6 +1102,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INJECTION_NEXT_APP";
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
 			};
 			name = Release;

@@ -128,6 +128,16 @@ class MonitorXcode {
                             with: "/../buildbot_osx"+llvmIncs)
                     }
                     
+                    /// Arguments received from SourceKit while syntax highlighting the editor
+                    /// have their own "Intermediates" directory. Map it back to the main one.
+                    let alt = arg[indexBuild, "/Build/"]
+                    if !arg.hasSuffix(".yaml"), alt != arg,
+                       !arg.contains("/Intermediates.noindex/"),
+                       let path: String = alt[#"(?:-I)?(.*)"#],
+                       FileManager.default.fileExists(atPath: path) {
+                        arg = alt
+                    }
+
                     /// Determine path to DerivedData for "unhiding".
                     if args.last == "-F" {
                         if arg.hasSuffix("/PackageFrameworks") {
@@ -137,16 +147,6 @@ class MonitorXcode {
                                 arg.hasSuffix(productDir) {
                             Unhider.packageFrameworks = arg+"/PackageFrameworks"
                         }
-                    }
-
-                    /// Arguments received from SourceKit while syntax highlighting the editor
-                    /// have their own "Intermediates" directory. Map it back to the main one.
-                    let alt = arg[indexBuild, "/Build/"]
-                    if !arg.hasSuffix(".yaml"), alt != arg,
-                       !arg.contains("/Intermediates.noindex/"),
-                       let path: String = alt[#"(?:-I)?(.*)"#],
-                       FileManager.default.fileExists(atPath: path) {
-                        arg = alt
                     }
 
                     if arg.hasSuffix(".swift") && args.last != "-F" {
