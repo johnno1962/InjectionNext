@@ -33,8 +33,7 @@ extension AppDelegate {
     }
 
     func watch(path: String) {
-        guard Self.watchers[path] == nil &&
-              Self.alreadyWatching(path) == nil else { return }
+        guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
         Reloader.injectionQueue = .main
         setenv(INJECTION_DIRECTORIES,
@@ -44,7 +43,8 @@ extension AppDelegate {
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {
-        return watchers.keys.first { projectRoot.hasPrefix($0+"/") }
+        return Self.watchers[projectRoot] != nil ? projectRoot :
+            watchers.keys.first { projectRoot.hasPrefix($0+"/") }
     }
     static func restartLastWatcher() {
         DispatchQueue.main.async {

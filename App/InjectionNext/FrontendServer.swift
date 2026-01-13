@@ -126,7 +126,7 @@ class FrontendServer: SimpleSocket {
                 if let object = feed.readString(),
                    Unhider.packageFrameworks == nil {
                     var url = URL(fileURLWithPath: object)
-                    for _ in 1...3 {
+                    for _ in 1...4 {
                         url.deleteLastPathComponent()
                     }
                     Unhider.packageFrameworks = url.path
@@ -135,7 +135,9 @@ class FrontendServer: SimpleSocket {
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") && args.last != "-F" {
+                if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
+                    Unhider.packageFrameworks = arg
+                } else if arg.hasSuffix(".swift") && args.last != "-F" {
                     swiftFiles += arg+"\n"
                 } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()
