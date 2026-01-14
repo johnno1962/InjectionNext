@@ -35,7 +35,15 @@ class MonitorXcode {
         #if DEBUG
         args += " | tee \(recompiler.tmpbase).log"
         #endif
-        if let xcodeStdout = Popen(cmd: """
+        if !FileManager.default.fileExists(atPath: Defaults.xcodePath) {
+            InjectionServer.error("""
+                No valid Xcode at path:
+                \(Defaults.xcodePath)
+                Use menu item "Select Xcode"
+                to select a valid path.
+                """)
+        }
+        else if let xcodeStdout = Popen(cmd: """
             export SOURCEKIT_LOGGING=1; export RUNNING_VIA_INJECTION_NEXT=1; \
             '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)
             """) {
