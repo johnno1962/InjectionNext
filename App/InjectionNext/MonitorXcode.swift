@@ -44,8 +44,9 @@ class MonitorXcode {
                 """)
         }
         else if let xcodeStdout = Popen(cmd: """
-            export SOURCEKIT_LOGGING=1; export RUNNING_VIA_INJECTION_NEXT=1; \
-            '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1\(args)
+            export SOURCEKIT_LOGGING=1
+            export RUNNING_VIA_INJECTION_NEXT=1
+            '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)
             """) {
             Self.runningXcode = self
             AppDelegate.ui.launchXcodeItem.state = .on
