@@ -13,6 +13,10 @@
 import Cocoa
 import Popen
 
+#if INJECTION_III_APP
+struct Unhider { static var packageFrameworks: String? }
+#endif
+
 class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"
@@ -85,7 +89,7 @@ class FrontendServer: SimpleSocket {
 
     override func runInBackground() {
         guard validateConnection() && readString() == "1.0" else {
-            return _ = Self.frontendRecompiler()
+            return Self.frontendRecompiler()
                 .error("Unpatch then repatch compiler to update script version")
         }
         do {
@@ -119,12 +123,21 @@ class FrontendServer: SimpleSocket {
                     swiftFiles += source+"\n"
                 }
             case "-o":
-                _ = feed.readString()
+                if let object = feed.readString(),
+                   Unhider.packageFrameworks == nil {
+                    var url = URL(fileURLWithPath: object)
+                    for _ in 1...4 {
+                        url.deleteLastPathComponent()
+                    }
+                    Unhider.packageFrameworks = url.path
+                }
             default:
                 if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
                     platform = sdkPlatform
                 }
-                if arg.hasSuffix(".swift") && args.last != "-F" {
+                if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
+                    Unhider.packageFrameworks = arg
+                } else if arg.hasSuffix(".swift") && args.last != "-F" {
                     swiftFiles += arg+"\n"
                 } else if arg[Reloader.optionsToRemove] {
                     _ = feed.readString()

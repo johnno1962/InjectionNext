@@ -83,13 +83,12 @@ class NextCompiler {
     /// Default counter for Compilertron
     var compileNumber = 0
 
-    func error(_ msg: String) -> Bool {
+    func error(_ msg: String) {
         let msg = "⚠️ "+msg
         NSLog(msg)
         log(msg)
-        return false
     }
-    func error(_ err: Error) -> Bool {
+    func error(_ err: Error) {
         error("Internal app error: \(err)")
     }
 
@@ -119,7 +118,8 @@ class NextCompiler {
                         = prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     AppDelegate.ui.setMenuIcon(.error)
-                    return error("Injection failed. Was your app connected?")
+                    error("Injection failed. Was your app connected?")
+                    return false
                 }
 
                 InjectionServer.clientQueue.sync {
@@ -160,7 +160,8 @@ class NextCompiler {
                 metrics.success = false
                 sendMetrics(metrics)
             }
-            return self.error(error)
+            self.error(error)
+            return false
         }
     }
 
@@ -289,7 +290,7 @@ class NextCompiler {
     /// task and return the full path to the resulting object file.
     func recompile(source: String, platform: String) ->  String? {
         guard let stored = compilations[source] else {
-            _ = error("Postponing: \(source) Have you viewed it in Xcode?")
+            error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }
@@ -326,11 +327,17 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-
+        var arguments = stored.arguments
+        if let target = InjectionServer.currentClient?.arch, target != "arm64" {
+            // Simulator running in Rosetta.
+            for i in 0..<arguments.count {
+                arguments[i][#"^(\w+)-apple-ios"#] = target
+            }
+        }
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
         let compile = Topen(exec: compiler,
-               arguments: stored.arguments + languageSpecific,
+               arguments: arguments + languageSpecific,
                cd: stored.workingDir)
         var errors = ""
         while let line = compile.readLine() {
@@ -340,9 +347,9 @@ class NextCompiler {
             errors += line+"\n"
         }
         if errors.contains(" error: ") {
-            print(([compiler] + stored.arguments +
-                   languageSpecific).joined(separator: " "))
-            _ = error("Recompile failed for: \(source)\n"+errors)
+            error("Failed compilation: "+([compiler] + arguments +
+                        languageSpecific).joined(separator: " "))
+            error("Recompile failed for: \(source)\n"+errors)
             Self.lastError = errors
             return nil
         }
@@ -352,7 +359,7 @@ class NextCompiler {
         let compilationTimeMs = (now - compilationStartTime) * 1000
         detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
 
-        let compilationCommand = (stored.arguments + languageSpecific)
+        let compilationCommand = (arguments + languageSpecific)
             .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")
         Reloader.extractLinkCommand(from: compilationCommand)
         return object
@@ -376,7 +383,7 @@ class NextCompiler {
         }
 
         if let errors = Popen.system(linkCommand, errors: true) {
-            _ = error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
+            error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             Self.lastError = errors
             return nil
         }
@@ -401,7 +408,7 @@ class NextCompiler {
             else exit 1; fi)
             """
         if let errors = Popen.system(codesign, errors: true) {
-            _ = error("Codesign failed \(codesign) errors:\n"+errors)
+            error("Codesign failed \(codesign) errors:\n"+errors)
             Self.lastError = errors
         }
         }
