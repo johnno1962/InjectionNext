@@ -41,6 +41,8 @@ class NextCompiler {
         let swiftFiles: String
         /// Directory to run compiler in (not important for Swift)
         let workingDir: String
+        /// captured environment
+        var env: String? = nil
     }
 
     /// Queue for one compilation at a time.
@@ -336,9 +338,17 @@ class NextCompiler {
         }
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
+        var env: [String: String]?
+        if let stored = stored.env {
+            env = [String: String]()
+            for (k, v): (String, String) in stored[#"(\w+)=(.*)"#] {
+                env?[k] = v
+            }
+        }
         let compile = Topen(exec: compiler,
-               arguments: arguments + languageSpecific,
-               cd: stored.workingDir)
+                            arguments: arguments + languageSpecific,
+                            cd: stored.workingDir, env: env)
+
         var errors = ""
         while let line = compile.readLine() {
             if let slow: String = line[Reloader.typeCheckRegex] {

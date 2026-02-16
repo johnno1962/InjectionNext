@@ -101,10 +101,16 @@ class FrontendServer: SimpleSocket {
 
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard let projectRoot = feed.readString(),
-              let frontendPath = feed.readString(),
+              var frontendPath = feed.readString(),
               frontendPath.hasSuffix(".save"),
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
+        
+        var split = frontendPath.components(separatedBy: "+++"), env = ""
+        if split.count == 2 {
+            env = split.removeFirst()
+            frontendPath = split.removeLast()
+        }
 
         var swiftFiles = "", args = [String](), primaries = [String](),
             platform = "iPhoneSimulator"
@@ -181,7 +187,7 @@ class FrontendServer: SimpleSocket {
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: projectRoot)
+                      swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
                 recompiler.store(compilation: update, for: source)
             }
         }

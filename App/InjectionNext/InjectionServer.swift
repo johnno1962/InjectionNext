@@ -183,7 +183,8 @@ class InjectionServer: SimpleSocket {
                     error("""
                         Xcode not launched via app. Injection will not be possible \ 
                         unless you file-watch a project and Xcode logs are available \
-                        or use the "Intercept Compiler" menu item.
+                        You can add a env var INJECTION_PROJECT_ROOT to your scheme \
+                        with value $(SRCROOT) to auto file-watch this project.
                         """)
                 }
                 if !AppDelegate.watchers.isEmpty {
