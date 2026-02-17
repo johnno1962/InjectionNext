@@ -36,8 +36,9 @@ extension AppDelegate {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
         Reloader.injectionQueue = .main
-        setenv(INJECTION_DIRECTORIES,
-               NSHomeDirectory()+"/Library/Developer,"+path, 1)
+        let watchPaths = (getenv(INJECTION_DIRECTORIES) == nil ?
+            NSHomeDirectory()+"/Library/Developer," : "") + path
+        setenv(INJECTION_DIRECTORIES, watchPaths, 1)
         Self.watchers[path] = InjectionHybrid()
         Self.lastWatched = path
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on

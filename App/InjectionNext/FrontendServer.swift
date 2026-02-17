@@ -106,8 +106,8 @@ class FrontendServer: SimpleSocket {
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
         
-        var split = frontendPath.components(separatedBy: "+++"), env = ""
-        if split.count == 2 {
+        var split = frontendPath.components(separatedBy: "+++"), env: String?
+        if split.count > 1 {
             env = split.removeFirst()
             frontendPath = split.removeLast()
         }
@@ -172,7 +172,9 @@ class FrontendServer: SimpleSocket {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
+            let recompiler = Self.frontendRecompiler(platform: platform),
+                update = NextCompiler.Compilation(arguments: args,
+                  swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
             Self.loggedFrontend = frontendPath
 
             for source in primaries {
@@ -186,8 +188,6 @@ class FrontendServer: SimpleSocket {
 
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
-                let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
                 recompiler.store(compilation: update, for: source)
             }
         }
