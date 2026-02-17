@@ -101,16 +101,23 @@ class FrontendServer: SimpleSocket {
     }
 
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        guard let projectRoot = feed.readString(),
+        guard var projectRoot = feed.readString(),
               var frontendPath = feed.readString(),
               frontendPath.hasSuffix(".save"),
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
         
-        var split = frontendPath.components(separatedBy: "+++"), env: String?
+        // swift-frontend.sh version 2.0+ capture environment
+        var split = projectRoot.components(separatedBy: "+++"), env: String?
         if split.count > 1 {
             env = split.removeFirst()
-            frontendPath = split.removeLast()
+            projectRoot = split.removeLast()
+        } else {
+            split = frontendPath.components(separatedBy: "+++")
+            if split.count > 1 {
+                env = split.removeFirst()
+                frontendPath = split.removeLast()
+            }
         }
 
         var swiftFiles = "", args = [String](), primaries = [String](),
@@ -155,6 +162,9 @@ class FrontendServer: SimpleSocket {
             }
         }
 
+        let update = NextCompiler.Compilation(arguments: args,
+            swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
+
         DispatchQueue.main.async {
             if !projectRoot.hasSuffix(".xcodeproj") &&
 //                MonitorXcode.runningXcode == nil &&
@@ -173,9 +183,7 @@ class FrontendServer: SimpleSocket {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform),
-                update = NextCompiler.Compilation(arguments: args,
-                  swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
+            let recompiler = Self.frontendRecompiler(platform: platform)
             Self.loggedFrontend = frontendPath
 
             for source in primaries {
