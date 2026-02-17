@@ -86,7 +86,7 @@ class MonitorXcode {
                        let end = strrchr(start+1, doubleQuote) {
                         end[0] = 0
                         var out = String(cString: start+1)
-                        // Xcode uses NSLog to log internal UTF8 strings
+                        // Xcode used NSLog to log internal UTF8 strings
                         // using %s which uses the macOS system encoding.
                         // https://en.wikipedia.org/wiki/Mac_OS_Roman
                         // For now we need to do the following dance
