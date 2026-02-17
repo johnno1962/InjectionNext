@@ -142,7 +142,7 @@ class MonitorXcode {
                     let alt = arg[indexBuild, "/Build/"]
                     if !arg.hasSuffix(".yaml"), alt != arg,
                        !arg.contains("/Intermediates.noindex/"),
-                       let path: String = alt[#"(?:-I)?(.*)"#],
+                       let path: String = alt[#"[^/]*([^#]*)"#],
                        FileManager.default.fileExists(atPath: path) {
                         arg = alt
                     }

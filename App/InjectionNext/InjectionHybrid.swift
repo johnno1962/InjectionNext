@@ -119,8 +119,8 @@ class InjectionHybrid: InjectionBase {
 
     func injectNext() {
         guard let source = (DispatchQueue.main.sync { () -> String? in
-            if Self.pendingFilesChanged.isEmpty { return nil }
-            let source = Self.pendingFilesChanged.removeFirst()
+            guard let source = Self.pendingFilesChanged.first else { return nil }
+            Self.pendingFilesChanged.removeAll(where: { $0 == source })
             if !Self.pendingFilesChanged.isEmpty {
                 NextCompiler.compileQueue.async { self.injectNext() }
             }
