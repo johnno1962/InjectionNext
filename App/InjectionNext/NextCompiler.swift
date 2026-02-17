@@ -341,7 +341,8 @@ class NextCompiler {
         var env: [String: String]?
         if let stored = stored.env {
             env = [String: String]()
-            for (k, v): (String, String) in stored[#"(\w+)=(.*)"#] {
+            for (k, v): (String, String) in stored[
+                #"^(\w+)=(.*)"#.anchorsMatchLines] {
                 env?[k] = v
             }
         }
