@@ -138,8 +138,9 @@ class InjectionHybrid: InjectionBase {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
-        } else if !(recompiler === liteRecompiler) {
+        } else if recompiler.updated {
             FrontendServer.writeCache()
+            recompiler.updated = false
         }
     }
 }

@@ -73,13 +73,18 @@ class NextCompiler {
     func error(_ err: Error) {
         error("Internal app error: \(err)")
     }
+    
+    var updated = false
 
     func store(compilation: Compilation, for source: String) {
         Self.lastSource = source
         if lastCompilation != compilation {
             lastCompilation = compilation
         } //else { print("reusing") }
-        compilations[source] = lastCompilation
+        if compilations[source] != lastCompilation {
+            compilations[source] = lastCompilation
+            updated = true
+        }
         if source == pendingSource {
             print("Delayed injection of "+source)
             if inject(source: source) {
@@ -145,6 +150,31 @@ class NextCompiler {
             self.error(error)
             return false
         }
+    }
+
+    /// Seek to highlight potentially unsupported injections.
+    func unsupported(source: String, dylib: String, client: InjectionServer) {
+        #if !INJECTION_III_APP
+        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
+            .filter({ entry in
+                lazy var symbol: String = String(cString: entry.name)
+                return strncmp(entry.name, "_$s", 3) == 0 &&
+                strstr(entry.name, "fU") == nil && // closures
+                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
+                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
+            .map({ String(cString: $0.name) }).sorted() {
+//            print(symbols)
+            if let previous = client.exports[source],
+               previous.count != symbols.count {
+                log("ℹ️ Symbols altered, this may not be supported." +
+                      " \(symbols.count) c.f. \(previous.count)")
+                if #available(macOS 15.0, *) {
+                    print(symbols.difference(from: previous))
+                }
+            }
+            client.exports[source] = symbols
+        }
+        #endif
     }
 
     func prepare(source: String, connected: InjectionServer?)
@@ -397,31 +427,6 @@ class NextCompiler {
         }
         for client in InjectionServer.currentClients {
             client?.sendCommand(.metrics, with: jsonString)
-        }
-        #endif
-    }
-
-    /// Seek to highlight potentially unsupported injections.
-    func unsupported(source: String, dylib: String, client: InjectionServer) {
-        #if !INJECTION_III_APP
-        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-            .filter({ entry in
-                lazy var symbol: String = String(cString: entry.name)
-                return strncmp(entry.name, "_$s", 3) == 0 &&
-                strstr(entry.name, "fU") == nil && // closures
-                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
-                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
-            .map({ String(cString: $0.name) }).sorted() {
-//            print(symbols)
-            if let previous = client.exports[source],
-               previous.count != symbols.count {
-                log("ℹ️ Symbols altered, this may not be supported." +
-                      " \(symbols.count) c.f. \(previous.count)")
-                if #available(macOS 15.0, *) {
-                    print(symbols.difference(from: previous))
-                }
-            }
-            client.exports[source] = symbols
         }
         #endif
     }
