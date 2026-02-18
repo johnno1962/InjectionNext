@@ -1257,7 +1257,7 @@
 			repositoryURL = "https://github.com/johnno1962/SwiftRegex5";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 6.2.1;
+				minimumVersion = 6.3.0;
 			};
 		};
 		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {

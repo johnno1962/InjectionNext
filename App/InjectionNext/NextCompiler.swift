@@ -50,26 +50,6 @@ class NextCompiler {
     /// Last build error.
     static var lastError: String?, lastSource: String?
 
-    /// Tracks timing metrics for injection process
-    final class InjectionMetricsTracker: Codable {
-        var compilationTimeMs: Double = 0
-        var linkingTimeMs: Double = 0
-        var totalTimeMs: Double = 0
-        var sourcePath: String
-        var bazelTarget: String?
-        var success: Bool = false
-        var notificationName: String = INJECTION_METRICS_NOTIFICATION
-        let startTime: Double
-
-        init(sourcePath: String) {
-            self.sourcePath = sourcePath
-            self.startTime = Date.timeIntervalSinceReferenceDate
-        }
-    }
-
-    /// Current metrics being tracked
-    var currentMetrics: InjectionMetricsTracker?
-
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available
@@ -165,79 +145,6 @@ class NextCompiler {
             self.error(error)
             return false
         }
-    }
-
-    /// Enrich metrics with Bazel target and normalize source path
-    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
-        let sourcePath = metrics.sourcePath
-
-        // Find workspace root to normalize the path
-        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
-            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
-            let fullPath = (sourcePath as NSString).standardizingPath
-
-            // Normalize sourcePath to workspace-relative (in place)
-            if fullPath.hasPrefix(workspaceRootPath + "/") {
-                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
-            } else {
-                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
-            }
-
-            // Try to discover the Bazel app target
-            do {
-                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
-                queryHandler.autoDiscoverAppTarget(for: sourcePath)
-                metrics.bazelTarget = queryHandler.getAppTarget()
-            } catch {
-                // Bazel discovery failed, metrics will have nil bazelTarget
-                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
-            }
-        }
-        #endif
-    }
-
-    /// Send metrics to all connected clients
-    func sendMetrics(_ metrics: InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
-        var enrichedMetrics = metrics
-        enrichMetrics(&enrichedMetrics)
-
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        guard let jsonData = try? encoder.encode(enrichedMetrics),
-              let jsonString = String(data: jsonData, encoding: .utf8) else {
-            return
-        }
-        for client in InjectionServer.currentClients {
-            client?.sendCommand(.metrics, with: jsonString)
-        }
-        #endif
-    }
-
-    /// Seek to highlight potentially unsupported injections.
-    func unsupported(source: String, dylib: String, client: InjectionServer) {
-        #if !INJECTION_III_APP
-        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
-            .filter({ entry in
-                lazy var symbol: String = String(cString: entry.name)
-                return strncmp(entry.name, "_$s", 3) == 0 &&
-                strstr(entry.name, "fU") == nil && // closures
-                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
-                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
-            .map({ String(cString: $0.name) }).sorted() {
-//            print(symbols)
-            if let previous = client.exports[source],
-               previous.count != symbols.count {
-                log("ℹ️ Symbols altered, this may not be supported." +
-                      " \(symbols.count) c.f. \(previous.count)")
-                if #available(macOS 15.0, *) {
-                    print(symbols.difference(from: previous))
-                }
-            }
-            client.exports[source] = symbols
-        }
-        #endif
     }
 
     func prepare(source: String, connected: InjectionServer?)
@@ -424,5 +331,98 @@ class NextCompiler {
         }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
+    }
+
+    /// Tracks timing metrics for injection process
+    final class InjectionMetricsTracker: Codable {
+        var compilationTimeMs: Double = 0
+        var linkingTimeMs: Double = 0
+        var totalTimeMs: Double = 0
+        var sourcePath: String
+        var bazelTarget: String?
+        var success: Bool = false
+        var notificationName: String = INJECTION_METRICS_NOTIFICATION
+        let startTime: Double
+
+        init(sourcePath: String) {
+            self.sourcePath = sourcePath
+            self.startTime = Date.timeIntervalSinceReferenceDate
+        }
+    }
+
+    /// Current metrics being tracked
+    var currentMetrics: InjectionMetricsTracker?
+
+    /// Enrich metrics with Bazel target and normalize source path
+    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        #if canImport(InjectionBazel)
+        let sourcePath = metrics.sourcePath
+
+        // Find workspace root to normalize the path
+        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
+            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
+            let fullPath = (sourcePath as NSString).standardizingPath
+
+            // Normalize sourcePath to workspace-relative (in place)
+            if fullPath.hasPrefix(workspaceRootPath + "/") {
+                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
+            } else {
+                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
+            }
+
+            // Try to discover the Bazel app target
+            do {
+                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
+                queryHandler.autoDiscoverAppTarget(for: sourcePath)
+                metrics.bazelTarget = queryHandler.getAppTarget()
+            } catch {
+                // Bazel discovery failed, metrics will have nil bazelTarget
+                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+            }
+        }
+        #endif
+    }
+
+    /// Send metrics to all connected clients
+    func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        #if canImport(InjectionBazel)
+        var enrichedMetrics = metrics
+        enrichMetrics(&enrichedMetrics)
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let jsonData = try? encoder.encode(enrichedMetrics),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return
+        }
+        for client in InjectionServer.currentClients {
+            client?.sendCommand(.metrics, with: jsonString)
+        }
+        #endif
+    }
+
+    /// Seek to highlight potentially unsupported injections.
+    func unsupported(source: String, dylib: String, client: InjectionServer) {
+        #if !INJECTION_III_APP
+        if let symbols = FileSymbols(path: dylib)?.trieSymbols()?
+            .filter({ entry in
+                lazy var symbol: String = String(cString: entry.name)
+                return strncmp(entry.name, "_$s", 3) == 0 &&
+                strstr(entry.name, "fU") == nil && // closures
+                !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
+                !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
+            .map({ String(cString: $0.name) }).sorted() {
+//            print(symbols)
+            if let previous = client.exports[source],
+               previous.count != symbols.count {
+                log("ℹ️ Symbols altered, this may not be supported." +
+                      " \(symbols.count) c.f. \(previous.count)")
+                if #available(macOS 15.0, *) {
+                    print(symbols.difference(from: previous))
+                }
+            }
+            client.exports[source] = symbols
+        }
+        #endif
     }
 }

@@ -12,6 +12,7 @@
 //
 import Cocoa
 import Popen
+import Fortify
 
 #if INJECTION_III_APP
 struct Unhider { static var packageFrameworks: String? }
@@ -94,7 +95,9 @@ class FrontendServer: SimpleSocket {
                 .error("Unpatch then repatch compiler to update script version")
         }
         do {
-            try Self.processFrontendCommandFrom(feed: self)
+            try Fortify.protect {
+                try Self.processFrontendCommandFrom(feed: self)
+            }
         } catch {
             Self.error("Feed error: \(error)")
         }
@@ -102,22 +105,17 @@ class FrontendServer: SimpleSocket {
 
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard var projectRoot = feed.readString(),
-              var frontendPath = feed.readString(),
+              let frontendPath = feed.readString(),
               frontendPath.hasSuffix(".save"),
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
         
-        // swift-frontend.sh version 2.0+ capture environment
-        var split = projectRoot.components(separatedBy: "+++"), env: String?
-        if split.count > 1 {
-            env = split.removeFirst()
-            projectRoot = split.removeLast()
-        } else {
-            split = frontendPath.components(separatedBy: "+++")
-            if split.count > 1 {
-                env = split.removeFirst()
-                frontendPath = split.removeLast()
-            }
+        // swift-frontend.sh 2.0+ capture environment
+        var env: String?
+        if let pwd: String = projectRoot[ "PWD=(.*)\n"] ??
+                             projectRoot["HOME=(.*)\n"] {
+            env = projectRoot
+            projectRoot = pwd
         }
 
         var swiftFiles = "", args = [String](), primaries = [String](),

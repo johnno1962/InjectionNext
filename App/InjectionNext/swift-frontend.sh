@@ -9,4 +9,4 @@
 FRONTEND="$0"
 "$FRONTEND.save" "$@" &&
 ("/Applications/InjectionNext.app/Contents/Resources/feedcommands" \
-    "2.0" "`env`+++`pwd`" "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 &)
+    "2.0" "`/usr/bin/env`" "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 &)
