@@ -122,6 +122,9 @@ class FrontendServer: SimpleSocket {
             platform = "iPhoneSimulator"
 
         while let arg = feed.readString() {
+            if arg.hasPrefix("llvmcas://") {
+                return
+            }
             switch arg {
             case "-filelist":
                 guard let filelist = feed.readString() else { return }
