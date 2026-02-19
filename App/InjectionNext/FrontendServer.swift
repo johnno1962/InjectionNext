@@ -114,7 +114,7 @@ class FrontendServer: SimpleSocket {
         var env: String?
         if let pwd: String = projectRoot[ "PWD=(.*)\n"] ??
                              projectRoot["HOME=(.*)\n"] {
-            env = projectRoot
+            env = projectRoot["LLBUILD_.*", ""]
             projectRoot = pwd
         }
 
@@ -123,7 +123,7 @@ class FrontendServer: SimpleSocket {
 
         while let arg = feed.readString() {
             if arg.hasPrefix("llvmcas://") {
-                return
+                //return
             }
             switch arg {
             case "-filelist":

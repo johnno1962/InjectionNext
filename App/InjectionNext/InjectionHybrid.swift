@@ -128,7 +128,7 @@ class InjectionHybrid: InjectionBase {
         }) else { return }
 
         if let running = MonitorXcode.runningXcode,
-           running.recompiler.compilations[source] != nil { return }
+           running.recompiler.inject(source: source) { return }
 
         var recompiler = liteRecompiler
         if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {

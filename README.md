@@ -134,7 +134,8 @@ selected by `xcode-select`. With Xcode 16.3+, for this log parsing
 mode to continue working you'll need to add a custom build setting
 EMIT_FRONTEND_COMMAND_LINES. If you'd like the InjectionNext.app to
 automatically file watch your project, add the following environment
-variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`.
+variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`. Also,
+Injection won't work with setting COMPILATION_CACHE_ENABLE_CACHING.
 
 ### Scheme environment variable INJECTION_TRACE
 
