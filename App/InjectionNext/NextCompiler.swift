@@ -58,8 +58,6 @@ class NextCompiler {
     var compilations = [String: Compilation]()
     /// Trying to avoid fragmenting memory
     var lastCompilation: Compilation?
-    /// Last Injected
-    var lastInjected = [String: TimeInterval]()
     /// Previous dynamic libraries prepared by source file
     var prepared = [String: String]()
     /// Default counter for Compilertron
@@ -234,7 +232,6 @@ class NextCompiler {
             return nil
         }
 
-        lastInjected[source] = Date().timeIntervalSince1970
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
         let object = tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")

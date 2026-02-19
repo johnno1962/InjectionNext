@@ -40,10 +40,10 @@ class FrontendServer: SimpleSocket {
     static var clientPlatform: String {
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
     static func cacheURL(platform: String) -> URL {
-        return URL(fileURLWithPath: "/tmp/\(platform)_commands.json")
+        return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
     }
     static private var recompilers = [String: NextCompiler]()
-    static func frontendRecompiler(platform: String = clientPlatform) -> NextCompiler {
+    static func frontendRecompiler(for platform: String = clientPlatform) -> NextCompiler {
         if let recompiler = recompilers[platform] {
             return recompiler
         }
@@ -67,12 +67,12 @@ class FrontendServer: SimpleSocket {
         recompilers[platform] = recompiler
         return recompiler
     }
-    static func writeCache(platform: String = clientPlatform) {
+    static func writeCache(for platform: String) {
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let cache = cacheURL(platform: platform)
-            let commands = frontendRecompiler(platform: platform).compilations
+            let commands = frontendRecompiler(for: platform).compilations
             try encoder.encode(commands).write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
@@ -114,7 +114,7 @@ class FrontendServer: SimpleSocket {
         var env: String?
         if let pwd: String = projectRoot[ "PWD=(.*)\n"] ??
                              projectRoot["HOME=(.*)\n"] {
-            env = projectRoot["LLBUILD_.*", ""]
+            env = projectRoot
             projectRoot = pwd
         }
 
@@ -123,7 +123,7 @@ class FrontendServer: SimpleSocket {
 
         while let arg = feed.readString() {
             if arg.hasPrefix("llvmcas://") {
-                //return
+                return
             }
             switch arg {
             case "-filelist":
@@ -184,7 +184,7 @@ class FrontendServer: SimpleSocket {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
+            let recompiler = Self.frontendRecompiler(for: platform)
             Self.loggedFrontend = frontendPath
 
             for source in primaries {

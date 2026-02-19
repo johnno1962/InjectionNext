@@ -17,6 +17,15 @@ import InjectionImpl
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {
+    
+    override class open func error(_ message: String) -> Int32 {
+        let msg = String(format: message, strerror(errno))
+        print(APP_PREFIX+APP_NAME+": "+msg)
+        if errno == EHOSTUNREACH { // No route to host
+            print("ℹ️ "+APP_NAME+": Accept permission prompt on device.")
+        }
+        return errno
+    }
 
     func log(_ msg: String) {
         print(APP_PREFIX+APP_NAME+": "+msg)

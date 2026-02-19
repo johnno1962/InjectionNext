@@ -55,13 +55,16 @@ extension AppDelegate {
 }
 
 class InjectionHybrid: InjectionBase {
+    /// Last Injected for deduplication
+    static var lastInjected = [String: TimeInterval]()
+    /// Last queue of file changes
     static var pendingFilesChanged = [String]()
     /// Repository locked state - stops processing until app reconnects
     static var isRepositoryLocked = false
     /// Path to detected git lock file - used to check if git operation still active
     static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
-    var liteRecompiler: NextCompiler = HybridCompiler()
+    var liteCompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
@@ -108,11 +111,13 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        guard !AppDelegate.watchers.isEmpty,
-              Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
-                .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
+        let now = Date().timeIntervalSince1970
+        guard !AppDelegate.watchers.isEmpty, now - (
+                Self.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
+        Self.lastInjected[source] = now
+
         Self.pendingFilesChanged.append(source)
         NextCompiler.compileQueue.async { self.injectNext() }
     }
@@ -127,19 +132,23 @@ class InjectionHybrid: InjectionBase {
             return source
         }) else { return }
 
-        if let running = MonitorXcode.runningXcode,
-           running.recompiler.inject(source: source) { return }
+        let platform = FrontendServer.clientPlatform
+        if MonitorXcode.recompiler.compilations[source]?.arguments.filter({
+            $0.contains("SDKs/"+platform) }).first != nil,
+           MonitorXcode.recompiler.inject(source: source) {
+            return FrontendServer.writeCache(for: "Xcode")
+        }
 
-        var recompiler = liteRecompiler
+        var recompiler = liteCompiler
         if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
-            recompiler = FrontendServer.frontendRecompiler()
+            recompiler = FrontendServer.frontendRecompiler(for: platform)
         }
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
         } else if recompiler.updated {
-            FrontendServer.writeCache()
+            FrontendServer.writeCache(for: platform)
             recompiler.updated = false
         }
     }

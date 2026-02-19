@@ -22,7 +22,7 @@ class MonitorXcode {
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
     // The service to recompile and inject a source file.
-    var recompiler = NextCompiler()
+    static var recompiler = FrontendServer.frontendRecompiler(for: "Xcode")
 
     func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
@@ -33,7 +33,7 @@ class MonitorXcode {
     init(args: String = "") {
         var args = args
         #if DEBUG
-        args += " | tee \(recompiler.tmpbase).log"
+        args += " | tee \(Self.recompiler.tmpbase).log"
         #endif
         if !FileManager.default.fileExists(atPath: Defaults.xcodePath) {
             InjectionServer.error("""
@@ -66,7 +66,7 @@ class MonitorXcode {
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error
-                        self.recompiler.error(error)
+                        Self.recompiler.error(error)
                     }
                 }
             }
@@ -189,14 +189,14 @@ class MonitorXcode {
                     swiftFiles: swiftFiles, workingDir: workingDir)
  
                 NextCompiler.compileQueue.async {
-                    self.recompiler.store(compilation: update, for: source)
+                    Self.recompiler.store(compilation: update, for: source)
                 }
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
                 NextCompiler.compileQueue.async {
-                    _ = self.recompiler.inject(source: source)
+                    _ = Self.recompiler.inject(source: source)
                 }
             }
         }
