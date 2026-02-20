@@ -146,7 +146,7 @@ open class InjectionNext: SimpleSocket {
         /// Trace calls to framework e.g. SwiftUI,SwiftUICore
         if let which = getenv(INJECTION_TRACE_FRAMEWORKS) {
             var frmwks = String(cString: which)
-            if frmwks == "" { frmwks = "SwiftUI,SwiftUICore" }
+            if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let dylib = DLKit.imageMap[frmwk] {
                     Self.target = dylib
@@ -161,7 +161,7 @@ open class InjectionNext: SimpleSocket {
         // Trace UIKit internals using swizzling
         if let which = getenv(INJECTION_TRACE_UIKIT) {
             var frmwks = String(cString: which)
-            if frmwks == "" { frmwks = "UIKitCore" }
+            if frmwks == "" || frmwks == "1" { frmwks = "UIKitCore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let bundle = DLKit.imageMap[frmwk]?.imageName {
                     SwiftTrace.trace(bundlePath: bundle)

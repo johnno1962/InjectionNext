@@ -100,10 +100,10 @@ class NextCompiler {
             let result = try Fortify.protect { () -> Bool in
                 for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
-                        = prepare(source: source, connected: client),
+                        = try prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
-                    AppDelegate.ui.setMenuIcon(.error)
                     error("Injection failed. Was your app connected?")
+                    AppDelegate.ui.setMenuIcon(.error)
                     return false
                 }
 
@@ -132,7 +132,6 @@ class NextCompiler {
 
             // Calculate total time and send metrics
             if let metrics = currentMetrics {
-                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = result
                 sendMetrics(metrics)
             }
@@ -141,7 +140,6 @@ class NextCompiler {
         } catch {
             // Send failure metrics
             if let metrics = currentMetrics {
-                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = false
                 sendMetrics(metrics)
             }
@@ -175,10 +173,10 @@ class NextCompiler {
         #endif
     }
 
-    func prepare(source: String, connected: InjectionServer?)
+    func prepare(source: String, connected: InjectionServer?) throws
         -> (dylib: String, dylibName: String, platform: String, Bool)? {
-        connected?.injectionNumber += 1
         AppDelegate.ui.setMenuIcon(.busy)
+        connected?.injectionNumber += 1
         compileNumber += 1
         Self.lastError = nil
 
@@ -204,7 +202,7 @@ class NextCompiler {
         #else
         let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
         #endif
-        guard let object = recompile(source: source, platform: platform), {
+        guard let object = try recompile(source: source, platform: platform), {
                 // Track compilation time
                 if let startTime = currentMetrics?.startTime {
                     currentMetrics?.compilationTimeMs =
@@ -225,7 +223,7 @@ class NextCompiler {
 
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
-    func recompile(source: String, platform: String) ->  String? {
+    func recompile(source: String, platform: String) throws ->  String? {
         guard let stored = compilations[source] else {
             error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
@@ -239,8 +237,8 @@ class NextCompiler {
 
         unlink(object)
         unlink(filesfile)
-        try? stored.swiftFiles.write(toFile: filesfile,
-                                     atomically: false, encoding: .utf8)
+        try stored.swiftFiles.write(toFile: filesfile,
+                                    atomically: false, encoding: .utf8)
 
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
@@ -381,8 +379,8 @@ class NextCompiler {
     var currentMetrics: InjectionMetricsTracker?
 
     /// Enrich metrics with Bazel target and normalize source path
+    #if !INJECTION_III_APP
     func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
         let sourcePath = metrics.sourcePath
 
         // Find workspace root to normalize the path
@@ -407,12 +405,14 @@ class NextCompiler {
                 print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
             }
         }
-        #endif
     }
+    #endif
 
     /// Send metrics to all connected clients
     func sendMetrics(_ metrics: InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
+        #if !INJECTION_III_APP
+        metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate
+                               - metrics.startTime) * 1000
         var enrichedMetrics = metrics
         enrichMetrics(&enrichedMetrics)
 
