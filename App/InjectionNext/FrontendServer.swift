@@ -25,6 +25,7 @@ class FrontendServer: SimpleSocket {
     }
 
     /// Paths to unpatched/patched swift-frontend binary/script in toolchain.
+    static let frontendQueue = DispatchQueue(label: "InjectionCapture")
     static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
         "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
     static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
@@ -88,18 +89,20 @@ class FrontendServer: SimpleSocket {
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
 
-    override func runInBackground() {
-        guard validateConnection(),
-              let vers = readString(), vers == "1.0" || vers == "2.0" else {
-            return Self.frontendRecompiler()
-                .error("Unpatch then repatch compiler to update script version")
-        }
-        do {
-            try Fortify.protect {
-                try Self.processFrontendCommandFrom(feed: self)
+    override func run() {
+        Self.frontendQueue.async {
+            do {
+                try Fortify.protect {
+                    guard self.validateConnection(),
+                          let vers = self.readString(), vers == "1.0" || vers == "2.0" else {
+                        return Self.frontendRecompiler()
+                            .error("Unpatch then repatch compiler to update script version")
+                    }
+                    try Self.processFrontendCommandFrom(feed: self)
+                }
+            } catch {
+                Self.error("Feed error: \(error)")
             }
-        } catch {
-            Self.error("Feed error: \(error)")
         }
     }
 
