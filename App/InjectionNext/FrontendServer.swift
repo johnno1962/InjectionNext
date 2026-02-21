@@ -137,7 +137,7 @@ class FrontendServer: SimpleSocket {
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 primaries.append(source)
-                if !swiftFiles.contains(source) {
+                if strstr(swiftFiles, source) == nil {
                     swiftFiles += source+"\n"
                 }
             case "-o":

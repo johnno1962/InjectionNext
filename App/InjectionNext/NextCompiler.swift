@@ -60,6 +60,8 @@ class NextCompiler {
     var lastCompilation: Compilation?
     /// Previous dynamic libraries prepared by source file
     var prepared = [String: String]()
+    /// Invalidate on three failures
+    var strikes = [String: Int]()
     /// Default counter for Compilertron
     var compileNumber = 0
 
@@ -212,10 +214,18 @@ class NextCompiler {
             }(),
            tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
            let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
-                    arch: connected?.arch ?? compilerArch) else { return nil }
+                    arch: connected?.arch ?? compilerArch) else {
+                        let strike = (strikes[source] ?? 0)+1
+                        strikes[source] = strike
+                        if strike > 2 {
+                            compilations.removeValue(forKey: source)
+                        }
+                        return nil
+                    }
 
         currentMetrics?.linkingTimeMs = linkingTimeMs
 
+        strikes[source] = 0
         prepared[sourceName] = dylib
         print("Prepared dylib: "+dylib)
         return (dylib, dylibName, platform, useFilesystem)
