@@ -111,7 +111,7 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        let now = Date().timeIntervalSince1970
+        let now = Date.timeIntervalSinceReferenceDate
         guard !AppDelegate.watchers.isEmpty, now - (
                 Self.lastInjected[source] ?? 0.0) > minInterval else {
             return

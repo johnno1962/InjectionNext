@@ -29,7 +29,7 @@ extension AppDelegate {
                        FrontendServer.frontendRecompiler().lastCompilation)?
             .swiftFiles.components(separatedBy: "\n").dropLast() ??
                        Array(Recompiler.workspaceCache.keys) {
-            InjectionHybrid.lastInjected[source] = Date().timeIntervalSince1970
+            InjectionHybrid.lastInjected[source] = Date.timeIntervalSinceReferenceDate
             prepareSwiftUI(source: source, changes: &changes)
             edited += 1
         }

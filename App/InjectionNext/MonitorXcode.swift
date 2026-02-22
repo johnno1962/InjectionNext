@@ -60,9 +60,10 @@ class MonitorXcode {
                         }
                         Self.runningXcode = nil
                         AppDelegate.ui.launchXcodeItem.state = .off
-                        if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
+                        if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }
+                        FrontendServer.writeCache(for: "Xcode")
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error

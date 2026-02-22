@@ -421,7 +421,8 @@ class NextCompiler {
     /// Send metrics to all connected clients
     func sendMetrics(_ metrics: InjectionMetricsTracker) {
         #if !INJECTION_III_APP
-        if AppDelegate.watchers.isEmpty { return }
+        if AppDelegate.watchers.isEmpty &&
+            BazelActionQueryHandler.cachedAppTarget == nil { return }
         metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate
                                - metrics.startTime) * 1000
         var enrichedMetrics = metrics
