@@ -7,17 +7,28 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "/tmp/InjectionNextSalt.h"
 #import "../../../InjectionNext/Sources/InjectionNextC/include/SimpleSocket.h"
 #import "../../../InjectionNext/Sources/InjectionNextC/include/InjectionClient.h"
 
 @interface FeedSocket: SimpleSocket
 @end
-@implementation FeedSocket
+@implementation FeedSocket {
+    FILE *out;
+}
 + (int)error:(NSString *)message {
     if (isatty(STDIN_FILENO))
         printf([NSString stringWithFormat:@"%@/%@\n",
                 self, message].UTF8String, strerror(errno));
     return 1;
+}
+- (BOOL)writeBytes:(const void *)buffer length:(size_t)length cmd:(SEL)cmd {
+    if (!out)
+        out = fdopen(clientSocket, "w");
+    return fwrite(buffer, 1, length, out) == length;
+}
+- (void)dealloc {
+    fclose(out);
 }
 @end
 

@@ -92,7 +92,7 @@ class FrontendServer: SimpleSocket {
     override func run() {
         Self.frontendQueue.async {
             do {
-                try Fortify.protect {
+                try Fortify.protect { () -> () in
                     guard self.validateConnection(),
                           let vers = self.readString(), vers == "1.0" || vers == "2.0" else {
                         return Self.frontendRecompiler()
@@ -188,7 +188,7 @@ class FrontendServer: SimpleSocket {
 
         NextCompiler.compileQueue.async {
             let recompiler = Self.frontendRecompiler(for: platform)
-            Self.loggedFrontend = frontendPath
+            loggedFrontend = frontendPath
 
             for source in primaries {
                 #if !INJECTION_III_APP

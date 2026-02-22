@@ -552,6 +552,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BB85A42A2D6B9C5300FA29D0 /* Build configuration list for PBXNativeTarget "feedcommands" */;
 			buildPhases = (
+				BBDD999A2F4AF61000E88DFB /* ShellScript */,
 				BB85A4202D6B9C5300FA29D0 /* Sources */,
 				BB85A4212D6B9C5300FA29D0 /* Frameworks */,
 				BB85A4222D6B9C5300FA29D0 /* CopyFiles */,
@@ -746,6 +747,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nInjectionNext/build_bundles.sh\n";
+		};
+		BBDD999A2F4AF61000E88DFB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "perl -e 'print \"#define COMMANDS_VERSION @{[1_000_000 + int(rand() * ((1 << 31)) - 1_000_000)]}\\n\"' >/tmp/InjectionNextSalt.h\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

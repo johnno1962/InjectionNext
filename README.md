@@ -162,6 +162,7 @@ compilations using a script and send them to the InjectionNext.app. Once this
 patch has been applied you don't need to launch Xcode from the app and you can 
 inject by starting a file watcher using the "...or Watch Project" menu item
 (though this should happen automatically when you recompile Swift sources).
+For proxy mode to work the app must be installed in /Applications.
 
 So, InjectionNext now has three ways which it can operate. The original mode 
 of operation launching Xcode inside the app takes precedence and, if you have
