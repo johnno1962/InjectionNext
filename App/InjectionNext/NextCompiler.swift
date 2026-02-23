@@ -74,7 +74,7 @@ class NextCompiler {
         error("Internal app error: \(err)")
     }
     
-    var updated = false
+    var modified = false
 
     func store(compilation: Compilation, for source: String) {
         Self.lastSource = source
@@ -83,7 +83,7 @@ class NextCompiler {
         } //else { print("reusing") }
         if compilations[source] != lastCompilation {
             compilations[source] = lastCompilation
-            updated = true
+            modified = true
         }
         if source == pendingSource {
             print("Delayed injection of "+source)
@@ -91,6 +91,14 @@ class NextCompiler {
                 pendingSource = nil
             }
         }
+    }
+    
+    func canCompile(source: String, for platform: String? = nil) -> Bool {
+        if let compilation = compilations[source],
+           platform == nil || compilation.arguments
+            .first(where: { $0.contains("SDKs/"+platform!) }) != nil {
+            return true
+        } else { return false }
     }
 
     /// Main entry point called by MonitorXcode

@@ -133,23 +133,24 @@ class InjectionHybrid: InjectionBase {
         }) else { return }
 
         let platform = FrontendServer.clientPlatform
-        if MonitorXcode.recompiler.compilations[source]?.arguments.filter({
-            $0.contains("SDKs/"+platform) }).first != nil,
+        if MonitorXcode.recompiler.canCompile(source: source, for: platform),
            MonitorXcode.recompiler.inject(source: source) {
-            return FrontendServer.writeCache(for: "Xcode")
+            return FrontendServer.writeCache(for: MonitorXcode.compilerName)
         }
 
         var recompiler = liteCompiler
-        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
-            recompiler = FrontendServer.frontendRecompiler(for: platform)
+        if source.hasSuffix(".swift") && AppDelegate.ui.updatePatchUnpatch() == .patched {
+            let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
+            if proxyCompiler.canCompile(source: source) {
+                recompiler = proxyCompiler
+            }
         }
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
-        } else if recompiler.updated {
+        } else if recompiler.modified {
             FrontendServer.writeCache(for: platform)
-            recompiler.updated = false
         }
     }
 }

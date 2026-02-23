@@ -69,17 +69,19 @@ class FrontendServer: SimpleSocket {
         return recompiler
     }
     static func writeCache(for platform: String) {
+        let recompiler = frontendRecompiler(for: platform)
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let cache = cacheURL(platform: platform)
-            let commands = frontendRecompiler(for: platform).compilations
+            let commands = recompiler.compilations
             try encoder.encode(commands).write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
             } else {
                 print("Cached \(commands.count) \(platform) commands")
             }
+            recompiler.modified = false
         } catch {
             InjectionServer.error("Unable to write commands cache: \(error)")
         }
@@ -390,7 +392,7 @@ extension AppDelegate {
         if patched != original {
             do {
                 try patched.write(to: fileURL,
-                                  atomically: false, encoding: .utf8)
+                                  atomically: true, encoding: .utf8)
             } catch {
                 InjectionServer.error("Could not save \(source): \(error)")
             }
