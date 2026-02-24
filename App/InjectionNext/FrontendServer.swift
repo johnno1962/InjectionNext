@@ -172,7 +172,7 @@ class FrontendServer: SimpleSocket {
             swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
 
         DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") &&
+            if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
 //                MonitorXcode.runningXcode == nil &&
                 AppDelegate.alreadyWatching(projectRoot) == nil {
                 let open = NSOpenPanel()

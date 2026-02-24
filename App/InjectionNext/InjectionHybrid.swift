@@ -35,11 +35,7 @@ extension AppDelegate {
     func watch(path: String) {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
-        Reloader.injectionQueue = .main
-        let watchPaths = (getenv(INJECTION_DIRECTORIES) == nil ?
-            NSHomeDirectory()+"/Library/Developer," : "") + path
-        setenv(INJECTION_DIRECTORIES, watchPaths, 1)
-        Self.watchers[path] = InjectionHybrid()
+        Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
@@ -68,11 +64,15 @@ class InjectionHybrid: InjectionBase {
     /// Minimum seconds between injections
     let minInterval = 1.0
 
-    override init() {
+    init(watching path: String) { // FileWatcher compatibility
+        let watchPaths = (getenv(INJECTION_DIRECTORIES) == nil ?
+            NSHomeDirectory()+"/Library/Developer," : "") + path
+        setenv(INJECTION_DIRECTORIES, watchPaths, 1)
+        Reloader.injectionQueue = .main
         super.init()
         // Extend FileWatcher pattern to detect git lock files
         FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: #"[^~]\.(mm?|cpp|swift|lock)$"#)
+            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock)$"#)
     }
 
     /// Called from file watcher when file is edited.
@@ -133,7 +133,8 @@ class InjectionHybrid: InjectionBase {
         }) else { return }
 
         let platform = FrontendServer.clientPlatform
-        if MonitorXcode.recompiler.canCompile(source: source, for: platform),
+        if MonitorXcode.runningXcode == nil,
+           MonitorXcode.recompiler.canCompile(source: source, for: platform),
            MonitorXcode.recompiler.inject(source: source) {
             return FrontendServer.writeCache(for: MonitorXcode.compilerName)
         }
@@ -160,9 +161,9 @@ class HybridCompiler: NextCompiler {
     static var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
-        let cacheFile = Reloader.cacheFile
+        let oldCache = Reloader.cacheFile
         Reloader.cacheFile[#"_(\w+)_builds"#, 1] = platform
-        if cacheFile != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
+        if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
         return Self.liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
     }
