@@ -154,7 +154,7 @@ open class InjectionNext: SimpleSocket {
                         rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
                     }
                 } else {
-                    error("Inavlid trace framework \(frmwk)")
+                    error("Invalid trace framework \(frmwk)")
                 }
             }
         }
@@ -166,7 +166,7 @@ open class InjectionNext: SimpleSocket {
                 if let bundle = DLKit.imageMap[frmwk]?.imageName {
                     SwiftTrace.trace(bundlePath: bundle)
                 } else {
-                    error("Inavlid swizzle framework \(frmwk)")
+                    error("Invalid swizzle framework \(frmwk)")
                 }
             }
         }
@@ -209,10 +209,10 @@ open class InjectionNext: SimpleSocket {
                 UserDefaults.standard.set(count, forKey: countKey)
                 if count % howOften == 0 && getenv("INJECTION_SPONSOR") == nil {
                     log("""
-                        Seems like you're using injection quite a bit. \
+                        ℹ️ Seems like you're using injection quite a bit. \
                         Have you considered sponsoring the project at \
                         https://github.com/johnno1962/\(APP_NAME) or \
-                        asking your boss if they should? (This messsage \
+                        asking your boss if they should? (This message \
                         prints every \(howOften) injections.)
                         """)
                 }
@@ -231,7 +231,7 @@ open class InjectionNext: SimpleSocket {
             }
             switch command {
             case .invalid:
-                return error("Connection did not validate.")
+                return error("Connection did not validate. Have you upgraded?")
             case .log:
                 if let msg = readString() {
                     print(msg)

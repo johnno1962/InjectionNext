@@ -13,7 +13,7 @@ let package = Package(
         // To avoid duplicate symbols if other
         // packages use e.g. DLKit or fishhook
 //        .library(
-//            name: "InjectionNextDyanmic",
+//            name: "InjectionNextDynamic",
 //            type: .dynamic,
 //            targets: ["InjectionNext"]),
     ],

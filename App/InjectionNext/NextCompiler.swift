@@ -225,8 +225,9 @@ class NextCompiler {
                     arch: connected?.arch ?? compilerArch) else {
                         let strike = (strikes[source] ?? 0)+1
                         strikes[source] = strike
-                        if strike > 2 {
+                        if strike >= 3 {
                             compilations.removeValue(forKey: source)
+                            writeCache()
                         }
                         return nil
                     }
@@ -289,11 +290,11 @@ class NextCompiler {
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
         var env: [String: String]?
-        if let stored = stored.env {
+        if let environment = stored.env {
             env = [String: String]()
-            for (k, v): (String, String) in stored[
+            for (key, value): (String, String) in environment[
                 #"^(\w+)=(.*)"#.anchorsMatchLines] {
-                env?[k] = v
+                env?[key] = value
             }
         }
         let compile = Topen(exec: compiler,

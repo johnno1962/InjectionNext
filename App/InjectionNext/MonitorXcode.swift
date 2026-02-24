@@ -22,8 +22,7 @@ class MonitorXcode {
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
     // The service to recompile and inject a source file.
-    static let compilerName = "Xcode"
-    static var recompiler = FrontendServer.frontendRecompiler(for: compilerName)
+    static var recompiler = FrontendServer.frontendRecompiler(for: "Xcode")
 
     func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
@@ -64,7 +63,7 @@ class MonitorXcode {
                         if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }
-                        FrontendServer.writeCache(for: Self.compilerName)
+                        Self.recompiler.writeCache()
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error
@@ -200,7 +199,7 @@ class MonitorXcode {
                 NextCompiler.compileQueue.async {
                     if Self.recompiler.inject(source: source) &&
                         Self.recompiler.modified {
-                        FrontendServer.writeCache(for: Self.compilerName)
+                        Self.recompiler.writeCache()
                     }
                 }
             }

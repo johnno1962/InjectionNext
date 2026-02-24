@@ -60,7 +60,7 @@ class InjectionHybrid: InjectionBase {
     /// Path to detected git lock file - used to check if git operation still active
     static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
-    var liteCompiler: NextCompiler = HybridCompiler()
+    var logParsingCompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
@@ -118,8 +118,10 @@ class InjectionHybrid: InjectionBase {
         }
         Self.lastInjected[source] = now
 
-        Self.pendingFilesChanged.append(source)
-        NextCompiler.compileQueue.async { self.injectNext() }
+        NextCompiler.compileQueue.async {
+            Self.pendingFilesChanged.append(source)
+            self.injectNext()
+        }
     }
 
     func injectNext() {
@@ -132,14 +134,15 @@ class InjectionHybrid: InjectionBase {
             return source
         }) else { return }
 
+        var recompiler = MonitorXcode.recompiler
         let platform = FrontendServer.clientPlatform
         if MonitorXcode.runningXcode == nil,
-           MonitorXcode.recompiler.canCompile(source: source, for: platform),
-           MonitorXcode.recompiler.inject(source: source) {
-            return FrontendServer.writeCache(for: MonitorXcode.compilerName)
+           recompiler.canCompile(source: source, for: platform),
+           recompiler.inject(source: source) {
+            return recompiler.writeCache()
         }
 
-        var recompiler = liteCompiler
+        recompiler = logParsingCompiler
         if source.hasSuffix(".swift") && AppDelegate.ui.updatePatchUnpatch() == .patched {
             let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
             if proxyCompiler.canCompile(source: source) {
@@ -151,7 +154,7 @@ class InjectionHybrid: InjectionBase {
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
         } else if recompiler.modified {
-            FrontendServer.writeCache(for: platform)
+            recompiler.writeCache()
         }
     }
 }

@@ -18,6 +18,15 @@ import Fortify
 struct Unhider { static var packageFrameworks: String? }
 #endif
 
+extension NextCompiler {
+    func writeCache() {
+        if let platform = FrontendServer.recompilers.keys
+            .first(where: {FrontendServer.recompilers[$0] === self }) {
+            FrontendServer.writeCache(for: platform)
+        }
+    }
+}
+
 class FrontendServer: SimpleSocket {
     enum State: String {
         case unpatched = "Intercept Compiler"
@@ -43,7 +52,7 @@ class FrontendServer: SimpleSocket {
     static func cacheURL(platform: String) -> URL {
         return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
     }
-    static private var recompilers = [String: NextCompiler]()
+    static private(set) var recompilers = [String: NextCompiler]()
     static func frontendRecompiler(for platform: String = clientPlatform) -> NextCompiler {
         if let recompiler = recompilers[platform] {
             return recompiler
@@ -60,7 +69,8 @@ class FrontendServer: SimpleSocket {
                     guard let compile = stored[source] else { continue }
                     recompiler.store(compilation: compile, for: source)
                 }
-                print("Loaded \(recompiler.compilations.count) cached commands")
+                recompiler.modified = false
+                print("Loaded \(recompiler.compilations.count) \(platform) commands.")
             }
         } catch {
             InjectionServer.error("Unable to read commands cache: \(error).")

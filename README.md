@@ -135,7 +135,7 @@ mode to continue working you'll need to add a custom build setting
 EMIT_FRONTEND_COMMAND_LINES. If you'd like the InjectionNext.app to
 automatically file watch your project, add the following environment
 variable to your scheme: `INJECTION_PROJECT_ROOT=$(SRCROOT)`. Also,
-injection doesn't work when the Xcode build setting `COMPILATION_CACHE_ENABLE_CACHING` is enabled.
+Injection doesn't work with setting COMPILATION_CACHE_ENABLE_CACHING.
 
 ### Scheme environment variable INJECTION_TRACE
 

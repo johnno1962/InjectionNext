@@ -19,16 +19,15 @@ import Popen
 
 class InjectionServer: SimpleSocket {
 
-    struct ClientConnection {
+    struct ActiveClient {
         weak var connection: InjectionServer?
     }
 
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
-    static private var connected = [ClientConnection]()
+    static private var connected = [ActiveClient]()
     static var currentClients: [InjectionServer?] {
-        connected.removeAll { $0.connection == nil }
-        return connected.isEmpty ? [nil] : connected.map { $0.connection }
+        return connected.isEmpty ? [nil] : connected.compactMap { $0.connection }
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
@@ -124,7 +123,6 @@ class InjectionServer: SimpleSocket {
                     return
                 }
                 DispatchQueue.main.async {
-                    InjectionHybrid.pendingFilesChanged.removeAll()
                     // Reset repository locked state on app reconnect (relaunch)
                     if InjectionHybrid.isRepositoryLocked {
                         InjectionHybrid.isRepositoryLocked = false
@@ -171,7 +169,9 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     if !tmpPath.contains("/Xcode/UserData/Previews/") {
                         NextCompiler.compileQueue.async {
-                            Self.connected.append(ClientConnection(connection: self))
+                            Self.connected.removeAll { $0.connection == nil }
+                            Self.connected.append(ActiveClient(connection: self))
+                            InjectionHybrid.pendingFilesChanged.removeAll()
                         }
                     }
                 } else {
@@ -182,7 +182,7 @@ class InjectionServer: SimpleSocket {
                     AppDelegate.ui.updatePatchUnpatch() == .unpatched {
                     error("""
                         Xcode not launched via app. Injection will not be possible \ 
-                        unless you file-watch a project and Xcode logs are available \
+                        unless you file-watch a project and Xcode logs are available. \
                         You can add an env var INJECTION_PROJECT_ROOT to your scheme \
                         with value $(SRCROOT) to auto file-watch this project.
                         """)
