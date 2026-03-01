@@ -105,7 +105,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 Defaults.xcodeDefault = xcodePath
             }
             selectXcodeItem.toolTip = Defaults.xcodePath
-            if updatePatchUnpatch() == .unpatched {
+            if updatePatchUnpatch() == .unpatched &&
+                getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
                 InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
