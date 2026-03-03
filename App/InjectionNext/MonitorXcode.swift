@@ -22,7 +22,7 @@ class MonitorXcode {
     // Currently running Xcode process
     static weak var runningXcode: MonitorXcode?
     // The service to recompile and inject a source file.
-    var recompiler = NextCompiler()
+    static var recompiler = FrontendServer.frontendRecompiler(for: "Xcode")
 
     func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
@@ -33,7 +33,7 @@ class MonitorXcode {
     init(args: String = "") {
         var args = args
         #if DEBUG
-        args += " | tee \(recompiler.tmpbase).log"
+        args += " | tee \(Self.recompiler.tmpbase).log"
         #endif
         if !FileManager.default.fileExists(atPath: Defaults.xcodePath) {
             InjectionServer.error("""
@@ -60,13 +60,14 @@ class MonitorXcode {
                         }
                         Self.runningXcode = nil
                         AppDelegate.ui.launchXcodeItem.state = .off
-                        if Defaults.xcodeRestart == true && !xcodeStdout.terminatedOK()  {
+                        if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }
+                        Self.recompiler.writeCache()
                         break // break on clean exit and EOF.
                     } catch {
                         // Continue processing on error
-                        self.recompiler.error(error)
+                        Self.recompiler.error(error)
                     }
                 }
             }
@@ -86,7 +87,7 @@ class MonitorXcode {
                        let end = strrchr(start+1, doubleQuote) {
                         end[0] = 0
                         var out = String(cString: start+1)
-                        // Xcode uses NSLog to log internal UTF8 strings
+                        // Xcode used NSLog to log internal UTF8 strings
                         // using %s which uses the macOS system encoding.
                         // https://en.wikipedia.org/wiki/Mac_OS_Roman
                         // For now we need to do the following dance
@@ -142,7 +143,7 @@ class MonitorXcode {
                     let alt = arg[indexBuild, "/Build/"]
                     if !arg.hasSuffix(".yaml"), alt != arg,
                        !arg.contains("/Intermediates.noindex/"),
-                       let path: String = alt[#"(?:-I)?(.*)"#],
+                       let path: String = alt[#"[^/]*([^#]+)"#],
                        FileManager.default.fileExists(atPath: path) {
                         arg = alt
                     }
@@ -189,14 +190,17 @@ class MonitorXcode {
                     swiftFiles: swiftFiles, workingDir: workingDir)
  
                 NextCompiler.compileQueue.async {
-                    self.recompiler.store(compilation: update, for: source)
+                    Self.recompiler.store(compilation: update, for: source)
                 }
             } else if line ==
                 "  key.request: source.request.indexer.editor-did-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
                 NextCompiler.compileQueue.async {
-                    _ = self.recompiler.inject(source: source)
+                    if Self.recompiler.inject(source: source) &&
+                        Self.recompiler.modified {
+                        Self.recompiler.writeCache()
+                    }
                 }
             }
         }

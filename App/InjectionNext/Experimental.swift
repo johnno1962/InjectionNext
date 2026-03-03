@@ -24,12 +24,12 @@ extension AppDelegate {
     /// Prepare all sources in the current target for injection.
     @IBAction func prepareProject(_ sender: NSMenuItem) {
         var changes = 0, edited = 0
-        for source in (MonitorXcode.runningXcode?.recompiler ??
-                       FrontendServer.frontendRecompiler()).lastCompilation?
+        for source in ((MonitorXcode.runningXcode != nil ?
+                        MonitorXcode.recompiler.lastCompilation : nil) ??
+                       FrontendServer.frontendRecompiler().lastCompilation)?
             .swiftFiles.components(separatedBy: "\n").dropLast() ??
                        Array(Recompiler.workspaceCache.keys) {
-            FrontendServer.frontendRecompiler()
-                .lastInjected[source] = Date().timeIntervalSince1970
+            InjectionHybrid.lastInjected[source] = Date.timeIntervalSinceReferenceDate
             prepareSwiftUI(source: source, changes: &changes)
             edited += 1
         }

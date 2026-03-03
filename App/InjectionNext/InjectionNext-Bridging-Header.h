@@ -5,3 +5,4 @@
 #import "SimpleSocket.h"
 #import "InjectionImplC.h"
 #import "InjectionClient.h"
+#import "/tmp/InjectionNextSalt.h"

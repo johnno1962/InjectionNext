@@ -35,10 +35,7 @@ extension AppDelegate {
     func watch(path: String) {
         guard Self.alreadyWatching(path) == nil else { return }
         GitIgnoreParser.monitor(directory: path)
-        Reloader.injectionQueue = .main
-        setenv(INJECTION_DIRECTORIES,
-               NSHomeDirectory()+"/Library/Developer,"+path, 1)
-        Self.watchers[path] = InjectionHybrid()
+        Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
     }
@@ -54,21 +51,28 @@ extension AppDelegate {
 }
 
 class InjectionHybrid: InjectionBase {
+    /// Last Injected for deduplication
+    static var lastInjected = [String: TimeInterval]()
+    /// Last queue of file changes
     static var pendingFilesChanged = [String]()
     /// Repository locked state - stops processing until app reconnects
     static var isRepositoryLocked = false
     /// Path to detected git lock file - used to check if git operation still active
     static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
-    var liteRecompiler: NextCompiler = HybridCompiler()
+    var logParsingCompiler: NextCompiler = HybridCompiler()
     /// Minimum seconds between injections
     let minInterval = 1.0
 
-    override init() {
+    init(watching path: String) { // FileWatcher compatibility
+        let watchPaths = (getenv(INJECTION_DIRECTORIES) == nil ?
+            NSHomeDirectory()+"/Library/Developer," : "") + path
+        setenv(INJECTION_DIRECTORIES, watchPaths, 1)
+        Reloader.injectionQueue = .main
         super.init()
         // Extend FileWatcher pattern to detect git lock files
         FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: "[^~]\\.(mm?|cpp|swift|storyboard|xib|lock)$")
+            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock)$"#)
     }
 
     /// Called from file watcher when file is edited.
@@ -107,38 +111,50 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        guard !AppDelegate.watchers.isEmpty,
-              Date().timeIntervalSince1970 - (MonitorXcode.runningXcode?
-                .recompiler.lastInjected[source] ?? 0.0) > minInterval else {
+        let now = Date.timeIntervalSinceReferenceDate
+        guard !AppDelegate.watchers.isEmpty, now - (
+                Self.lastInjected[source] ?? 0.0) > minInterval else {
             return
         }
-        Self.pendingFilesChanged.append(source)
-        NextCompiler.compileQueue.async { self.injectNext() }
+        Self.lastInjected[source] = now
+
+        NextCompiler.compileQueue.async {
+            Self.pendingFilesChanged.append(source)
+            self.injectNext()
+        }
     }
 
     func injectNext() {
         guard let source = (DispatchQueue.main.sync { () -> String? in
-            if Self.pendingFilesChanged.isEmpty { return nil }
-            let source = Self.pendingFilesChanged.removeFirst()
+            guard let source = Self.pendingFilesChanged.first else { return nil }
+            Self.pendingFilesChanged.removeAll(where: { $0 == source })
             if !Self.pendingFilesChanged.isEmpty {
                 NextCompiler.compileQueue.async { self.injectNext() }
             }
             return source
         }) else { return }
 
-        if let running = MonitorXcode.runningXcode,
-           running.recompiler.inject(source: source) { return }
+        var recompiler = MonitorXcode.recompiler
+        let platform = FrontendServer.clientPlatform
+        if MonitorXcode.runningXcode == nil,
+           recompiler.canCompile(source: source, for: platform),
+           recompiler.inject(source: source) {
+            return recompiler.writeCache()
+        }
 
-        var recompiler = liteRecompiler
-        if FrontendServer.loggedFrontend != nil && source.hasSuffix(".swift") {
-            recompiler = FrontendServer.frontendRecompiler()
+        recompiler = logParsingCompiler
+        if source.hasSuffix(".swift") && AppDelegate.ui.updatePatchUnpatch() == .patched {
+            let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
+            if proxyCompiler.canCompile(source: source) {
+                recompiler = proxyCompiler
+            }
         }
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
-        } else if !(recompiler === liteRecompiler) {
-            FrontendServer.writeCache()
+        } else if recompiler.modified {
+            recompiler.writeCache()
         }
     }
 }
@@ -148,9 +164,9 @@ class HybridCompiler: NextCompiler {
     static var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
-        let cacheFile = Reloader.cacheFile
+        let oldCache = Reloader.cacheFile
         Reloader.cacheFile[#"_(\w+)_builds"#, 1] = platform
-        if cacheFile != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
+        if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
         return Self.liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
     }

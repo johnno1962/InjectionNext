@@ -41,32 +41,14 @@ class NextCompiler {
         let swiftFiles: String
         /// Directory to run compiler in (not important for Swift)
         let workingDir: String
+        /// captured environment
+        var env: String? = nil
     }
 
     /// Queue for one compilation at a time.
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
     static var lastError: String?, lastSource: String?
-
-    /// Tracks timing metrics for injection process
-    final class InjectionMetricsTracker: Codable {
-        var compilationTimeMs: Double = 0
-        var linkingTimeMs: Double = 0
-        var totalTimeMs: Double = 0
-        var sourcePath: String
-        var bazelTarget: String?
-        var success: Bool = false
-        var notificationName: String = INJECTION_METRICS_NOTIFICATION
-        let startTime: Double
-
-        init(sourcePath: String) {
-            self.sourcePath = sourcePath
-            self.startTime = Date.timeIntervalSinceReferenceDate
-        }
-    }
-
-    /// Current metrics being tracked
-    var currentMetrics: InjectionMetricsTracker?
 
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
@@ -76,10 +58,10 @@ class NextCompiler {
     var compilations = [String: Compilation]()
     /// Trying to avoid fragmenting memory
     var lastCompilation: Compilation?
-    /// Last Injected
-    var lastInjected = [String: TimeInterval]()
     /// Previous dynamic libraries prepared by source file
     var prepared = [String: String]()
+    /// Invalidate on three failures
+    var strikes = [String: Int]()
     /// Default counter for Compilertron
     var compileNumber = 0
 
@@ -91,19 +73,32 @@ class NextCompiler {
     func error(_ err: Error) {
         error("Internal app error: \(err)")
     }
+    
+    var modified = false
 
     func store(compilation: Compilation, for source: String) {
         Self.lastSource = source
         if lastCompilation != compilation {
             lastCompilation = compilation
         } //else { print("reusing") }
-        compilations[source] = lastCompilation
+        if compilations[source] != lastCompilation {
+            compilations[source] = lastCompilation
+            modified = true
+        }
         if source == pendingSource {
             print("Delayed injection of "+source)
             if inject(source: source) {
                 pendingSource = nil
             }
         }
+    }
+    
+    func canCompile(source: String, for platform: String? = nil) -> Bool {
+        if let compilation = compilations[source],
+           platform == nil || compilation.arguments
+            .first(where: { $0.contains("SDKs/"+platform!) }) != nil {
+            return true
+        } else { return false }
     }
 
     /// Main entry point called by MonitorXcode
@@ -115,10 +110,10 @@ class NextCompiler {
             let result = try Fortify.protect { () -> Bool in
                 for client in InjectionServer.currentClients.reversed() {
                 guard let (dylib, dylibName, platform, useFilesystem)
-                        = prepare(source: source, connected: client),
+                        = try prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
-                    AppDelegate.ui.setMenuIcon(.error)
                     error("Injection failed. Was your app connected?")
+                    AppDelegate.ui.setMenuIcon(.error)
                     return false
                 }
 
@@ -147,7 +142,6 @@ class NextCompiler {
 
             // Calculate total time and send metrics
             if let metrics = currentMetrics {
-                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = result
                 sendMetrics(metrics)
             }
@@ -156,61 +150,12 @@ class NextCompiler {
         } catch {
             // Send failure metrics
             if let metrics = currentMetrics {
-                metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate - metrics.startTime) * 1000
                 metrics.success = false
                 sendMetrics(metrics)
             }
             self.error(error)
             return false
         }
-    }
-
-    /// Enrich metrics with Bazel target and normalize source path
-    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
-        let sourcePath = metrics.sourcePath
-
-        // Find workspace root to normalize the path
-        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
-            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
-            let fullPath = (sourcePath as NSString).standardizingPath
-
-            // Normalize sourcePath to workspace-relative (in place)
-            if fullPath.hasPrefix(workspaceRootPath + "/") {
-                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
-            } else {
-                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
-            }
-
-            // Try to discover the Bazel app target
-            do {
-                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
-                queryHandler.autoDiscoverAppTarget(for: sourcePath)
-                metrics.bazelTarget = queryHandler.getAppTarget()
-            } catch {
-                // Bazel discovery failed, metrics will have nil bazelTarget
-                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
-            }
-        }
-        #endif
-    }
-
-    /// Send metrics to all connected clients
-    func sendMetrics(_ metrics: InjectionMetricsTracker) {
-        #if canImport(InjectionBazel)
-        var enrichedMetrics = metrics
-        enrichMetrics(&enrichedMetrics)
-
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        guard let jsonData = try? encoder.encode(enrichedMetrics),
-              let jsonString = String(data: jsonData, encoding: .utf8) else {
-            return
-        }
-        for client in InjectionServer.currentClients {
-            client?.sendCommand(.metrics, with: jsonString)
-        }
-        #endif
     }
 
     /// Seek to highlight potentially unsupported injections.
@@ -238,10 +183,10 @@ class NextCompiler {
         #endif
     }
 
-    func prepare(source: String, connected: InjectionServer?)
+    func prepare(source: String, connected: InjectionServer?) throws
         -> (dylib: String, dylibName: String, platform: String, Bool)? {
-        connected?.injectionNumber += 1
         AppDelegate.ui.setMenuIcon(.busy)
+        connected?.injectionNumber += 1
         compileNumber += 1
         Self.lastError = nil
 
@@ -267,7 +212,7 @@ class NextCompiler {
         #else
         let dylibPath = (useFilesystem ? tmpPath : "/tmp") + dylibName
         #endif
-        guard let object = recompile(source: source, platform: platform), {
+        guard let object = try recompile(source: source, platform: platform), {
                 // Track compilation time
                 if let startTime = currentMetrics?.startTime {
                     currentMetrics?.compilationTimeMs =
@@ -277,10 +222,19 @@ class NextCompiler {
             }(),
            tmpPath != compilerTmp || mkdir(compilerTmp, 0o777) != -999,
            let (dylib, linkingTimeMs) = link(object: object, dylib: dylibPath,
-                    arch: connected?.arch ?? compilerArch) else { return nil }
+                    arch: connected?.arch ?? compilerArch) else {
+                        let strike = (strikes[source] ?? 0)+1
+                        strikes[source] = strike
+                        if strike >= 3 {
+                            compilations.removeValue(forKey: source)
+                            writeCache()
+                        }
+                        return nil
+                    }
 
         currentMetrics?.linkingTimeMs = linkingTimeMs
 
+        strikes[source] = 0
         prepared[sourceName] = dylib
         print("Prepared dylib: "+dylib)
         return (dylib, dylibName, platform, useFilesystem)
@@ -288,14 +242,13 @@ class NextCompiler {
 
     /// Compile a source file using inforation provided by MonitorXcode
     /// task and return the full path to the resulting object file.
-    func recompile(source: String, platform: String) ->  String? {
+    func recompile(source: String, platform: String) throws ->  String? {
         guard let stored = compilations[source] else {
             error("Postponing: \(source) Have you viewed it in Xcode?")
             pendingSource = source
             return nil
         }
 
-        lastInjected[source] = Date().timeIntervalSince1970
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
         let object = tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")
@@ -303,8 +256,8 @@ class NextCompiler {
 
         unlink(object)
         unlink(filesfile)
-        try? stored.swiftFiles.write(toFile: filesfile,
-                                     atomically: false, encoding: .utf8)
+        try stored.swiftFiles.write(toFile: filesfile,
+                                    atomically: false, encoding: .utf8)
 
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
@@ -336,9 +289,18 @@ class NextCompiler {
         }
         // Call compiler process with timing
         let compilationStartTime = Date.timeIntervalSinceReferenceDate
+        var env: [String: String]?
+        if let environment = stored.env {
+            env = [String: String]()
+            for (key, value): (String, String) in environment[
+                #"^(\w+)=(.*)"#.anchorsMatchLines] {
+                env?[key] = value
+            }
+        }
         let compile = Topen(exec: compiler,
-               arguments: arguments + languageSpecific,
-               cd: stored.workingDir)
+                            arguments: arguments + languageSpecific,
+                            cd: stored.workingDir, env: env)
+
         var errors = ""
         while let line = compile.readLine() {
             if let slow: String = line[Reloader.typeCheckRegex] {
@@ -413,5 +375,77 @@ class NextCompiler {
         }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
+    }
+
+    /// Tracks timing metrics for injection process
+    final class InjectionMetricsTracker: Codable {
+        var compilationTimeMs: Double = 0
+        var linkingTimeMs: Double = 0
+        var totalTimeMs: Double = 0
+        var sourcePath: String
+        var bazelTarget: String?
+        var success: Bool = false
+        var notificationName: String = INJECTION_METRICS_NOTIFICATION
+        let startTime: Double
+
+        init(sourcePath: String) {
+            self.sourcePath = sourcePath
+            self.startTime = Date.timeIntervalSinceReferenceDate
+        }
+    }
+
+    /// Current metrics being tracked
+    var currentMetrics: InjectionMetricsTracker?
+
+    /// Enrich metrics with Bazel target and normalize source path
+    #if !INJECTION_III_APP
+    func enrichMetrics(_ metrics: inout InjectionMetricsTracker) {
+        let sourcePath = metrics.sourcePath
+
+        // Find workspace root to normalize the path
+        if let workspaceRoot = BazelInterface.findWorkspaceRoot(containing: sourcePath) {
+            let workspaceRootPath = (workspaceRoot as NSString).standardizingPath
+            let fullPath = (sourcePath as NSString).standardizingPath
+
+            // Normalize sourcePath to workspace-relative (in place)
+            if fullPath.hasPrefix(workspaceRootPath + "/") {
+                metrics.sourcePath = String(fullPath.dropFirst(workspaceRootPath.count + 1))
+            } else {
+                metrics.sourcePath = URL(fileURLWithPath: sourcePath).lastPathComponent
+            }
+
+            // Try to discover the Bazel app target
+            do {
+                let queryHandler = try BazelAQueryParser(workspaceRoot: workspaceRoot)
+                queryHandler.autoDiscoverAppTarget(for: sourcePath)
+                metrics.bazelTarget = queryHandler.getAppTarget()
+            } catch {
+                // Bazel discovery failed, metrics will have nil bazelTarget
+                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+            }
+        }
+    }
+    #endif
+
+    /// Send metrics to all connected clients
+    func sendMetrics(_ metrics: InjectionMetricsTracker) {
+        #if !INJECTION_III_APP
+        if AppDelegate.watchers.isEmpty &&
+            BazelActionQueryHandler.cachedAppTarget == nil { return }
+        metrics.totalTimeMs = (Date.timeIntervalSinceReferenceDate
+                               - metrics.startTime) * 1000
+        var enrichedMetrics = metrics
+        enrichMetrics(&enrichedMetrics)
+
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        guard let jsonData = try? encoder.encode(enrichedMetrics),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return
+        }
+        for client in InjectionServer.currentClients {
+            client?.sendCommand(.metrics, with: jsonString)
+        }
+        #endif
     }
 }

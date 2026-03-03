@@ -12,10 +12,20 @@
 //
 import Cocoa
 import Popen
+import Fortify
 
 #if INJECTION_III_APP
 struct Unhider { static var packageFrameworks: String? }
 #endif
+
+extension NextCompiler {
+    func writeCache() {
+        if let platform = FrontendServer.recompilers.keys
+            .first(where: {FrontendServer.recompilers[$0] === self }) {
+            FrontendServer.writeCache(for: platform)
+        }
+    }
+}
 
 class FrontendServer: SimpleSocket {
     enum State: String {
@@ -24,6 +34,7 @@ class FrontendServer: SimpleSocket {
     }
 
     /// Paths to unpatched/patched swift-frontend binary/script in toolchain.
+    static let frontendQueue = DispatchQueue(label: "InjectionCapture")
     static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
         "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin") }
     static var unpatchedURL: URL { binURL.appendingPathComponent("swift-frontend") }
@@ -39,10 +50,10 @@ class FrontendServer: SimpleSocket {
     static var clientPlatform: String {
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
     static func cacheURL(platform: String) -> URL {
-        return URL(fileURLWithPath: "/tmp/\(platform)_commands.json")
+        return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
     }
-    static private var recompilers = [String: NextCompiler]()
-    static func frontendRecompiler(platform: String = clientPlatform) -> NextCompiler {
+    static private(set) var recompilers = [String: NextCompiler]()
+    static func frontendRecompiler(for platform: String = clientPlatform) -> NextCompiler {
         if let recompiler = recompilers[platform] {
             return recompiler
         }
@@ -58,7 +69,8 @@ class FrontendServer: SimpleSocket {
                     guard let compile = stored[source] else { continue }
                     recompiler.store(compilation: compile, for: source)
                 }
-                print("Loaded \(recompiler.compilations.count) cached commands")
+                recompiler.modified = false
+                print("Loaded \(recompiler.compilations.count) \(platform) commands.")
             }
         } catch {
             InjectionServer.error("Unable to read commands cache: \(error).")
@@ -66,18 +78,20 @@ class FrontendServer: SimpleSocket {
         recompilers[platform] = recompiler
         return recompiler
     }
-    static func writeCache(platform: String = clientPlatform) {
+    static func writeCache(for platform: String) {
+        let recompiler = frontendRecompiler(for: platform)
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let cache = cacheURL(platform: platform)
-            let commands = frontendRecompiler(platform: platform).compilations
+            let commands = recompiler.compilations
             try encoder.encode(commands).write(to: cache, options: .atomic)
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
             } else {
                 print("Cached \(commands.count) \(platform) commands")
             }
+            recompiler.modified = false
         } catch {
             InjectionServer.error("Unable to write commands cache: \(error)")
         }
@@ -87,29 +101,45 @@ class FrontendServer: SimpleSocket {
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
 
-    override func runInBackground() {
-        guard validateConnection() && readString() == "1.0" else {
-            return Self.frontendRecompiler()
-                .error("Unpatch then repatch compiler to update script version")
-        }
-        do {
-            try Self.processFrontendCommandFrom(feed: self)
-        } catch {
-            Self.error("Feed error: \(error)")
+    override func run() {
+        Self.frontendQueue.async {
+            do {
+                try Fortify.protect { () -> () in
+                    guard self.validateConnection(),
+                          let vers = self.readString(), vers == "1.0" || vers == "2.0" else {
+                        return Self.frontendRecompiler()
+                            .error("Unpatch then repatch compiler to update script version")
+                    }
+                    try Self.processFrontendCommandFrom(feed: self)
+                }
+            } catch {
+                Self.error("Feed error: \(error)")
+            }
         }
     }
 
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
-        guard let projectRoot = feed.readString(),
+        guard var projectRoot = feed.readString(),
               let frontendPath = feed.readString(),
               frontendPath.hasSuffix(".save"),
               feed.readString() == "-frontend" &&
                 feed.readString() == "-c" else { return }
+        
+        // swift-frontend.sh 2.0+ capture environment
+        var env: String?
+        if let pwd: String = projectRoot[ "PWD=(.*)\n"] ??
+                             projectRoot["HOME=(.*)\n"] {
+            env = projectRoot
+            projectRoot = pwd
+        }
 
         var swiftFiles = "", args = [String](), primaries = [String](),
             platform = "iPhoneSimulator"
 
         while let arg = feed.readString() {
+            if arg.hasPrefix("llvmcas://") {
+                return
+            }
             switch arg {
             case "-filelist":
                 guard let filelist = feed.readString() else { return }
@@ -119,7 +149,7 @@ class FrontendServer: SimpleSocket {
             case "-primary-file":
                 guard let source = feed.readString() else { return }
                 primaries.append(source)
-                if !swiftFiles.contains(source) {
+                if strstr(swiftFiles, source) == nil {
                     swiftFiles += source+"\n"
                 }
             case "-o":
@@ -148,8 +178,11 @@ class FrontendServer: SimpleSocket {
             }
         }
 
+        let update = NextCompiler.Compilation(arguments: args,
+            swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
+
         DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") &&
+            if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
 //                MonitorXcode.runningXcode == nil &&
                 AppDelegate.alreadyWatching(projectRoot) == nil {
                 let open = NSOpenPanel()
@@ -166,8 +199,8 @@ class FrontendServer: SimpleSocket {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(platform: platform)
-            Self.loggedFrontend = frontendPath
+            let recompiler = Self.frontendRecompiler(for: platform)
+            loggedFrontend = frontendPath
 
             for source in primaries {
                 #if !INJECTION_III_APP
@@ -180,8 +213,6 @@ class FrontendServer: SimpleSocket {
 
                 print("Updating \(args.count) args for \(platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
-                let update = NextCompiler.Compilation(arguments: args,
-                      swiftFiles: swiftFiles, workingDir: projectRoot)
                 recompiler.store(compilation: update, for: source)
             }
         }
@@ -371,7 +402,7 @@ extension AppDelegate {
         if patched != original {
             do {
                 try patched.write(to: fileURL,
-                                  atomically: false, encoding: .utf8)
+                                  atomically: true, encoding: .utf8)
             } catch {
                 InjectionServer.error("Could not save \(source): \(error)")
             }

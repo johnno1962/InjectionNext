@@ -17,6 +17,15 @@ import InjectionImpl
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {
+    
+    override class open func error(_ message: String) -> Int32 {
+        let msg = String(format: message, strerror(errno))
+        print(APP_PREFIX+APP_NAME+": "+msg)
+        if errno == EHOSTUNREACH { // No route to host
+            print("ℹ️ "+APP_NAME+": Accept permission prompt on device.")
+        }
+        return errno
+    }
 
     func log(_ msg: String) {
         print(APP_PREFIX+APP_NAME+": "+msg)
@@ -137,7 +146,7 @@ open class InjectionNext: SimpleSocket {
         /// Trace calls to framework e.g. SwiftUI,SwiftUICore
         if let which = getenv(INJECTION_TRACE_FRAMEWORKS) {
             var frmwks = String(cString: which)
-            if frmwks == "" { frmwks = "SwiftUI,SwiftUICore" }
+            if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let dylib = DLKit.imageMap[frmwk] {
                     Self.target = dylib
@@ -145,19 +154,19 @@ open class InjectionNext: SimpleSocket {
                         rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
                     }
                 } else {
-                    error("Inavlid trace framework \(frmwk)")
+                    error("Invalid trace framework \(frmwk)")
                 }
             }
         }
         // Trace UIKit internals using swizzling
         if let which = getenv(INJECTION_TRACE_UIKIT) {
             var frmwks = String(cString: which)
-            if frmwks == "" { frmwks = "UIKitCore" }
+            if frmwks == "" || frmwks == "1" { frmwks = "UIKitCore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let bundle = DLKit.imageMap[frmwk]?.imageName {
                     SwiftTrace.trace(bundlePath: bundle)
                 } else {
-                    error("Inavlid swizzle framework \(frmwk)")
+                    error("Invalid swizzle framework \(frmwk)")
                 }
             }
         }
@@ -200,10 +209,10 @@ open class InjectionNext: SimpleSocket {
                 UserDefaults.standard.set(count, forKey: countKey)
                 if count % howOften == 0 && getenv("INJECTION_SPONSOR") == nil {
                     log("""
-                        Seems like you're using injection quite a bit. \
+                        ℹ️ Seems like you're using injection quite a bit. \
                         Have you considered sponsoring the project at \
                         https://github.com/johnno1962/\(APP_NAME) or \
-                        asking your boss if they should? (This messsage \
+                        asking your boss if they should? (This message \
                         prints every \(howOften) injections.)
                         """)
                 }
@@ -222,7 +231,7 @@ open class InjectionNext: SimpleSocket {
             }
             switch command {
             case .invalid:
-                return error("Connection did not validate.")
+                return error("Connection did not validate. Have you upgraded?")
             case .log:
                 if let msg = readString() {
                     print(msg)
