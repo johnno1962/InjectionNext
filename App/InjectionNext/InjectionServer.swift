@@ -27,7 +27,8 @@ class InjectionServer: SimpleSocket {
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
     static private var connected = [ActiveClient]()
     static var currentClients: [InjectionServer?] {
-        return connected.isEmpty ? [nil] : connected.compactMap { $0.connection }
+        let active = connected.compactMap { $0.connection }
+        return active.isEmpty ? [nil] : active
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
