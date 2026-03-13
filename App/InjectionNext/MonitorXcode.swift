@@ -120,6 +120,7 @@ class MonitorXcode {
         let productDir = "-"+FrontendServer.clientPlatform.lowercased()
         while let line = xcodeStdout.readLine() {
 //            debug(">>"+line+"<<")
+            autoreleasepool {
             if line.hasPrefix("  key.request: source.request.") &&
                 (line == "  key.request: source.request.editor.open," ||
                  line == "  key.request: source.request.diagnostics," ||
@@ -182,7 +183,7 @@ class MonitorXcode {
                 guard !args.isEmpty, let source =
                         readQuotedString() ?? readQuotedString(),
                       !source.contains("\\n") else {
-                    continue
+                    return
                 }
 
                 print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
@@ -203,6 +204,7 @@ class MonitorXcode {
                     }
                 }
             }
+        }
         }
     }
 }

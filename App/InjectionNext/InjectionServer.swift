@@ -124,6 +124,7 @@ class InjectionServer: SimpleSocket {
                     return
                 }
                 DispatchQueue.main.async {
+                    InjectionHybrid.pendingFilesChanged.removeAll()
                     // Reset repository locked state on app reconnect (relaunch)
                     if InjectionHybrid.isRepositoryLocked {
                         InjectionHybrid.isRepositoryLocked = false
@@ -172,7 +173,6 @@ class InjectionServer: SimpleSocket {
                         NextCompiler.compileQueue.async {
                             Self.connected.removeAll { $0.connection == nil }
                             Self.connected.append(ActiveClient(connection: self))
-                            InjectionHybrid.pendingFilesChanged.removeAll()
                         }
                     }
                 } else {

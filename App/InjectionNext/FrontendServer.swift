@@ -20,9 +20,12 @@ struct Unhider { static var packageFrameworks: String? }
 
 extension NextCompiler {
     func writeCache() {
-        if let platform = FrontendServer.recompilers.keys
-            .first(where: {FrontendServer.recompilers[$0] === self }) {
-            FrontendServer.writeCache(for: platform)
+        os_unfair_lock_lock(&FrontendServer.recompilersLock)
+        let platform = FrontendServer.recompilers.keys
+            .first { FrontendServer.recompilers[$0] === self }
+        os_unfair_lock_unlock(&FrontendServer.recompilersLock)
+        if platform != nil {
+            FrontendServer.writeCache(for: platform!, recompiler: self)
         }
     }
 }
@@ -52,8 +55,11 @@ class FrontendServer: SimpleSocket {
     static func cacheURL(platform: String) -> URL {
         return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
     }
-    static private(set) var recompilers = [String: NextCompiler]()
+    static fileprivate var recompilersLock = os_unfair_lock()
+    static fileprivate private(set) var recompilers = [String: NextCompiler]()
     static func frontendRecompiler(for platform: String = clientPlatform) -> NextCompiler {
+        os_unfair_lock_lock(&recompilersLock)
+        defer { os_unfair_lock_unlock(&recompilersLock) }
         if let recompiler = recompilers[platform] {
             return recompiler
         }
@@ -78,8 +84,7 @@ class FrontendServer: SimpleSocket {
         recompilers[platform] = recompiler
         return recompiler
     }
-    static func writeCache(for platform: String) {
-        let recompiler = frontendRecompiler(for: platform)
+    static func writeCache(for platform: String, recompiler: NextCompiler) {
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted

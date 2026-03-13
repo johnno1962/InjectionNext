@@ -118,8 +118,8 @@ class InjectionHybrid: InjectionBase {
         }
         Self.lastInjected[source] = now
 
+        Self.pendingFilesChanged.append(source)
         NextCompiler.compileQueue.async {
-            Self.pendingFilesChanged.append(source)
             self.injectNext()
         }
     }
@@ -134,6 +134,7 @@ class InjectionHybrid: InjectionBase {
             return source
         }) else { return }
 
+        autoreleasepool {
         var recompiler = MonitorXcode.recompiler
         let platform = FrontendServer.clientPlatform
         if MonitorXcode.runningXcode == nil,
@@ -143,18 +144,21 @@ class InjectionHybrid: InjectionBase {
         }
 
         recompiler = logParsingCompiler
-        if source.hasSuffix(".swift") && AppDelegate.ui.updatePatchUnpatch() == .patched {
+        if source.hasSuffix(".swift") &&
+            AppDelegate.ui.updatePatchUnpatch() == .patched {
             let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
             if proxyCompiler.canCompile(source: source) {
                 recompiler = proxyCompiler
             }
         }
+
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
         } else if recompiler.modified {
             recompiler.writeCache()
+        }
         }
     }
 }
