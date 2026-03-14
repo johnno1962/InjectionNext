@@ -137,6 +137,9 @@ class NextCompiler {
                 }
                 }
                 Self.lastSource = source
+                if modified {
+                    writeCache()
+                }
                 return true
             }
 

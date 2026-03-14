@@ -185,10 +185,7 @@ class MonitorXcode {
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
                 print("Injecting saved file "+source)
                 NextCompiler.compileQueue.async {
-                    if Self.recompiler.inject(source: source) &&
-                        Self.recompiler.modified {
-                        Self.recompiler.writeCache()
-                    }
+                    _ = Self.recompiler.inject(source: source)
                 }
             }
         }

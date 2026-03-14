@@ -68,8 +68,8 @@ class FrontendServer: SimpleSocket {
         do {
             let compressed = cacheURL(platform: platform).path+".gz"
             if Fstat(path: compressed)?.st_size ?? 0 != 0,
-               let stream = Popen(cmd: "gunzip <"+compressed)?.readAll(),
-               let cached = stream.data(using: .utf8) {
+               let stream = Popen(cmd: "gunzip <"+compressed),
+               let cached = stream.readAll().data(using: .utf8) {
                 let stored = try JSONDecoder().decode(
                     [String: NextCompiler.Compilation].self, from: cached)
                 for source in stored.keys.sorted() {
@@ -134,7 +134,7 @@ class FrontendServer: SimpleSocket {
         
         // swift-frontend.sh 2.0+ capture environment
         var env: String?
-        if let pwd: String = projectRoot[ "PWD=(.*)\n"] ??
+        if let pwd: String = projectRoot["PWD=(.*)\n"] ??
                              projectRoot["HOME=(.*)\n"] {
             env = projectRoot
             projectRoot = pwd
@@ -174,7 +174,7 @@ class FrontendServer: SimpleSocket {
                 #if !INJECTION_III_APP
                 // Don't update compilations while connected
                 if InjectionServer.currentClient != nil &&
-                    recompiler.compilations.index(forKey: source) != nil {
+                    recompiler.canCompile(source: source, for: parser.platform) {
                     continue
                 }
                 #endif

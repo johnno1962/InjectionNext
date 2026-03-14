@@ -26,8 +26,12 @@ class InjectionServer: SimpleSocket {
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
     static private var connected = [ActiveClient]()
+    /// All access to `connected` serialised through clientQueue.
     static var currentClients: [InjectionServer?] {
-        let active = connected.compactMap(\.connection)
+        let active = clientQueue.sync {
+            Self.connected.removeAll { $0.connection == nil }
+            return connected.compactMap(\.connection)
+        }
         return active.isEmpty ? [nil] : active
     }
     /// Current connection to client app. There can be only one.
@@ -170,8 +174,7 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath = tmpPath
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     if !tmpPath.contains("/Xcode/UserData/Previews/") {
-                        NextCompiler.compileQueue.async {
-                            Self.connected.removeAll { $0.connection == nil }
+                        Self.clientQueue.async {
                             Self.connected.append(ActiveClient(connection: self))
                         }
                     }
