@@ -31,6 +31,7 @@ extension NextCompiler {
 }
 
 class FrontendServer: SimpleSocket {
+
     enum State: String {
         case unpatched = "Intercept Compiler"
         case patched = "Unpatch Compiler"
@@ -84,7 +85,8 @@ class FrontendServer: SimpleSocket {
         recompilers[platform] = recompiler
         return recompiler
     }
-    static func writeCache(for platform: String, recompiler: NextCompiler) {
+    static func writeCache(for platform: String, recompiler: NextCompiler? = nil) {
+        let recompiler = recompiler ?? frontendRecompiler(for: platform)
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
@@ -138,53 +140,14 @@ class FrontendServer: SimpleSocket {
             projectRoot = pwd
         }
 
-        var swiftFiles = "", args = [String](), primaries = [String](),
-            platform = "iPhoneSimulator"
-
+        var parser = CompilationArgParser()
         while let arg = feed.readString() {
-            if arg.hasPrefix("llvmcas://") {
-                return
-            }
-            switch arg {
-            case "-filelist":
-                guard let filelist = feed.readString() else { return }
-                let files = try String(contentsOfFile: filelist,
-                                       encoding: .utf8)
-                swiftFiles += files
-            case "-primary-file":
-                guard let source = feed.readString() else { return }
-                primaries.append(source)
-                if strstr(swiftFiles, source) == nil {
-                    swiftFiles += source+"\n"
-                }
-            case "-o":
-                if let object = feed.readString(),
-                   Unhider.packageFrameworks == nil {
-                    var url = URL(fileURLWithPath: object)
-                    for _ in 1...4 {
-                        url.deleteLastPathComponent()
-                    }
-                    Unhider.packageFrameworks = url.path
-                }
-            default:
-                if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
-                    platform = sdkPlatform
-                }
-                if args.last == "-F" && arg.hasSuffix("/PackageFrameworks") {
-                    Unhider.packageFrameworks = arg
-                } else if arg.hasSuffix(".swift") && args.last != "-F" {
-                    swiftFiles += arg+"\n"
-                } else if arg[Reloader.optionsToRemove] {
-                    _ = feed.readString()
-                } else if !(arg == "-F" && args.last == "-F") && !arg[
-                    "-validate-clang-modules-once|-frontend-parseable-output"] {
-                    args.append(arg)
-                }
-            }
+            if arg.hasPrefix("llvmcas://") { return }
+            parser.process(arg: arg, next: feed.readString)
         }
 
-        let update = NextCompiler.Compilation(arguments: args,
-            swiftFiles: swiftFiles, workingDir: projectRoot, env: env)
+        let update = NextCompiler.Compilation(arguments: parser.args,
+            swiftFiles: parser.swiftFiles, workingDir: projectRoot, env: env)
 
         DispatchQueue.main.async {
             if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
@@ -204,10 +167,10 @@ class FrontendServer: SimpleSocket {
         }
 
         NextCompiler.compileQueue.async {
-            let recompiler = Self.frontendRecompiler(for: platform)
+            let recompiler = Self.frontendRecompiler(for: parser.platform)
             loggedFrontend = frontendPath
 
-            for source in primaries {
+            for source in parser.primaries {
                 #if !INJECTION_III_APP
                 // Don't update compilations while connected
                 if InjectionServer.currentClient != nil &&
@@ -216,9 +179,67 @@ class FrontendServer: SimpleSocket {
                 }
                 #endif
 
-                print("Updating \(args.count) args for \(platform)/" +
+                print("Updating \(parser.args.count) args for \(parser.platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 recompiler.store(compilation: update, for: source)
+            }
+        }
+    }
+
+    /// Argument parser shared by FrontendServer and MonitorXcode to accumulate
+    /// compiler arguments into a NextCompiler.Compilation.
+    struct CompilationArgParser {
+        var swiftFiles = ""
+        var args = [String]()
+        var primaries = [String]()
+        var platform = "iPhoneSimulator"
+        var workingDir = "/tmp"
+        var swiftFileCount = 0
+        lazy var productDirSuffix = "-"+clientPlatform.lowercased()
+
+        /// Process one argument, calling `next()` to consume the following
+        /// token whenever the argument takes a value.
+        mutating func process(arg: String, next: () -> String?) {
+            switch arg {
+            case "-filelist":
+                if let filelist = next(), let files =
+                    try? String(contentsOfFile: filelist, encoding: .utf8) {
+                    swiftFiles += files
+                }
+            case "-primary-file":
+                if let source = next(), !source.isEmpty {
+                    primaries.append(source)
+                    if strstr(swiftFiles, source) == nil {
+                        swiftFiles += source+"\n"
+                    }
+                }
+            case "-o":
+                if let object = next(), !object.isEmpty &&
+                    Unhider.packageFrameworks == nil {
+                    var url = URL(fileURLWithPath: object)
+                    for _ in 1...4 { url.deleteLastPathComponent() }
+                    Unhider.packageFrameworks = url.path
+                }
+            default:
+                if let sdkPlatform: String = arg[#"/([A-Za-z]+)[\d\.]+\.sdk$"#] {
+                    platform = sdkPlatform
+                } else if args.last == "-F" {
+                    if arg.hasSuffix("/PackageFrameworks") {
+                        Unhider.packageFrameworks = arg
+                    } else if Unhider.packageFrameworks == nil,
+                              arg.hasSuffix(productDirSuffix) {
+                        Unhider.packageFrameworks = arg+"/PackageFrameworks"
+                    }
+                }
+                if arg.hasSuffix(".swift") && args.last != "-F" {
+                    swiftFiles += arg+"\n"
+                    swiftFileCount += 1
+                } else if arg[Reloader.optionsToRemove] {
+                    _ = next()
+                } else if !arg[
+                    "-validate-clang-modules-once|-frontend-parseable-output"] {
+                    args.append(arg)
+                }
             }
         }
     }

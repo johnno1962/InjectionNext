@@ -42,7 +42,7 @@ class NextCompiler {
         /// Directory to run compiler in (not important for Swift)
         let workingDir: String
         /// captured environment
-        var env: String? = nil
+        var env: String?
     }
 
     /// Queue for one compilation at a time.

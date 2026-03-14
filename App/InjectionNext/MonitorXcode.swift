@@ -117,7 +117,6 @@ class MonitorXcode {
         }
 
         let indexBuild = "/Index.noindex/Build/"
-        let productDir = "-"+FrontendServer.clientPlatform.lowercased()
         while let line = xcodeStdout.readLine() {
 //            debug(">>"+line+"<<")
             autoreleasepool {
@@ -128,8 +127,7 @@ class MonitorXcode {
                  line == "  key.request: source.request.relatedidents,") &&
                 xcodeStdout.readLine() == "  key.compilerargs: [" ||
                 line == "  key.compilerargs: [" {
-                var swiftFiles = "", args = [String](), fileCount = 0,
-                    workingDir = "/tmp"
+                var parser = FrontendServer.CompilationArgParser()
 
                 while var arg = readQuotedString() {
                     /// Used if injecting the Swift compiler.
@@ -138,7 +136,7 @@ class MonitorXcode {
                         arg = arg.replacingOccurrences(of: llvmIncs,
                             with: "/../buildbot_osx"+llvmIncs)
                     }
-                    
+
                     /// Arguments received from SourceKit while syntax highlighting the editor
                     /// have their own "Intermediates" directory. Map it back to the main one.
                     let alt = arg[indexBuild, "/Build/"]
@@ -149,47 +147,36 @@ class MonitorXcode {
                         arg = alt
                     }
 
-                    /// Determine path to DerivedData for "unhiding".
-                    if args.last == "-F" {
-                        if arg.hasSuffix("/PackageFrameworks") {
-                            Unhider.packageFrameworks = arg
-                        }
-                        else if Unhider.packageFrameworks == nil,
-                                arg.hasSuffix(productDir) {
-                            Unhider.packageFrameworks = arg+"/PackageFrameworks"
-                        }
-                    }
-
-                    if arg.hasSuffix(".swift") && args.last != "-F" {
-                        swiftFiles += arg+"\n"
-                        fileCount += 1
-                    } else if arg == "-fsyntax-only" || arg == "-o" {
+                    // SourceKit-specific args handled before the shared parser.
+                    if arg == "-fsyntax-only" || arg == "-o" {
                         _ = xcodeStdout.readLine()
                     } else if var work: String = arg[#"-working-directory(?:=(.*))?"#] {
                         if work == RegexOptioned.unmatchedGroup,
                            let swork = readQuotedString() {
                             work = swork
                         }
-                        workingDir = work
-                    } else if args.last == "-vfsoverlay" &&
-                                arg.contains(indexBuild) {
+                        parser.workingDir = work
+                    } else if parser.args.last == "-vfsoverlay",
+                              arg.contains(indexBuild) {
                         // injecting tests without having run tests
-                        args.removeLast()
-                    } else if arg != "-Xfrontend" && !arg.hasPrefix("-driver-") {
-                        args.append(arg)
+                        parser.args.removeLast()
+                    } else if arg == "-Xfrontend" || arg.hasPrefix("-driver-") {
+                        // drop silently
+                    } else {
+                        parser.process(arg: arg, next: readQuotedString)
                     }
                 }
 
-                guard !args.isEmpty, let source =
+                guard !parser.args.isEmpty, let source =
                         readQuotedString() ?? readQuotedString(),
                       !source.contains("\\n") else {
                     return
                 }
 
-                print("Updating \(args.count) args with \(fileCount) swift files "+source+" "+line)
-                let update = NextCompiler.Compilation(arguments: args,
-                    swiftFiles: swiftFiles, workingDir: workingDir)
- 
+                print("Updating \(parser.args.count) args with \(parser.swiftFileCount) swift files "+source+" "+line)
+                let update = NextCompiler.Compilation(arguments: parser.args,
+                    swiftFiles: parser.swiftFiles, workingDir: parser.workingDir)
+
                 NextCompiler.compileQueue.async {
                     Self.recompiler.store(compilation: update, for: source)
                 }
