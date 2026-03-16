@@ -95,8 +95,8 @@ class NextCompiler {
     
     func canCompile(source: String, for platform: String? = nil) -> Bool {
         if let compilation = compilations[source],
-           platform == nil || compilation.arguments
-            .first(where: { $0.contains("SDKs/"+platform!) }) != nil {
+           platform == nil || ("SDKs/"+platform!).withCString({ sdk in
+               compilation.arguments.first { strstr($0, sdk) != nil }}) != nil {
             return true
         } else { return false }
     }

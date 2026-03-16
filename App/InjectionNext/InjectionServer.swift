@@ -171,12 +171,13 @@ class InjectionServer: SimpleSocket {
             case .tmpPath:
                 if let tmpPath = readString() {
                     print("Tmp path: "+tmpPath)
+                    if tmpPath.contains("/Xcode/UserData/Previews/") {
+                        return
+                    }
                     self.tmpPath = tmpPath
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
-                    if !tmpPath.contains("/Xcode/UserData/Previews/") {
-                        Self.clientQueue.async {
-                            Self.connected.append(ActiveClient(connection: self))
-                        }
+                    Self.clientQueue.async {
+                        Self.connected.append(ActiveClient(connection: self))
                     }
                 } else {
                     error("**** Bad tmp ****")
