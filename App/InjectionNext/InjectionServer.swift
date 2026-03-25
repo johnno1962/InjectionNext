@@ -26,8 +26,13 @@ class InjectionServer: SimpleSocket {
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
     static private var connected = [ActiveClient]()
+    /// All access to `connected` serialised through clientQueue.
     static var currentClients: [InjectionServer?] {
-        return connected.isEmpty ? [nil] : connected.compactMap { $0.connection }
+        let active = clientQueue.sync {
+            Self.connected.removeAll { $0.connection == nil }
+            return connected.compactMap(\.connection)
+        }
+        return active.isEmpty ? [nil] : active
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
@@ -123,6 +128,7 @@ class InjectionServer: SimpleSocket {
                     return
                 }
                 DispatchQueue.main.async {
+                    InjectionHybrid.pendingFilesChanged.removeAll()
                     // Reset repository locked state on app reconnect (relaunch)
                     if InjectionHybrid.isRepositoryLocked {
                         InjectionHybrid.isRepositoryLocked = false
@@ -165,14 +171,13 @@ class InjectionServer: SimpleSocket {
             case .tmpPath:
                 if let tmpPath = readString() {
                     print("Tmp path: "+tmpPath)
+                    if tmpPath.contains("/Xcode/UserData/Previews/") {
+                        return
+                    }
                     self.tmpPath = tmpPath
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
-                    if !tmpPath.contains("/Xcode/UserData/Previews/") {
-                        NextCompiler.compileQueue.async {
-                            Self.connected.removeAll { $0.connection == nil }
-                            Self.connected.append(ActiveClient(connection: self))
-                            InjectionHybrid.pendingFilesChanged.removeAll()
-                        }
+                    Self.clientQueue.async {
+                        Self.connected.append(ActiveClient(connection: self))
                     }
                 } else {
                     error("**** Bad tmp ****")

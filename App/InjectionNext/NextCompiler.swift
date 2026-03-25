@@ -42,7 +42,7 @@ class NextCompiler {
         /// Directory to run compiler in (not important for Swift)
         let workingDir: String
         /// captured environment
-        var env: String? = nil
+        var env: String?
     }
 
     /// Queue for one compilation at a time.
@@ -95,8 +95,8 @@ class NextCompiler {
     
     func canCompile(source: String, for platform: String? = nil) -> Bool {
         if let compilation = compilations[source],
-           platform == nil || compilation.arguments
-            .first(where: { $0.contains("SDKs/"+platform!) }) != nil {
+           platform == nil || ("SDKs/"+platform!).withCString({ sdk in
+               compilation.arguments.first { strstr($0, sdk) != nil }}) != nil {
             return true
         } else { return false }
     }
@@ -137,6 +137,9 @@ class NextCompiler {
                 }
                 }
                 Self.lastSource = source
+                if modified {
+                    writeCache()
+                }
                 return true
             }
 

@@ -118,8 +118,8 @@ class InjectionHybrid: InjectionBase {
         }
         Self.lastInjected[source] = now
 
+        Self.pendingFilesChanged.append(source)
         NextCompiler.compileQueue.async {
-            Self.pendingFilesChanged.append(source)
             self.injectNext()
         }
     }
@@ -134,27 +134,27 @@ class InjectionHybrid: InjectionBase {
             return source
         }) else { return }
 
+        autoreleasepool {
         var recompiler = MonitorXcode.recompiler
         let platform = FrontendServer.clientPlatform
         if MonitorXcode.runningXcode == nil,
            recompiler.canCompile(source: source, for: platform),
-           recompiler.inject(source: source) {
-            return recompiler.writeCache()
-        }
+           recompiler.inject(source: source) { return }
 
         recompiler = logParsingCompiler
-        if source.hasSuffix(".swift") && AppDelegate.ui.updatePatchUnpatch() == .patched {
+        if source.hasSuffix(".swift") &&
+            AppDelegate.ui.updatePatchUnpatch() == .patched {
             let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
             if proxyCompiler.canCompile(source: source) {
                 recompiler = proxyCompiler
             }
         }
+
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
-        } else if recompiler.modified {
-            recompiler.writeCache()
+        }
         }
     }
 }
@@ -165,7 +165,7 @@ class HybridCompiler: NextCompiler {
 
     override func recompile(source: String, platform: String) ->  String? {
         let oldCache = Reloader.cacheFile
-        Reloader.cacheFile[#"_(\w+)_builds"#, 1] = platform
+        Reloader.cacheFile[#"_([A-Za-z]+)_builds"#, 1] = platform
         if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
         return Self.liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
