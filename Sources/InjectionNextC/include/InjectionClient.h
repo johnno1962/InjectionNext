@@ -5,7 +5,7 @@
 //  Created by John Holdsworth on 06/11/2017.
 //  Copyright © 2017 John Holdsworth. All rights reserved.
 //
-//  $Id: //depot/HotReloading/Sources/HotReloadingGuts/include/InjectionClient.h#60 $
+//  $Id: //depot/InjectionNext/Sources/InjectionNextC/include/InjectionClient.h#60 $
 //
 //  Shared definitions between server and client.
 //
@@ -22,7 +22,7 @@ extern NSString *INJECTION_KEY;
 #undef APP_NAME
 #define APP_NAME "InjectionNext"
 #define APP_PREFIX "🔥 "
-#define DYLIB_PREFIX "/eval_injection_" // Was expected by DLKit
+#define DYLIB_PREFIX "/eval_injection_" // Expected by DLKit.appImages
 
 @interface NSObject(HotReloading)
 + (void)runXCTestCase:(Class)aTestCase;
