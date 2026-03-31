@@ -72,7 +72,7 @@ class InjectionHybrid: InjectionBase {
         super.init()
         // Extend FileWatcher pattern to detect git lock files
         FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock)$"#)
+            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock|o)$"#)
     }
 
     /// Called from file watcher when file is edited.
@@ -167,8 +167,16 @@ class HybridCompiler: NextCompiler {
         let oldCache = Reloader.cacheFile
         Reloader.cacheFile[#"_([A-Za-z]+)_builds"#, 1] = platform
         if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
-        return Self.liteRecompiler.recompile(source: source, platformFilter:
-                                            "SDKs/"+platform, dylink: false)
+        var object = Self.liteRecompiler.recompile(source: source, platformFilter:
+            "SDKs/"+platform, module: Reloader.appName, dylink: false)
+        if object.flatMap({ FileManager.default.fileExists(atPath: $0)
+                }) == false, let base = FileWatcher.objectBase {
+            let filename = URL(fileURLWithPath: source).deletingPathExtension()
+                .lastPathComponent[#"([ $])"#, "\\\\$1"]+".o"
+            object = URL(fileURLWithPath: base)
+                .appendingPathComponent(filename).path
+        }
+        return object
     }
 
     override func link(object: String, dylib: String, arch: String) -> (String, Double)? {

@@ -1166,6 +1166,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1211,6 +1212,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

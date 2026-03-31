@@ -207,6 +207,11 @@ class InjectionServer: SimpleSocket {
                 } else {
                     error("**** Bad root ****")
                 }
+            case .executable:
+                if let executable = readString() {
+                    Reloader.appName = URL(fileURLWithPath:
+                                            executable).lastPathComponent
+                }
             case .detail:
                 if let detail = readString() {
                     setenv(INJECTION_DETAIL, detail, 1)
