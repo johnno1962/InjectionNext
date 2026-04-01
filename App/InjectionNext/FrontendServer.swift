@@ -20,13 +20,7 @@ struct Unhider { static var packageFrameworks: String? }
 
 extension NextCompiler {
     func writeCache() {
-        os_unfair_lock_lock(&FrontendServer.recompilersLock)
-        let platform = FrontendServer.recompilers.keys
-            .first { FrontendServer.recompilers[$0] === self }
-        os_unfair_lock_unlock(&FrontendServer.recompilersLock)
-        if platform != nil {
-            FrontendServer.writeCache(for: platform!, recompiler: self)
-        }
+        FrontendServer.writeCache(for: self.name, recompiler: self)
     }
 }
 
@@ -56,15 +50,15 @@ class FrontendServer: SimpleSocket {
     static func cacheURL(platform: String) -> URL {
         return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
     }
-    static fileprivate var recompilersLock = os_unfair_lock()
-    static fileprivate private(set) var recompilers = [String: NextCompiler]()
+    static private var recompilersLock = os_unfair_lock()
+    static private var recompilers = [String: NextCompiler]()
     static func frontendRecompiler(for platform: String = clientPlatform) -> NextCompiler {
         os_unfair_lock_lock(&recompilersLock)
         defer { os_unfair_lock_unlock(&recompilersLock) }
         if let recompiler = recompilers[platform] {
             return recompiler
         }
-        let recompiler = NextCompiler()
+        let recompiler = NextCompiler(name: platform)
         do {
             let compressed = cacheURL(platform: platform).path+".gz"
             if Fstat(path: compressed)?.st_size ?? 0 != 0,

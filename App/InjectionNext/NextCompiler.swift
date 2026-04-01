@@ -50,6 +50,7 @@ class NextCompiler {
     /// Last build error.
     static var lastError: String?, lastSource: String?
 
+    let name: String
     /// Base for temporary files
     let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available
@@ -64,6 +65,10 @@ class NextCompiler {
     var strikes = [String: Int]()
     /// Default counter for Compilertron
     var compileNumber = 0
+    
+    init(name: String) {
+        self.name = name
+    }
 
     func error(_ msg: String) {
         let msg = "⚠️ "+msg
@@ -322,7 +327,8 @@ class NextCompiler {
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
         let compilationTimeMs = (now - compilationStartTime) * 1000
-        detail(String(format: "⚡ Compiled in %.0fms", compilationTimeMs))
+        detail(String(format: "⚡ Compiled for \(name) in %.0fms",
+                      compilationTimeMs))
 
         let compilationCommand = (arguments + languageSpecific)
             .map { $0[#"([ $()])"#, "\\\\$1"] }.joined(separator:  " ")

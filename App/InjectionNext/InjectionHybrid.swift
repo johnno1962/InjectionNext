@@ -60,7 +60,7 @@ class InjectionHybrid: InjectionBase {
     /// Path to detected git lock file - used to check if git operation still active
     static var gitLockPath: String?
     /// InjectionNext compiler that uses InjectionLite log parser
-    var logParsingCompiler: NextCompiler = HybridCompiler()
+    var logParsingCompiler: NextCompiler = HybridCompiler(name: "BuildLogs")
     /// Minimum seconds between injections
     let minInterval = 1.0
 
@@ -77,6 +77,7 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
+        guard MonitorXcode.runningXcode == nil else { return }
         // Detect git lock files - record path for later checking
         if source.hasSuffix(".lock") &&
            source.contains("/.git/") {
@@ -137,8 +138,7 @@ class InjectionHybrid: InjectionBase {
         autoreleasepool {
         var recompiler = MonitorXcode.recompiler
         let platform = FrontendServer.clientPlatform
-        if MonitorXcode.runningXcode == nil,
-           recompiler.canCompile(source: source, for: platform),
+        if recompiler.canCompile(source: source, for: platform),
            recompiler.inject(source: source) { return }
 
         recompiler = logParsingCompiler
