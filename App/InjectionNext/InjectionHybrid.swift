@@ -167,16 +167,8 @@ class HybridCompiler: NextCompiler {
         let oldCache = Reloader.cacheFile
         Reloader.cacheFile[#"_([A-Za-z]+)_builds"#, 1] = platform
         if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
-        var object = Self.liteRecompiler.recompile(source: source, platformFilter:
-            "SDKs/"+platform, module: Reloader.appName, dylink: false)
-        if object.flatMap({ FileManager.default.fileExists(atPath: $0)
-                }) == false, let base = FileWatcher.objectBase {
-            let filename = URL(fileURLWithPath: source).deletingPathExtension()
-                .lastPathComponent[#"([ $])"#, "\\\\$1"]+".o"
-            object = URL(fileURLWithPath: base)
-                .appendingPathComponent(filename).path
-        }
-        return object
+        return Self.liteRecompiler.recompile(source: source, platformFilter:
+                                            "SDKs/"+platform, dylink: false)
     }
 
     override func link(object: String, dylib: String, arch: String) -> (String, Double)? {
