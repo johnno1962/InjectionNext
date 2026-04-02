@@ -165,7 +165,7 @@ class HybridCompiler: NextCompiler {
 
     override func recompile(source: String, platform: String) ->  String? {
         let oldCache = Reloader.cacheFile
-        Reloader.cacheFile[#"_([A-Za-z]+)_builds"#, 1] = platform
+        Reloader.cacheFile[#"_([^_]+)_([^_]+)_builds"#] = (Reloader.appName, platform)
         if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
         return Self.liteRecompiler.recompile(source: source, platformFilter:
                                             "SDKs/"+platform, dylink: false)
