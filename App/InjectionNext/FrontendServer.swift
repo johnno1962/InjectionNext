@@ -48,7 +48,7 @@ class FrontendServer: SimpleSocket {
     static var clientPlatform: String {
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
     static func cacheURL(platform: String) -> URL {
-        return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
+        return URL(fileURLWithPath: Reloader.tmpbase+"_\(platform)_builds.json")
     }
     static private var recompilersLock = os_unfair_lock()
     static private var recompilers = [String: NextCompiler]()
