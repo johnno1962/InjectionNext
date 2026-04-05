@@ -19,20 +19,12 @@ import Popen
 
 class InjectionServer: SimpleSocket {
 
-    struct ActiveClient {
-        weak var connection: InjectionServer?
-    }
-
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
-    static private var connected = [ActiveClient]()
+    static private var connected = [InjectionServer]()
     /// All access to `connected` serialised through clientQueue.
     static var currentClients: [InjectionServer?] {
-        let active = clientQueue.sync {
-            Self.connected.removeAll { $0.connection == nil }
-            return connected.compactMap(\.connection)
-        }
-        return active.isEmpty ? [nil] : active
+        return clientQueue.sync { connected.isEmpty ? [nil] : connected }
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
@@ -144,7 +136,9 @@ class InjectionServer: SimpleSocket {
         } catch {
             self.error("\(self) error \(error)")
         }
-        Self.clientQueue.sync {} // flush messages
+        Self.clientQueue.sync {
+            Self.connected.removeAll { $0 === self }
+        } // flush messages and de-register
     }
 
     func processResponses() {
@@ -177,7 +171,7 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath = tmpPath
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     Self.clientQueue.async {
-                        Self.connected.append(ActiveClient(connection: self))
+                        Self.connected.append(self)
                     }
                 } else {
                     error("**** Bad tmp ****")
@@ -206,6 +200,11 @@ class InjectionServer: SimpleSocket {
                     }
                 } else {
                     error("**** Bad root ****")
+                }
+            case .executable:
+                if let executable = readString() {
+                    Reloader.appName = URL(fileURLWithPath:
+                                            executable).lastPathComponent
                 }
             case .detail:
                 if let detail = readString() {

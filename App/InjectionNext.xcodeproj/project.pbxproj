@@ -1091,7 +1091,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1115,7 +1115,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1166,6 +1166,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1211,6 +1212,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

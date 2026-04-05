@@ -51,8 +51,6 @@ class NextCompiler {
     static var lastError: String?, lastSource: String?
 
     let name: String
-    /// Base for temporary files
-    let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available
     var pendingSource: String?
     /// Information for compiling a file per source file.
@@ -258,9 +256,9 @@ class NextCompiler {
         }
 
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
-        let object = tmpbase+"_\(uniqueObject).o"
+        let object = Reloader.tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")
-        let filesfile = tmpbase+".filelist"
+        let filesfile = Reloader.tmpbase+".filelist"
 
         unlink(object)
         unlink(filesfile)
