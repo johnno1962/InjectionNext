@@ -1,0 +1,74 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build InjectionNext.app
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Resolve SPM dependencies
+        run: |
+          cd App
+          xcodebuild -resolvePackageDependencies \
+            -project InjectionNext.xcodeproj \
+            -scheme InjectionNext
+
+      - name: Build app
+        run: |
+          cd App
+          xcodebuild -project InjectionNext.xcodeproj \
+            -scheme InjectionNext \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package .app as zip
+        run: |
+          APP_PATH="App/build/Build/Products/Release/InjectionNext.app"
+          if [ ! -d "$APP_PATH" ]; then
+            APP_PATH="App/build/Build/Products/Debug/InjectionNext.app"
+          fi
+          cd "$(dirname "$APP_PATH")"
+          zip -r -y InjectionNext.app.zip InjectionNext.app
+
+      - name: Get tag name
+        id: tag
+        run: echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: InjectionNext ${{ steps.tag.outputs.name }}
+          body: |
+            ## InjectionNext ${{ steps.tag.outputs.name }}
+
+            ### Installation
+            1. Download `InjectionNext.app.zip`
+            2. Unzip and move `InjectionNext.app` to `/Applications`
+            3. Launch InjectionNext from the menu bar
+
+            ### MCP Server (AI integration)
+            See [`mcp-server/README.md`](./mcp-server/README.md) for setup instructions.
+          files: |
+            App/build/Build/Products/*/InjectionNext.app.zip
+          draft: false
+          prerelease: false
