@@ -288,7 +288,12 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-        var arguments = stored.arguments
+        let wmoFlags: Set<String> = [
+            "-whole-module-optimization",
+            "-internalize-at-link",
+            "-no-serialize-debugging-options"
+        ]
+        var arguments = stored.arguments.filter { !wmoFlags.contains($0) }
         if let target = InjectionServer.currentClient?.arch, target != "arm64" {
             // Simulator running in Rosetta.
             for i in 0..<arguments.count {

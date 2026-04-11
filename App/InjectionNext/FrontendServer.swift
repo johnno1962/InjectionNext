@@ -231,7 +231,7 @@ class FrontendServer: SimpleSocket {
                 } else if arg[Reloader.optionsToRemove] {
                     _ = next()
                 } else if !arg[
-                    "-validate-clang-modules-once|-frontend-parseable-output"] {
+                    "-validate-clang-modules-once|-frontend-parseable-output|-whole-module-optimization|-internalize-at-link|-no-serialize-debugging-options"] {
                     args.append(arg)
                 }
             }
