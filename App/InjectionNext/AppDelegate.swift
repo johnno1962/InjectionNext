@@ -92,6 +92,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        ControlServer.start()
+
         librariesField.stringValue = Defaults.deviceLibraries
         let enableDevicesSticky = false
         if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
@@ -130,8 +132,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
         }
-
-        ControlServer.start()
     }
 
     func setMenuIcon(_ state: InjectionState) {
