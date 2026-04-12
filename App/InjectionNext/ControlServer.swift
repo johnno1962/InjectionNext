@@ -9,6 +9,74 @@
 
 import Cocoa
 
+// MARK: - Injection Event Tracker
+
+class InjectionEventTracker {
+
+    static let shared = InjectionEventTracker()
+
+    struct Event {
+        let timestamp: TimeInterval
+        let file: String
+        let status: String   // detecting, compiling, compiled, linking, linked, injected, failed
+        let detail: String?
+    }
+
+    private let lock = NSLock()
+    private var events = [Event]()
+    private let maxEvents = 500
+
+    func emit(_ file: String, status: String, detail: String? = nil) {
+        lock.lock()
+        defer { lock.unlock() }
+        events.append(Event(
+            timestamp: Date().timeIntervalSince1970,
+            file: file,
+            status: status,
+            detail: detail
+        ))
+        if events.count > maxEvents {
+            events.removeFirst(events.count - maxEvents)
+        }
+    }
+
+    func get(since: TimeInterval = 0, limit: Int = 50) -> [[String: Any]] {
+        lock.lock()
+        defer { lock.unlock() }
+        let filtered = events.filter { $0.timestamp > since }
+        let sliced = filtered.suffix(limit)
+        return sliced.map {
+            var dict: [String: Any] = [
+                "timestamp": $0.timestamp,
+                "file": $0.file,
+                "status": $0.status
+            ]
+            if let detail = $0.detail { dict["detail"] = detail }
+            return dict
+        }
+    }
+
+    func latest(for file: String? = nil) -> [String: Any]? {
+        lock.lock()
+        defer { lock.unlock() }
+        let match = file == nil ? events.last : events.last(where: { $0.file == file })
+        guard let e = match else { return nil }
+        var dict: [String: Any] = [
+            "timestamp": e.timestamp,
+            "file": e.file,
+            "status": e.status
+        ]
+        if let detail = e.detail { dict["detail"] = detail }
+        return dict
+    }
+
+    func clear() {
+        lock.lock()
+        defer { lock.unlock() }
+        events.removeAll()
+    }
+}
+
 // MARK: - Log Buffer
 
 class LogBuffer {
@@ -239,6 +307,15 @@ class ControlServer {
         case "clear_logs":
             return clearLogs()
 
+        case "get_injection_status":
+            let since = params["since"] as? TimeInterval ?? 0
+            let limit = params["limit"] as? Int ?? 50
+            let file = params["file"] as? String
+            return getInjectionStatus(since: since, limit: limit, file: file)
+
+        case "clear_injection_events":
+            return clearInjectionEvents()
+
         default:
             return .fail("Unknown action: \(action)")
         }
@@ -359,6 +436,19 @@ class ControlServer {
 
     private func clearLogs() -> ActionResult {
         LogBuffer.shared.clear()
+        return .ok()
+    }
+
+    private func getInjectionStatus(since: TimeInterval, limit: Int, file: String?) -> ActionResult {
+        let events = InjectionEventTracker.shared.get(since: since, limit: min(limit, 200))
+        let latest = InjectionEventTracker.shared.latest(for: file)
+        var data: [String: Any] = ["events": events, "count": events.count]
+        if let latest = latest { data["latest"] = latest }
+        return .ok(data)
+    }
+
+    private func clearInjectionEvents() -> ActionResult {
+        InjectionEventTracker.shared.clear()
         return .ok()
     }
 }

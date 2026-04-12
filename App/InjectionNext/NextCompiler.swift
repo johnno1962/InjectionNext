@@ -25,7 +25,6 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
-    LogBuffer.shared.append(msg, level: "info")
     for client in InjectionServer.currentClients {
         client?.sendCommand(.log, with: msg)
     }
@@ -268,6 +267,8 @@ class NextCompiler {
         try stored.swiftFiles.write(toFile: filesfile,
                                     atomically: false, encoding: .utf8)
 
+        let sourceFileName = URL(fileURLWithPath: source).lastPathComponent
+        InjectionEventTracker.shared.emit(sourceFileName, status: "compiling")
         log("Recompiling: "+source)
         let toolchain = Defaults.xcodePath +
             "/Contents/Developer/Toolchains/XcodeDefault.xctoolchain"
@@ -329,6 +330,7 @@ class NextCompiler {
             errors += line+"\n"
         }
         if errors.contains(" error: ") {
+            InjectionEventTracker.shared.emit(sourceFileName, status: "failed", detail: "compilation error")
             error("Failed compilation: "+([compiler] + arguments +
                         languageSpecific).joined(separator: " "))
             error("Recompile failed for: \(source)\n"+errors)
@@ -339,6 +341,7 @@ class NextCompiler {
         // Log successful compilation with timing
         let now = Date.timeIntervalSinceReferenceDate
         let compilationTimeMs = (now - compilationStartTime) * 1000
+        InjectionEventTracker.shared.emit(sourceFileName, status: "compiled", detail: String(format: "%.0fms", compilationTimeMs))
         detail(String(format: "⚡ Compiled for \(name) in %.0fms",
                       compilationTimeMs))
 
@@ -350,6 +353,8 @@ class NextCompiler {
 
     /// Link and object file to create a dynamic library
     func link(object: String, dylib: String, arch: String) -> (String, Double)? {
+        let linkedFile = URL(fileURLWithPath: dylib).lastPathComponent
+        InjectionEventTracker.shared.emit(linkedFile, status: "linking")
         let linkingStartTime = Date.timeIntervalSinceReferenceDate
         var linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
         if DispatchQueue.main.sync(execute: {
@@ -366,12 +371,14 @@ class NextCompiler {
         }
 
         if let errors = Popen.system(linkCommand, errors: true) {
+            InjectionEventTracker.shared.emit(linkedFile, status: "failed", detail: "linking error")
             error("Linking failed:\n\(linkCommand)\nerrors:\n"+errors)
             Self.lastError = errors
             return nil
         }
 
         let linkingTimeMs = (Date.timeIntervalSinceReferenceDate - linkingStartTime) * 1000
+        InjectionEventTracker.shared.emit(linkedFile, status: "linked", detail: String(format: "%.0fms", linkingTimeMs))
         return (dylib, linkingTimeMs)
     }
 

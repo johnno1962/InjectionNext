@@ -223,6 +223,7 @@ class InjectionServer: SimpleSocket {
                     error("**** Bad Bazel target ****")
                 }
             case .injected:
+                InjectionEventTracker.shared.emit(NextCompiler.lastSource.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "unknown", status: "injected")
                 AppDelegate.ui.setMenuIcon(.ok)
             case .failed:
                 AppDelegate.ui.setMenuIcon(.error)

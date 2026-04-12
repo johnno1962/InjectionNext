@@ -213,5 +213,51 @@ server.tool(
   }
 );
 
+server.tool(
+  "get_injection_status",
+  "Get real-time injection lifecycle events for files. Each event has: timestamp, file, status (detecting/compiling/compiled/linking/linked/injected/failed), and optional detail. Use 'since' to poll for new events. Use 'file' to filter by filename. Returns both the event timeline and the latest status for the requested file.",
+  {
+    since: z.number().optional().describe("Unix timestamp — only return events after this time. Omit for all recent events."),
+    limit: z.number().optional().describe("Max events to return (default 50, max 200)"),
+    file: z.string().optional().describe("Filter by filename (e.g. 'ATODecisionView.swift'). If omitted, returns all files."),
+  },
+  async ({ since, limit, file }) => {
+    const params = {};
+    if (since !== undefined) params.since = since;
+    if (limit !== undefined) params.limit = limit;
+    if (file !== undefined) params.file = file;
+    const result = await sendCommand("get_injection_status", params);
+    if (!result.success) {
+      return { content: [{ type: "text", text: `Error: ${result.error}` }], isError: true };
+    }
+    const events = result.data?.events ?? [];
+    const latest = result.data?.latest;
+    if (events.length === 0 && !latest) {
+      return { content: [{ type: "text", text: "No injection events." }] };
+    }
+    const lines = events.map((e) => {
+      const ts = new Date(e.timestamp * 1000).toISOString().slice(11, 23);
+      const detail = e.detail ? ` (${e.detail})` : "";
+      return `${ts} ${e.file} → ${e.status}${detail}`;
+    });
+    let text = `--- ${events.length} injection events ---\n` + lines.join("\n");
+    if (latest) {
+      const lts = new Date(latest.timestamp * 1000).toISOString().slice(11, 23);
+      text += `\n\nLatest: ${lts} ${latest.file} → ${latest.status}${latest.detail ? ` (${latest.detail})` : ""}`;
+    }
+    return { content: [{ type: "text", text }] };
+  }
+);
+
+server.tool(
+  "clear_injection_events",
+  "Clear the injection event history",
+  {},
+  async () => {
+    const result = await sendCommand("clear_injection_events");
+    return formatResponse(result);
+  }
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
