@@ -13,7 +13,7 @@ import Cocoa
 
 class LogBuffer {
 
-    static let shared = LogBuffer()
+    static var shared: LogBuffer?
 
     struct Entry {
         let timestamp: TimeInterval
@@ -135,6 +135,7 @@ class ControlServer {
     private func handleClient(_ sock: Int32) {
         defer { close(sock) }
 
+        let maxRequestSize = 64 * 1024
         var data = Data()
         var buf = [UInt8](repeating: 0, count: 4096)
         while true {
@@ -142,6 +143,10 @@ class ControlServer {
             guard n > 0 else { break }
             data.append(contentsOf: buf[0..<n])
             if data.contains(UInt8(ascii: "\n")) { break }
+            if data.count > maxRequestSize {
+                sendResponse(sock, success: false, error: "Request too large")
+                return
+            }
         }
 
         guard !data.isEmpty,
@@ -225,7 +230,7 @@ class ControlServer {
 
         case "get_logs":
             let since = params["since"] as? TimeInterval ?? 0
-            let limit = params["limit"] as? Int ?? 200
+            let limit = max(0, min(params["limit"] as? Int ?? 200, 500))
             return getLogs(since: since, limit: limit)
 
         case "clear_logs":
@@ -345,12 +350,12 @@ class ControlServer {
     }
 
     private func getLogs(since: TimeInterval, limit: Int) -> ActionResult {
-        let logs = LogBuffer.shared.get(since: since, limit: min(limit, 500))
-        return .ok(["logs": logs, "count": LogBuffer.shared.count])
+        let logs = LogBuffer.shared?.get(since: since, limit: limit)
+        return .ok(["logs": logs ?? [], "count": LogBuffer.shared?.count ?? 0])
     }
 
     private func clearLogs() -> ActionResult {
-        LogBuffer.shared.clear()
+        LogBuffer.shared?.clear()
         return .ok()
     }
 }

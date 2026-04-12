@@ -5,7 +5,7 @@ MCP (Model Context Protocol) server that lets AI agents control InjectionNext â€
 ## Prerequisites
 
 - **macOS** with Xcode installed
-- **Node.js** 18+
+- **Node.js** 18.14.1+
 - **InjectionNext.app** built from this repo (with ControlServer support)
 
 ## Step 1: Build InjectionNext with ControlServer
@@ -35,14 +35,28 @@ Optionally copy it to `/Applications`:
 cp -R ~/Library/Developer/Xcode/DerivedData/InjectionNext-*/Build/Products/Debug/InjectionNext.app /Applications/
 ```
 
-## Step 2: Install the MCP server
+## Step 2: Enable the ControlServer
+
+The TCP control server is **opt-in**. Enable it via a UserDefault before launching the app:
+
+```bash
+defaults write com.johnholdsworth.InjectionNext mcpServer -bool true
+```
+
+To disable it later:
+
+```bash
+defaults delete com.johnholdsworth.InjectionNext mcpServer
+```
+
+## Step 3: Install the MCP server
 
 ```bash
 cd mcp-server
 npm install
 ```
 
-## Step 3: Configure Cursor
+## Step 4: Configure Cursor
 
 Add to your Cursor MCP config at `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (per-project):
 
@@ -59,7 +73,7 @@ Add to your Cursor MCP config at `~/.cursor/mcp.json` (global) or `.cursor/mcp.j
 
 Replace `/absolute/path/to` with the actual path to this repo.
 
-## Step 4: Launch InjectionNext
+## Step 5: Launch InjectionNext
 
 Start the app before using the MCP tools:
 
@@ -71,7 +85,7 @@ open ~/Library/Developer/Xcode/DerivedData/InjectionNext-*/Build/Products/Debug/
 
 You should see the InjectionNext icon in the menu bar.
 
-## Step 5: Test it
+## Step 6: Test it
 
 ### Quick test from terminal (no MCP needed)
 
