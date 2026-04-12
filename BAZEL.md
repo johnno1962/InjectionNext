@@ -12,12 +12,12 @@ The system uses a two-tier approach: first attempting optimized queries using di
 
 Bazel integration requires either `bazel` or `/opt/homebrew/bin/bazelisk` to be available in your system PATH.
 
-### ⚠️ rules_xcodeproj Limitation
+### rules_xcodeproj Support
 
-**Important**: Currently, Bazel queries and commands cannot be executed from within the rules_xcodeproj-generated Xcode project environment. This means:
+When a project uses `rules_xcodeproj`, Xcode builds artifacts in a separate output base at `<outputBase>/rules_xcodeproj.noindex/build_output_base/` rather than the main Bazel output base. InjectionNext automatically detects this and:
 
-- If you run your app from Xcode using a rules_xcodeproj-generated project and modify a file, **hot reloading will not work** because the app runs through a different execution route that doesn't provide access to Bazel tooling
-- **Workaround**: Run your app directly from the terminal using `bazel run` instead of launching from Xcode to enable hot reloading functionality
-- This limitation only affects rules_xcodeproj workflows - standard Bazel development workflows are fully supported
+- Resolves `bazel-out/` paths to the rules_xcodeproj output base
+- Maps aquery configuration hashes (e.g. `ios_sim_arm64-fastbuild-*`) to the corresponding rules_xcodeproj configs (e.g. `ios_sim_arm64-dbg-*`)
+- Uses the rules_xcodeproj exec root as the working directory for recompilation
 
-We're working on addressing this limitation in future releases.
+This is transparent — hot reloading works the same whether you build via `bazel run` or from Xcode with a rules_xcodeproj-generated project.

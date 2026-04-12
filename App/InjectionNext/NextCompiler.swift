@@ -51,6 +51,8 @@ class NextCompiler {
     static var lastError: String?, lastSource: String?
 
     let name: String
+    /// Base for temporary files
+    let tmpbase = "/tmp/injectionNext"
     /// Injection pending if information was not available
     var pendingSource: String?
     /// Information for compiling a file per source file.
@@ -256,9 +258,9 @@ class NextCompiler {
         }
 
         let uniqueObject = InjectionServer.currentClient?.injectionNumber ?? 0
-        let object = Reloader.tmpbase+"_\(uniqueObject).o"
+        let object = tmpbase+"_\(uniqueObject).o"
         let isSwift = source.hasSuffix(".swift")
-        let filesfile = Reloader.tmpbase+".filelist"
+        let filesfile = tmpbase+".filelist"
 
         unlink(object)
         unlink(filesfile)
@@ -286,7 +288,18 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-        var arguments = stored.arguments
+        let wmoFlags: Set<String> = [
+            "-whole-module-optimization",
+            "-internalize-at-link",
+            "-no-serialize-debugging-options"
+        ]
+        var arguments = [String]()
+        var skipNext = false
+        for arg in stored.arguments where !wmoFlags.contains(arg) {
+            if skipNext { skipNext = false; continue }
+            if arg == "-o" { skipNext = true; continue }
+            arguments.append(arg)
+        }
         if let target = InjectionServer.currentClient?.arch, target != "arm64" {
             // Simulator running in Rosetta.
             for i in 0..<arguments.count {
