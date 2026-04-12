@@ -6,7 +6,7 @@
 	url = https://github.com/johnno1962/DLKit
 [submodule "InjectionLite"]
 	path = InjectionLite
-	url = https://github.com/johnno1962/InjectionLite
+	url = https://github.com/maatheusgois-dd/InjectionLite.git
 [submodule "SwiftRegex5"]
 	path = SwiftRegex5
 	url = https://github.com/johnno1962/SwiftRegex5
