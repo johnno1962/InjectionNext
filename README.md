@@ -2,6 +2,8 @@
 
 ### The fourth evolution of Code Injection for Xcode
 
+This fork ([**maatheusgois-dd/InjectionNext**](https://github.com/maatheusgois-dd/InjectionNext)) pins the **InjectionLite** submodule to [**maatheusgois-dd/InjectionLite**](https://github.com/maatheusgois-dd/InjectionLite) (see `.gitmodules`). Clone with `git clone --recurse-submodules …` or run `git submodule update --init --recursive` after clone; use `git submodule sync` if submodule remotes are stale.
+
 Using a feature of Apple's linker this implementation of Code Injection
 allows you to update the implementation (i.e. body) of functions in your
 app without having to relaunch it. This can save a developer a significant
@@ -168,7 +170,7 @@ So, InjectionNext now has three ways which it can operate. The original mode
 of operation launching Xcode inside the app takes precedence and, if you have
 selected a file watcher and are intercepting the compiler commands this "proxy
 mode" is the next preference followed by the log parsing fallback using
-the [InjectionLite](https://github.com/johnno1962/InjectionLite) package
+the [InjectionLite](https://github.com/maatheusgois-dd/InjectionLite) package
 which essentially works as InjectionIII did when the logs are available.
 
 For more information consult the [original InjectionIII README](https://github.com/johnno1962/InjectionIII)
