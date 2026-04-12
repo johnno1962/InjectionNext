@@ -278,6 +278,7 @@ class ControlServer {
             AppDelegate.watchers.removeAll()
             AppDelegate.lastWatched = nil
             AppDelegate.ui.watchDirectoryItem.state = .off
+            AppDelegate.ui.refreshWatchProjectMenuItem()
         }
         return .ok()
     }

@@ -46,6 +46,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var enableDevicesItem: NSMenuItem!
     @IBOutlet weak var watchDirectoryItem: NSMenuItem!
 
+    /// Matches `MainMenu.xib` default title for the watch item.
+    static let watchProjectMenuDefaultTitle = "...or Watch Project"
+
     // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
 
@@ -131,6 +134,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
+        }
+    }
+
+    /// Reflects active file-watch paths in the status menu (see `watchProject:` / MCP `watch_project`).
+    func refreshWatchProjectMenuItem() {
+        watchDirectoryItem.title = Self.watchProjectMenuDefaultTitle
+        if AppDelegate.watchers.isEmpty {
+            watchDirectoryItem.toolTip = "Start file watcher for project."
+        } else {
+            let paths = AppDelegate.watchers.keys.sorted().joined(separator: ", ")
+            watchDirectoryItem.toolTip = paths
         }
     }
 
