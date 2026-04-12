@@ -19,6 +19,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Get tag name
+        id: meta
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "title=${TAG}" >> "$GITHUB_OUTPUT"
+
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
@@ -49,17 +56,13 @@ jobs:
           cd "$(dirname "$APP_PATH")"
           zip -r -y InjectionNext.app.zip InjectionNext.app
 
-      - name: Get tag name
-        id: tag
-        run: echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.name }}
-          name: InjectionNext ${{ steps.tag.outputs.name }}
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: InjectionNext ${{ steps.meta.outputs.title }}
           body: |
-            ## InjectionNext ${{ steps.tag.outputs.name }}
+            ## InjectionNext ${{ steps.meta.outputs.title }}
 
             ### Installation
             1. Download `InjectionNext.app.zip`
@@ -67,7 +70,7 @@ jobs:
             3. Launch InjectionNext from the menu bar
 
             ### MCP Server (AI integration)
-            See [`mcp-server/README.md`](./mcp-server/README.md) for setup instructions.
+            See [MCP server setup](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/mcp-server/README.md) for instructions.
           files: |
             App/build/Build/Products/*/InjectionNext.app.zip
           draft: false
