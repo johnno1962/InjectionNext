@@ -1,7 +1,7 @@
 ### High Priority
 
 **1. Fix `rules_xcodeproj` output base resolution**
-The Bazel aquery path queries the wrong output base (`execroot/_main/bazel-out/fastbuild-*`) instead of `rules_xcodeproj.noindex/build_output_base/`. This is the main blocker for hot-reload in rules_xcodeproj projects. Fix: detect `rules_xcodeproj.noindex` in the workspace and redirect aquery or fall back to xcactivitylog parsing.
+The Bazel aquery path queries the wrong output base (`execroot/_main/bazel-out/fastbuild-*`) instead of `rules_xcodeproj.noindex/build_output_base/`. This is the main blocker for hot-reload in rules_xcodeproj projects. Fix: detect `rules_xcodeproj.noindex` in the workspace and redirect aquery or fall back to xcactivitylog parsing. - https://github.com/maatheusgois-dd/InjectionLite/pull/1
 
 **2. Add `compiling`/`compiled` events to `Recompiler` (submodule)**
 The event tracker only emits from `NextCompiler`. The `Recompiler` in InjectionLite (the Bazel/file watcher path) handles most compilations but doesn't emit `compiling`/`compiled` events yet — only `detecting → linking → injected` shows up.
