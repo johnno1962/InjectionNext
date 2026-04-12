@@ -29,6 +29,8 @@ extension AppDelegate {
         } else {
             Self.watchers.removeAll()
             Self.lastWatched = nil
+            watchDirectoryItem.state = .off
+            refreshWatchProjectMenuItem()
         }
     }
 
@@ -38,6 +40,7 @@ extension AppDelegate {
         Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
         watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
+        refreshWatchProjectMenuItem()
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {
         return Self.watchers[projectRoot] != nil ? projectRoot :
