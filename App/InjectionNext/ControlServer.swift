@@ -72,18 +72,26 @@ class ControlServer {
     private let queue = DispatchQueue(label: "ControlServer", attributes: .concurrent)
 
     static func start() {
-        guard shared == nil else { return }
+        guard shared == nil else {
+            print("\(APP_PREFIX)ControlServer: already started")
+            return
+        }
+        print("\(APP_PREFIX)ControlServer: initializing...")
         shared = ControlServer()
         shared?.listen()
     }
 
     private func listen() {
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                print("\(APP_PREFIX)ControlServer: self was deallocated before listen()")
+                return
+            }
 
+            print("\(APP_PREFIX)ControlServer: creating socket...")
             self.serverSocket = socket(AF_INET, SOCK_STREAM, 0)
             guard self.serverSocket >= 0 else {
-                NSLog("\(APP_PREFIX)ControlServer: socket() failed")
+                print("\(APP_PREFIX)ControlServer: socket() failed: \(String(cString: strerror(errno)))")
                 return
             }
 
@@ -103,18 +111,18 @@ class ControlServer {
             }
 
             guard bindResult == 0 else {
-                NSLog("\(APP_PREFIX)ControlServer: bind() failed on port \(Self.port): \(String(cString: strerror(errno)))")
+                print("\(APP_PREFIX)ControlServer: bind() failed on port \(Self.port): \(String(cString: strerror(errno)))")
                 close(self.serverSocket)
                 return
             }
 
             guard Darwin.listen(self.serverSocket, 5) == 0 else {
-                NSLog("\(APP_PREFIX)ControlServer: listen() failed")
+                print("\(APP_PREFIX)ControlServer: listen() failed: \(String(cString: strerror(errno)))")
                 close(self.serverSocket)
                 return
             }
 
-            NSLog("\(APP_PREFIX)ControlServer: listening on localhost:\(Self.port)")
+            print("\(APP_PREFIX)ControlServer: listening on localhost:\(Self.port)")
 
             while true {
                 var clientAddr = sockaddr_in()
