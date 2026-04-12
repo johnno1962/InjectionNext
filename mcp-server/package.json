@@ -8,8 +8,7 @@
     "injection-next-mcp": "./index.js"
   },
   "scripts": {
-    "start": "node index.js",
-    "test:stdio": "node scripts/test-stdio.mjs"
+    "start": "node index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1"

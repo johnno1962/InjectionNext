@@ -57,13 +57,7 @@ Add to your Cursor MCP config at `~/.cursor/mcp.json` (global) or `.cursor/mcp.j
 }
 ```
 
-Replace both paths with the real locations. **Use the full path to `node`**, not just `"node"`: Cursor is often launched from the Dock without your shell profile, so **nvm/fnm/Homebrew `node` may be missing from `PATH`** and the MCP server will fail to start silently or with “spawn node ENOENT”.
-
-Check your Node binary with `which node` in Terminal, or run the stdio smoke test (app must be running):
-
-```bash
-cd mcp-server && node scripts/test-stdio.mjs
-```
+Replace both paths with the real locations. **Use the full path to `node`**, not just `"node"`: Cursor is often launched from the Dock without your shell profile, so **nvm/fnm/Homebrew `node` may be missing from `PATH`** and the MCP server will fail to start silently or with “spawn node ENOENT”. Use `which node` in Terminal to get the path.
 
 ## Step 4: Launch InjectionNext
 
@@ -153,7 +147,7 @@ or:
 
 **MCP tools missing or server fails immediately**
 - Use the **absolute path to `node`** in `mcp.json` (see Step 3). Dock-launched Cursor usually does not load nvm.
-- From `mcp-server`: `node scripts/test-stdio.mjs` — if this prints JSON with `get_status` data, the server and port `8919` are fine; the problem is Cursor config or restart Cursor after editing `mcp.json`.
+- If the app is running, `echo '{"action":"status"}' | nc -w 3 localhost 8919` should return JSON; if that works but MCP does not, fix Cursor config or restart Cursor after editing `mcp.json`.
 
 **"Cannot connect to InjectionNext on port 8919"**
 - Make sure InjectionNext.app is running (check menu bar icon)
