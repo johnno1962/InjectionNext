@@ -80,6 +80,10 @@ class InjectionHybrid: InjectionBase {
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
+        let fileName = URL(fileURLWithPath: source).lastPathComponent
+        if source.hasSuffix(".swift") || source.hasSuffix(".m") || source.hasSuffix(".mm") || source.hasSuffix(".cpp") {
+            InjectionEventTracker.shared.emit(fileName, status: "detecting")
+        }
         guard MonitorXcode.runningXcode == nil else { return }
         // Detect git lock files - record path for later checking
         if source.hasSuffix(".lock") &&
