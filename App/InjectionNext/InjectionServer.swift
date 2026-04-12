@@ -223,9 +223,14 @@ class InjectionServer: SimpleSocket {
                     error("**** Bad Bazel target ****")
                 }
             case .injected:
-                InjectionEventTracker.shared.emit(NextCompiler.lastSource.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "unknown", status: "injected")
+                let sourceName = NextCompiler.lastSource.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "unknown"
+                InjectionEventTracker.shared.emit(sourceName, status: "injected")
+                log("✅ Injection loaded successfully: \(sourceName)")
                 AppDelegate.ui.setMenuIcon(.ok)
             case .failed:
+                let sourceName = NextCompiler.lastSource.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "unknown"
+                InjectionEventTracker.shared.emit(sourceName, status: "failed", detail: "client load failure")
+                log("❌ Injection failed to load: \(sourceName)")
                 AppDelegate.ui.setMenuIcon(.error)
             case .unhide:
                 log("Injection could not load. If this was due to a default " +

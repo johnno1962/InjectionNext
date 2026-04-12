@@ -64,6 +64,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to initialize your application
         Self.ui = self
 
+        Recompiler.onCompilationEvent = { file, status, detail in
+            InjectionEventTracker.shared.emit(file, status: status, detail: detail)
+        }
+
         let appName = "InjectionNext"
 
         if Bundle.main.infoDictionary?["LSUIElement"] as? Bool != true {

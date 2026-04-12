@@ -25,6 +25,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
+    LogBuffer.shared.append(msg)
     for client in InjectionServer.currentClients {
         client?.sendCommand(.log, with: msg)
     }
@@ -244,7 +245,7 @@ class NextCompiler {
 
         strikes[source] = 0
         prepared[sourceName] = dylib
-        print("Prepared dylib: "+dylib)
+        log("📦 Prepared dylib: "+dylibName)
         return (dylib, dylibName, platform, useFilesystem)
     }
 
