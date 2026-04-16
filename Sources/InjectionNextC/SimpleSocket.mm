@@ -104,8 +104,11 @@ static int lastServerSocket;
                     [self error:@"Could not set SO_NOSIGPIPE: %s"];
                 @autoreleasepool {
                     struct sockaddr_in *v4Addr = &clientAddr.ip4;
-                    printf("%s: Connection from %s:%d\n", object_getClassName(self),
-                           inet_ntoa(v4Addr->sin_addr), ntohs(v4Addr->sin_port));
+                    if ([self logAcceptedConnections])
+                        printf("%s: Connection from %s:%d\n",
+                               object_getClassName(self),
+                               inet_ntoa(v4Addr->sin_addr),
+                               ntohs(v4Addr->sin_port));
                     SimpleSocket *client = [[self alloc] initSocket:clientSocket];
                     client.isLocalClient =
                         v4Addr->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
@@ -130,6 +133,10 @@ static int lastServerSocket;
         close(lastServerSocket);
     lastServerSocket = 0;
     [NSThread sleepForTimeInterval:.5];
+}
+
++ (BOOL)logAcceptedConnections {
+    return YES;
 }
 
 + (instancetype)connectTo:(NSString *)address {
@@ -221,11 +228,16 @@ typedef ssize_t (*io_func)(int, void *, size_t);
     size_t bytes, ptr = 0;
     SLog(@"#%d %s %lu [%p] %s", clientSocket, io == read ?
          "<-" : "->", length, buffer, sel_getName(cmd));
+    // Clear any stale errno from unrelated syscalls so a clean EOF
+    // (read returns 0, errno untouched) isn't misreported below.
+    errno = 0;
     while (ptr < length && (bytes = io(clientSocket,
         (char *)buffer+ptr, MIN(length-ptr, MAX_PACKET))) > 0)
         ptr += bytes;
     if (ptr < length) {
-        if (errno)
+        // ptr == 0 with errno == 0 is a clean peer-close before any data;
+        // only log when there was a real I/O error or a partial transfer.
+        if (errno || ptr > 0)
             NSLog(@"[%@ %s:%p length:%lu] error: %lu %s",
                   self, sel_getName(cmd), buffer, length, ptr, strerror(errno));
         return FALSE;

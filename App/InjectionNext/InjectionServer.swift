@@ -130,6 +130,7 @@ class InjectionServer: SimpleSocket {
                         InjectionHybrid.gitLockPath = nil
                         self.log("Repository lock cleared - injection resumed")
                     }
+                    ConfigStore.shared.isClientConnected = true
                 }
                 AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
@@ -142,6 +143,10 @@ class InjectionServer: SimpleSocket {
         Self.clientQueue.sync {
             Self.connected.removeAll { $0 === self }
         } // flush messages and de-register
+        let stillConnected = !Self.currentClients.compactMap({ $0 }).isEmpty
+        DispatchQueue.main.async {
+            ConfigStore.shared.isClientConnected = stillConnected
+        }
     }
 
     func processResponses() {

@@ -74,6 +74,22 @@ final class LogManager: ObservableObject {
     func append(_ message: String, level: LogLevel = .info) {
         let trimmed = Self.stripNoise(message)
         guard !trimmed.isEmpty else { return }
+
+        // Record the dedup signature synchronously so a racing caller
+        // (e.g. the stdout/stderr hijack surfacing the same `print` a few
+        // milliseconds later) can't sneak past before the main-thread hop
+        // runs. Previously `remember(signature:)` was inside performOnMain,
+        // which allowed both copies to pass the contains() check.
+        lock.lock()
+        let now = Date().timeIntervalSince1970
+        recentSignatures.removeAll { now - $0.when > dedupeWindow }
+        if recentSignatures.contains(where: { $0.sig == trimmed }) {
+            lock.unlock()
+            return
+        }
+        recentSignatures.append((trimmed, now))
+        lock.unlock()
+
         let entry = LogEntry(timestamp: Date(), message: trimmed, level: level)
 
         performOnMain { [weak self] in
@@ -83,7 +99,6 @@ final class LogManager: ObservableObject {
             if self.entries.count > self.maxEntries {
                 self.entries.removeFirst(self.entries.count - self.maxEntries)
             }
-            self.remember(signature: trimmed)
             self.lock.unlock()
         }
     }
@@ -198,6 +213,8 @@ final class LogManager: ObservableObject {
             lock.unlock()
             return
         }
+        // Record signature synchronously (see append(_:level:) for rationale).
+        recentSignatures.append((cleaned, now))
         lock.unlock()
 
         let inferred = inferLevel(from: cleaned, default: level)
@@ -210,7 +227,6 @@ final class LogManager: ObservableObject {
             if self.entries.count > self.maxEntries {
                 self.entries.removeFirst(self.entries.count - self.maxEntries)
             }
-            self.remember(signature: cleaned)
             self.lock.unlock()
         }
     }
@@ -233,12 +249,23 @@ final class LogManager: ObservableObject {
         return fallback
     }
 
-    // Strip NSLog's `2026-04-16 14:00:00.123 AppName[1234:5678] ` prefix and
-    // trailing whitespace so the Console view stays compact.
+    // Strip NSLog's `2026-04-16 14:00:00.123 AppName[1234:5678] ` prefix,
+    // the app's own `🔥 InjectionNext ` / `🔥 ` prefix, and trailing
+    // whitespace so:
+    //   (a) the Console view stays compact, and
+    //   (b) dedup signatures match across the two ingest paths (the direct
+    //       LogBuffer.append call and the captured stdout/stderr surfacing
+    //       the same `print` / `NSLog` — previously the prefix difference
+    //       let both copies through).
     private static func stripNoise(_ line: String) -> String {
         var out = line
         if let range = out.range(
             of: #"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ \S+\[\d+(:[0-9a-fA-F]+)?\]\s*"#,
+            options: .regularExpression) {
+            out.removeSubrange(range)
+        }
+        if let range = out.range(
+            of: #"^🔥\s+(InjectionNext(\.[A-Za-z_][A-Za-z0-9_]*)?:?\s+)?"#,
             options: .regularExpression) {
             out.removeSubrange(range)
         }

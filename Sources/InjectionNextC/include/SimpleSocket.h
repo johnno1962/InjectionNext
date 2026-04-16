@@ -22,6 +22,12 @@
 + (void)runServer:(NSString *_Nonnull)address;
 + (int)error:(NSString *_Nonnull)message;
 + (void)stopLastServer;
+/// Override to return NO to silence the per-connection `Connection from
+/// 127.0.0.1:xxxxx` banner printed by -runServer:. Useful for high-volume
+/// subclasses like FrontendServer where Xcode's indexer/SourceKit/
+/// ScanDependencies each spawn a swift-frontend invocation and flood the
+/// console otherwise. Defaults to YES.
++ (BOOL)logAcceptedConnections;
 
 + (instancetype _Nullable)connectTo:(NSString *_Nonnull)address;
 + (BOOL)parseV4Address:(NSString *_Nonnull)address into:(struct sockaddr_storage *_Nonnull)serverAddr;

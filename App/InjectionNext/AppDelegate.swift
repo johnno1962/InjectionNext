@@ -70,17 +70,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             InjectionEventTracker.shared.emit(file, status: status, detail: detail)
         }
 
-        // SIGPIPE handler MUST be async-signal-safe: no malloc, no Swift
-        // runtime, no locks. The previous version called into
-        // Thread.callStackSymbols / regex / swiftDemangle, which triggered
-        // _os_unfair_lock_recursive_abort when SIGPIPE was delivered while
-        // the main thread was already inside malloc.
-        signal(SIGPIPE, { _ in
-            let msg: StaticString = "⚠️ SIGPIPE (ignored)\n"
-            msg.withUTF8Buffer { buf in
-                _ = Darwin.write(STDERR_FILENO, buf.baseAddress, buf.count)
-            }
-        })
+        // All TCP sockets in SimpleSocket are created with SO_NOSIGPIPE,
+        // so any SIGPIPE we see comes from stdout/stderr or one of the
+        // Popen(...) shell invocations writing to a broken pipe — in every
+        // case write() returns EPIPE and the caller handles it. Ignoring
+        // the signal outright avoids both spurious termination and the
+        // async-signal-unsafe logging handler we used to install here
+        // (which crashed with _os_unfair_lock_recursive_abort when it
+        // fired while the main thread was inside malloc).
+        signal(SIGPIPE, SIG_IGN)
 
         ControlServer.start()
 

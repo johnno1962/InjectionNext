@@ -31,6 +31,13 @@ class FrontendServer: SimpleSocket {
         case patched = "Unpatch Compiler"
     }
 
+    /// Silence the per-connection accept banner: every swift-frontend
+    /// invocation by Xcode (indexing, SourceKit, ScanDependencies, builds)
+    /// opens a socket here, which used to flood the console with
+    /// "FrontendServer: Connection from 127.0.0.1:xxxxx" lines. We still
+    /// log "Updating N args for …" on actual captures.
+    override class func logAcceptedConnections() -> Bool { false }
+
     /// Paths to unpatched/patched swift-frontend binary/script in toolchain.
     static let frontendQueue = DispatchQueue(label: "InjectionCapture")
     static var binURL: URL { URL(fileURLWithPath: Defaults.xcodePath +
@@ -40,6 +47,9 @@ class FrontendServer: SimpleSocket {
     static var patchedURL: URL { URL(fileURLWithPath: patched) }
     /// Path to swift-frontend  last logged.
     static var loggedFrontend: String?
+    /// One-time flag so the CAS/compilation-caching warning isn't spammed
+    /// on every swift-frontend invocation when Xcode has it enabled.
+    static var warnedAboutCAS = false
     /// Start server for command logging.
     static var startOnce: Void = {
         FrontendServer.startServer(COMMANDS_PORT)
@@ -164,7 +174,21 @@ class FrontendServer: SimpleSocket {
 
         var parser = CompilationArgParser()
         while let arg = feed.readString() {
-            if arg.hasPrefix("llvmcas://") { return }
+            if arg.hasPrefix("llvmcas://") {
+                if !Self.warnedAboutCAS {
+                    Self.warnedAboutCAS = true
+                    Self.frontendRecompiler().error("""
+                        ⚠️ Skipping compile-command capture: Xcode \
+                        Compilation Caching (llvmcas://) is enabled. \
+                        Set COMPILATION_CACHE_ENABLE_CACHING=NO and \
+                        SWIFT_ENABLE_COMPILE_CACHE=NO in your target's \
+                        build settings, clean, and rebuild. Until then \
+                        InjectionNext cannot cache commands and will not \
+                        be able to inject.
+                        """)
+                }
+                return
+            }
             parser.process(arg: arg, next: feed.readString)
         }
 
