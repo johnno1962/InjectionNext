@@ -19,9 +19,7 @@ struct StatusMenuView: View {
             Divider()
 
             Button {
-                if MonitorXcode.runningXcode == nil {
-                    _ = MonitorXcode()
-                }
+                AppDelegate.ui?.runXcode(self)
             } label: {
                 HStack {
                     Text("Launch Xcode")

@@ -372,9 +372,7 @@ class ControlServer {
 
     private func launchXcode() -> ActionResult {
         DispatchQueue.main.sync {
-            if MonitorXcode.runningXcode == nil {
-                _ = MonitorXcode()
-            }
+            AppDelegate.ui?.runXcode(self)
         }
         return .ok(["xcode_path": ConfigStore.shared.xcodePath])
     }

@@ -76,9 +76,7 @@ struct XcodeSettingsView: View {
                     }
                 }
                 Button("Launch Xcode Now") {
-                    if MonitorXcode.runningXcode == nil {
-                        _ = MonitorXcode()
-                    }
+                    AppDelegate.ui?.runXcode(self)
                 }
                 .disabled(config.isXcodeRunning)
             } header: {

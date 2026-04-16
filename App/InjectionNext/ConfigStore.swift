@@ -133,6 +133,14 @@ final class ConfigStore: ObservableObject {
     @Published var projectPath: String {
         didSet { ud.set(projectPath, forKey: "projectPath") }
     }
+    /// Remembers which .xcodeproj/.xcworkspace the user last chose inside projectPath.
+    @Published var defaultProjectFile: String {
+        didSet { ud.set(defaultProjectFile, forKey: "defaultProjectFile") }
+    }
+    /// Skip the picker dialog and always open the remembered project file.
+    @Published var autoOpenDefaultProject: Bool {
+        didSet { ud.set(autoOpenDefaultProject, forKey: "autoOpenDefaultProject") }
+    }
     @Published var preserveStatics: Bool {
         didSet { ud.set(preserveStatics, forKey: "preserveStatics") }
     }
@@ -229,6 +237,8 @@ final class ConfigStore: ObservableObject {
 
         // Injection
         self.projectPath = ud.string(forKey: "projectPath") ?? ""
+        self.defaultProjectFile = ud.string(forKey: "defaultProjectFile") ?? ""
+        self.autoOpenDefaultProject = ud.bool(forKey: "autoOpenDefaultProject")
         self.preserveStatics = ud.bool(forKey: "preserveStatics")
         self.disableStandalone = ud.bool(forKey: "disableStandalone")
         self.genericsMode = GenericsMode(rawValue: ud.string(forKey: "genericsMode") ?? "") ?? .auto
@@ -341,6 +351,8 @@ final class ConfigStore: ObservableObject {
         xcrunPath = "/usr/bin/xcrun"
         emitFrontendCommandLines = false
         projectPath = ""
+        defaultProjectFile = ""
+        autoOpenDefaultProject = false
         preserveStatics = false
         disableStandalone = false
         genericsMode = .auto
@@ -360,6 +372,108 @@ final class ConfigStore: ObservableObject {
         injectionHost = "127.0.0.1"
         verboseLogging = false
         benchmarking = false
+    }
+}
+
+// MARK: - Project Discovery
+
+struct DiscoveredProject: Identifiable, Hashable {
+    let path: String
+    var id: String { path }
+
+    var name: String { URL(fileURLWithPath: path).lastPathComponent }
+    var isWorkspace: Bool { path.hasSuffix(".xcworkspace") }
+    var icon: String { isWorkspace ? "building.2" : "hammer" }
+}
+
+enum ProjectDiscovery {
+
+    static func discoverProjects(in directory: String) -> [DiscoveredProject] {
+        let fm = FileManager.default
+        guard let contents = try? fm.contentsOfDirectory(atPath: directory) else { return [] }
+
+        let ignoredWorkspaces: Set<String> = ["project.xcworkspace"]
+
+        var projects = [DiscoveredProject]()
+        for item in contents.sorted() {
+            let full = (directory as NSString).appendingPathComponent(item)
+            if item.hasSuffix(".xcworkspace") && !ignoredWorkspaces.contains(item) {
+                projects.append(DiscoveredProject(path: full))
+            } else if item.hasSuffix(".xcodeproj") {
+                projects.append(DiscoveredProject(path: full))
+            }
+        }
+        return projects
+    }
+
+    /// Returns the project file to open:
+    /// - If only one exists, returns it directly.
+    /// - If a remembered default matches, returns it (when `autoOpen` is true).
+    /// - Otherwise shows a picker alert and returns the user's choice (or nil on cancel).
+    @MainActor
+    static func resolveProject(in directory: String,
+                                config: ConfigStore) -> String? {
+        let projects = discoverProjects(in: directory)
+        guard !projects.isEmpty else { return directory }
+
+        if projects.count == 1 {
+            let chosen = projects[0].path
+            config.defaultProjectFile = chosen
+            return chosen
+        }
+
+        if config.autoOpenDefaultProject,
+           !config.defaultProjectFile.isEmpty,
+           projects.contains(where: { $0.path == config.defaultProjectFile }) {
+            return config.defaultProjectFile
+        }
+
+        return showProjectPicker(projects: projects, directory: directory, config: config)
+    }
+
+    @MainActor
+    private static func showProjectPicker(projects: [DiscoveredProject],
+                                           directory: String,
+                                           config: ConfigStore) -> String? {
+        let alert = NSAlert()
+        alert.messageText = "Multiple Projects Found"
+        alert.informativeText = "Choose which project to open in Xcode from:\n\(URL(fileURLWithPath: directory).lastPathComponent)"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Open")
+        alert.addButton(withTitle: "Cancel")
+
+        let popup = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 350, height: 28), pullsDown: false)
+        for project in projects {
+            let prefix = project.isWorkspace ? "⚙️ " : "🔨 "
+            popup.addItem(withTitle: prefix + project.name)
+        }
+
+        if let savedIdx = projects.firstIndex(where: { $0.path == config.defaultProjectFile }) {
+            popup.selectItem(at: savedIdx)
+        }
+
+        let checkbox = NSButton(checkboxWithTitle: "Always open this project", target: nil, action: nil)
+        checkbox.state = config.autoOpenDefaultProject ? .on : .off
+
+        let stack = NSStackView(views: [popup, checkbox])
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 8
+        stack.setFrameSize(NSSize(width: 350, height: 56))
+
+        alert.accessoryView = stack
+        NSApp.activate(ignoringOtherApps: true)
+
+        guard alert.runModal() == .alertFirstButtonReturn else { return nil }
+
+        let selectedIdx = popup.indexOfSelectedItem
+        guard selectedIdx >= 0 && selectedIdx < projects.count else { return nil }
+
+        let chosen = projects[selectedIdx].path
+        config.defaultProjectFile = chosen
+        config.autoOpenDefaultProject = checkbox.state == .on
+
+        return chosen
     }
 }
 
