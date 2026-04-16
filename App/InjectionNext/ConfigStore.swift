@@ -132,12 +132,18 @@ final class ConfigStore: ObservableObject {
 
     /// User-facing selection (may be `.auto`).
     @Published var buildSystem: BuildSystem {
-        didSet { ud.set(buildSystem.rawValue, forKey: "buildSystem") }
+        didSet {
+            ud.set(buildSystem.rawValue, forKey: "buildSystem")
+            applyBuildSystemOverride()
+        }
     }
 
     /// Build system detected from the currently selected / watched project.
     /// Returns `nil` when nothing is selected or the type can't be determined.
+    /// When the user forces a non-Bazel build system via `buildSystem`, Bazel
+    /// detection is skipped entirely so we never shell out to `bazel query`.
     var detectedBuildSystem: BuildSystem? {
+        let bazelAllowed = buildSystem == .auto || buildSystem == .bazel
         let candidates = [defaultProjectFile]
             + watchingDirectories
             + (projectPath.isEmpty ? [] : [projectPath])
@@ -147,7 +153,8 @@ final class ConfigStore: ObservableObject {
             // rules_xcodeproj lives inside a Bazel workspace alongside a
             // BUILD file, so plain `.xcodeproj` suffix is not enough to
             // classify it as Xcode.
-            if BazelInterface.findWorkspaceRoot(containing: path) != nil {
+            if bazelAllowed,
+               BazelInterface.findWorkspaceRoot(containing: path) != nil {
                 return .bazel
             }
             if path.hasSuffix(".xcodeproj") || path.hasSuffix(".xcworkspace") {
@@ -157,7 +164,7 @@ final class ConfigStore: ObservableObject {
             var isDir: ObjCBool = false
             if FileManager.default.fileExists(atPath: path, isDirectory: &isDir), isDir.boolValue {
                 if let entries = try? FileManager.default.contentsOfDirectory(atPath: path) {
-                    if entries.contains(where: {
+                    if bazelAllowed, entries.contains(where: {
                         $0 == "MODULE.bazel" || $0 == "MODULE" ||
                         $0 == "WORKSPACE" || $0 == "WORKSPACE.bazel"
                     }) {
@@ -179,6 +186,14 @@ final class ConfigStore: ObservableObject {
     /// otherwise returns the detected value (nil if nothing selected).
     var effectiveBuildSystem: BuildSystem? {
         buildSystem == .auto ? detectedBuildSystem : buildSystem
+    }
+
+    /// Propagate the user override to the low-level Bazel detector and
+    /// invalidate any cached workspace lookups so already-seen sources
+    /// re-route through the Xcode log parser on the next injection.
+    private func applyBuildSystemOverride() {
+        BazelInterface.isDisabled = (buildSystem != .auto && buildSystem != .bazel)
+        Recompiler.workspaceCache.removeAll()
     }
     @Published var bazelPath: String {
         didSet { ud.set(bazelPath, forKey: "bazelPath") }
@@ -352,6 +367,8 @@ final class ConfigStore: ObservableObject {
 
         discoverXcodes()
         discoverCodesigningIdentities()
+
+        applyBuildSystemOverride()
     }
 
     // MARK: - Discovery
