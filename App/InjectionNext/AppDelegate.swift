@@ -130,6 +130,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
         }
+
+        if Defaults.mcpServer {
+            LogBuffer.shared = LogBuffer()
+            ControlServer.start()
+        }
     }
 
     func setMenuIcon(_ state: InjectionState) {
