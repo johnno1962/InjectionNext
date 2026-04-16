@@ -357,7 +357,7 @@ class NextCompiler {
         let linkedFile = URL(fileURLWithPath: dylib).lastPathComponent
         InjectionEventTracker.shared.emit(linkedFile, status: "linking")
         let linkingStartTime = Date.timeIntervalSinceReferenceDate
-        var linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
+        let linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
         // Device testing check runs async to avoid main queue deadlock in file-watcher workflow
         DispatchQueue.main.async {
             if AppDelegate.ui.deviceTesting?.state == .on {

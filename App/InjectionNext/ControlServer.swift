@@ -164,7 +164,7 @@ class ControlServer {
             }
 
             // Prevent Xcode subprocess from inheriting this socket
-            fcntl(self.serverSocket, F_SETFD, FD_CLOEXEC)
+            _ = fcntl(self.serverSocket, F_SETFD, FD_CLOEXEC)
 
             var reuse: Int32 = 1
             setsockopt(self.serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))

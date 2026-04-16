@@ -61,7 +61,7 @@ class MonitorXcode {
                         Self.runningXcode = nil
                         DispatchQueue.main.async { ConfigStore.shared.isXcodeRunning = false }
                         if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
-                            AppDelegate.ui.runXcode(self)
+                            DispatchQueue.main.async { AppDelegate.ui.runXcode(self) }
                         }
                         Self.recompiler.writeCache()
                         break // break on clean exit and EOF.
