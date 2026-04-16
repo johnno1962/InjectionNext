@@ -361,7 +361,6 @@ class NextCompiler {
         if DispatchQueue.main.sync(execute: {
             AppDelegate.ui.deviceTesting?.state == .on }) {
             let otherOptions = DispatchQueue.main.sync { () -> String in
-                AppDelegate.ui.librariesField.stringValue = Defaults.deviceLibraries
                 return Defaults.deviceLibraries }
             let platformDev = "\(Reloader.xcodeDev)/Platforms/\(Reloader.platform).platform/Developer"
             linkCommand += """

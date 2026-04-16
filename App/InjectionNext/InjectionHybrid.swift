@@ -17,19 +17,17 @@ extension AppDelegate {
     static var watchers = [String: InjectionHybrid]()
     static var lastWatched: String?
 
-    @IBAction func watchProject(_ sender: NSMenuItem) {
+    func watchProject(_ sender: Any) {
         let open = NSOpenPanel()
         open.prompt = "Select Project Directory"
         open.canChooseDirectories = true
         open.canChooseFiles = false
-        // open.showsHiddenFiles = TRUE;
         if open.runModal() == .OK, let url = open.url {
             Reloader.xcodeDev = Defaults.xcodePath+"/Contents/Developer"
             watch(path: url.path)
         } else {
             Self.watchers.removeAll()
             Self.lastWatched = nil
-            watchDirectoryItem.state = .off
             refreshWatchProjectMenuItem()
         }
     }
@@ -39,7 +37,6 @@ extension AppDelegate {
         GitIgnoreParser.monitor(directory: path)
         Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
-        watchDirectoryItem.state = Self.watchers.isEmpty ? .off : .on
         refreshWatchProjectMenuItem()
     }
     static func alreadyWatching(_ projectRoot: String) -> String? {

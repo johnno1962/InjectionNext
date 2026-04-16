@@ -15,14 +15,14 @@ import SwiftRegex
 extension AppDelegate {
 
     /// Prepare the SwiftUI source file currently being edited for injection.
-    @IBAction func prepareSource(_ sender: NSMenuItem) {
+    func prepareSource(_ sender: NSMenuItem) {
         if let lastSource = NextCompiler.lastSource {
             prepareSwiftUI(source: lastSource)
         }
     }
 
     /// Prepare all sources in the current target for injection.
-    @IBAction func prepareProject(_ sender: NSMenuItem) {
+    func prepareProject(_ sender: NSMenuItem) {
         var changes = 0, edited = 0
         for source in ((MonitorXcode.runningXcode != nil ?
                         MonitorXcode.recompiler.lastCompilation : nil) ??

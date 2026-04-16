@@ -49,7 +49,7 @@ class MonitorXcode {
             '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)
             """) {
             Self.runningXcode = self
-            AppDelegate.ui.launchXcodeItem.state = .on
+            DispatchQueue.main.async { ConfigStore.shared.isXcodeRunning = true }
             DispatchQueue.global().async {
                 while true {
                     do {
@@ -59,7 +59,7 @@ class MonitorXcode {
                             AppDelegate.ui.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        AppDelegate.ui.launchXcodeItem.state = .off
+                        DispatchQueue.main.async { ConfigStore.shared.isXcodeRunning = false }
                         if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }
