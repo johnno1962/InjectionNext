@@ -78,9 +78,15 @@ final class ConfigStore: ObservableObject {
     @Published var watchingDirectories: [String] = []
 
     var statusIcon: NSImage {
-        let tiffName = "Injection" + injectionState.rawValue
-        if let path = Bundle.main.path(forResource: tiffName, ofType: "tif"),
-           let image = NSImage(contentsOfFile: path) {
+        let assetName: String
+        switch injectionState {
+        case .idle:  assetName = "INJECTION_BLUE"
+        case .ok:    assetName = "INJECTION_GREEN"
+        case .busy:  assetName = "INJECTION_ORANGE"
+        case .ready: assetName = "INJECTION_PURPLE"
+        case .error: assetName = "INJECTION_YELLOW"
+        }
+        if let image = NSImage(named: assetName) {
             image.size = NSSize(width: 18, height: 18)
             return image
         }
