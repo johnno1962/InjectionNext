@@ -7,7 +7,7 @@ DERIVED_DATA  ?= build
 APP_NAME      ?= InjectionNext
 APP_PATH      := $(DERIVED_DATA)/Build/Products/$(XCODE_CONFIG)/$(APP_NAME).app
 
-.PHONY: all build-app run open clean kill help move-app
+.PHONY: all build-app run open clean kill help move-app sync
 
 all: build-app
 
@@ -17,6 +17,7 @@ help:
 	@echo "  run         Build then launch the app"
 	@echo "  open        Open the already-built app"
 	@echo "  kill        Kill any running $(APP_NAME) process"
+	@echo "  sync        Pull latest and sync submodules"
 	@echo "  clean       Remove derived data ($(DERIVED_DATA))"
 
 kill:
@@ -48,6 +49,12 @@ open: move-app
 	@open /Applications/InjectionNext.app
 
 run: build-app open
+
+sync:
+	@echo "==> Pulling latest and syncing submodules..."
+	git pull
+	git submodule update --init --recursive
+	@echo "==> Done."
 
 clean:
 	@echo "==> Cleaning $(DERIVED_DATA)..."
