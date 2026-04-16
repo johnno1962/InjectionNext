@@ -133,6 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Run Xcode
 
+    @MainActor
     func runXcode(_ sender: Any) {
         guard MonitorXcode.runningXcode == nil else { return }
         let config = ConfigStore.shared
@@ -145,6 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Discovers .xcodeproj/.xcworkspace files, shows a picker if needed,
     /// launches Xcode with the chosen project, and auto-watches the directory.
+    @MainActor
     func launchXcodeWithProject(directory: String, config: ConfigStore) {
         guard MonitorXcode.runningXcode == nil else { return }
         guard let resolved = ProjectDiscovery.resolveProject(
