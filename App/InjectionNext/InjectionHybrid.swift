@@ -135,8 +135,16 @@ class HybridCompiler: NextCompiler {
         let oldCache = Reloader.cacheFile
         Reloader.sdk = platform // Select commands cache file.
         if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
-        return Self.liteRecompiler.recompile(source: source, platformFilter:
-                                            "SDKs/"+platform, dylink: false)
+        // When no client is connected we don't actually know the target SDK
+        // (platform defaults to "MacOSX" in NextCompiler.prepare), so skip
+        // the SDK grep filter and let the most recent build log win. This
+        // avoids "Log scanning failed: … grep SDKs/MacOSX" when the user
+        // edits a file before the iOS app has connected back.
+        let noClient = InjectionServer.currentClients.compactMap({ $0 }).isEmpty
+        let filter = noClient ? "" : "SDKs/" + platform
+        return Self.liteRecompiler.recompile(source: source,
+                                             platformFilter: filter,
+                                             dylink: false)
     }
 
     override func link(object: String, dylib: String, arch: String) -> (String, Double)? {

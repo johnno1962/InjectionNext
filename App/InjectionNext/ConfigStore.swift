@@ -81,9 +81,9 @@ final class ConfigStore: ObservableObject {
         let assetName: String
         switch injectionState {
         case .idle:  assetName = "INJECTION_BLUE"
-        case .ok:    assetName = "INJECTION_GREEN"
-        case .busy:  assetName = "INJECTION_ORANGE"
-        case .ready: assetName = "INJECTION_PURPLE"
+        case .ok:    assetName = "INJECTION_ORANGE"
+        case .busy:  assetName = "INJECTION_PURPLE"
+        case .ready: assetName = "INJECTION_GREEN"
         case .error: assetName = "INJECTION_YELLOW"
         }
         if let image = NSImage(named: assetName) {

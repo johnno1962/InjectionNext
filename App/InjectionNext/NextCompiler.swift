@@ -50,6 +50,36 @@ class NextCompiler {
     static let compileQueue = DispatchQueue(label: "InjectionCompile")
     /// Last build error.
     static var lastError: String?, lastSource: String?
+    /// Throttle: avoid spamming the connection hint every failed edit.
+    static var lastConnectionHintAt: TimeInterval = 0
+
+    /// Log instructions a user needs to actually connect their app to
+    /// InjectionNext. Broadcast to every connected client (they appear in
+    /// the app's Xcode console) plus the Mac app's log buffer. Throttled
+    /// to once every 30s so repeated failed edits don't spam.
+    static func logConnectionHint() {
+        let now = Date.timeIntervalSinceReferenceDate
+        guard now - lastConnectionHintAt > 30 else { return }
+        lastConnectionHintAt = now
+        // Line-by-line so each prints as its own entry in the client's
+        // Xcode console (the .log command treats each message as a line).
+        for line in [
+            "ℹ️ If injection is not working, make sure your app loads the",
+            "   Injection bundle on launch. Add this to your @main / AppDelegate:",
+            "",
+            "   #if DEBUG",
+            "   if let path = Bundle.main.path(forResource: \"iOSInjection\", ofType: \"bundle\") ??",
+            "       Bundle.main.path(forResource: \"macOSInjection\", ofType: \"bundle\") {",
+            "       Bundle(path: path)!.load()",
+            "   }",
+            "   #endif",
+            "",
+            "   Then run your app from Xcode / the simulator and edit a",
+            "   file — it should reconnect and inject automatically.",
+        ] {
+            log(line)
+        }
+    }
 
     let name: String
     /// Base for temporary files
@@ -119,6 +149,15 @@ class NextCompiler {
                         = try prepare(source: source, connected: client),
                    let data = codesign(dylib: dylib, platform: platform) else {
                     error("Injection failed. Was your app connected?")
+                    // Only show the bundle-load snippet when nothing is
+                    // actually connected. If a client is attached, the
+                    // bundle is already loaded and the hint would be
+                    // misleading (the real failure is elsewhere — e.g.
+                    // Whole-Module mode or a Bazel target lookup error).
+                    if InjectionServer.currentClients
+                        .compactMap({ $0 }).isEmpty {
+                        Self.logConnectionHint()
+                    }
                     AppDelegate.ui.setMenuIcon(.error)
                     return false
                 }
@@ -202,7 +241,12 @@ class NextCompiler {
         // Support for https://github.com/johnno1962/Compilertron
         let isCompilertron = connected == nil && source.hasSuffix(".cpp")
         let compilerTmp = "/tmp/compilertron_patches"
-        let compilerPlatform = "MacOSX"
+        // When no client is connected, Compilertron (.cpp) stays on MacOSX.
+        // For Swift sources in file-watcher mode (Cursor/VSCode) we default
+        // to iPhoneSimulator so cache files & toolchain paths resolve to the
+        // SDK the user is actually building against.
+        let compilerPlatform = isCompilertron ? "MacOSX" :
+            (AppDelegate.watchers.isEmpty ? "MacOSX" : "iPhoneSimulator")
         let compilerArch = "arm64"
 
         let tmpPath = connected?.tmpPath ?? compilerTmp
