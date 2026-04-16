@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// Mimics `watchDirectoryItem.state` for InjectionHybrid.
     var watchDirectoryItem: CompatMenuItem { CompatMenuItem(isOn: !Self.watchers.isEmpty) }
     /// Mimics `launchXcodeItem.state` for MonitorXcode.
-    var launchXcodeItem: CompatMenuItem { CompatMenuItem(isOn: MonitorXcode.runningXcode != nil) }
+    var launchXcodeItem: CompatMenuItem { CompatMenuItem(isOn: MonitorXcode.isXcodeActive) }
     /// Mimics `patchCompilerItem` for Experimental.swift.
     var patchCompilerItem: NSMenuItem { NSMenuItem() }
     /// Mimics `selectXcodeItem.toolTip` for ControlServer.
@@ -70,14 +70,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             InjectionEventTracker.shared.emit(file, status: status, detail: detail)
         }
 
-        signal(SIGPIPE, { which in
-            print(APP_PREFIX+"⚠️ SIGPIPE #\(which)\n" +
-                  Thread.callStackSymbols.map { var frame = $0
-                        frame[#"(?:\S+\s+){3}(\S+)"#, 1] = {
-                            (groups: [String], stop) in
-                            return groups[1].swiftDemangle ?? groups[1] }
-                        return frame
-                    }.joined(separator: "\n")) })
+        // SIGPIPE handler MUST be async-signal-safe: no malloc, no Swift
+        // runtime, no locks. The previous version called into
+        // Thread.callStackSymbols / regex / swiftDemangle, which triggered
+        // _os_unfair_lock_recursive_abort when SIGPIPE was delivered while
+        // the main thread was already inside malloc.
+        signal(SIGPIPE, { _ in
+            let msg: StaticString = "⚠️ SIGPIPE (ignored)\n"
+            msg.withUTF8Buffer { buf in
+                _ = Darwin.write(STDERR_FILENO, buf.baseAddress, buf.count)
+            }
+        })
 
         ControlServer.start()
 
@@ -137,10 +140,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     func runXcode(_ sender: Any) {
-        guard MonitorXcode.runningXcode == nil else { return }
+        guard !MonitorXcode.isXcodeActive else { return }
         let config = ConfigStore.shared
         if let project = Defaults.projectPath {
             launchXcodeWithProject(directory: project, config: config)
+        } else if let match = MonitorXcode.existingInjectionXcode() {
+            MonitorXcode.attach(to: match)
+            match.app.activate(options: [.activateIgnoringOtherApps])
         } else {
             _ = MonitorXcode()
         }
@@ -148,11 +154,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Discovers .xcodeproj/.xcworkspace files, shows a picker if needed,
     /// launches Xcode with the chosen project, and auto-watches the directory.
+    /// If a previously-launched InjectionNext Xcode already has the project
+    /// open it is activated instead of spawning a new one.
     @MainActor
     func launchXcodeWithProject(directory: String, config: ConfigStore) {
-        guard MonitorXcode.runningXcode == nil else { return }
+        guard !MonitorXcode.isXcodeActive else { return }
         guard let resolved = ProjectDiscovery.resolveProject(
             in: directory, config: config) else { return }
+
+        if let match = MonitorXcode.existingInjectionXcode(matching: resolved) {
+            MonitorXcode.attach(to: match)
+            match.app.activate(options: [.activateIgnoringOtherApps])
+            Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
+            watch(path: directory)
+            config.updateWatchingDirectories()
+            return
+        }
 
         _ = MonitorXcode(args: " '\(resolved)'")
 

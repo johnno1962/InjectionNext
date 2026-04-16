@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AdvancedSettingsView: View {
     @ObservedObject var config: ConfigStore
+    @Environment(\.openWindow) private var openWindow
     @State private var showResetConfirmation = false
 
     var body: some View {
@@ -33,15 +34,9 @@ struct AdvancedSettingsView: View {
                         .textSelection(.enabled)
                 }
 
-                Button("Show Full Error") {
-                    let error = NextCompiler.lastError ?? "No error."
-                    let alert = NSAlert()
-                    alert.messageText = "Last Compilation Error"
-                    alert.informativeText = error
-                    alert.alertStyle = .informational
-                    alert.addButton(withTitle: "OK")
+                Button("Open Console") {
                     NSApp.activate(ignoringOtherApps: true)
-                    alert.runModal()
+                    openWindow(id: "console")
                 }
 
                 Button("Unhide Symbols") {

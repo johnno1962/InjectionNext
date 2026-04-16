@@ -31,18 +31,6 @@ struct StatusMenuView: View {
                 }
             }
 
-            Button("Select Xcode...") {
-                let open = NSOpenPanel()
-                open.prompt = "Select Xcode"
-                open.directoryURL = URL(fileURLWithPath: config.xcodePath)
-                open.canChooseDirectories = false
-                open.canChooseFiles = true
-                if open.runModal() == .OK, let path = open.url?.path {
-                    config.xcodePath = path
-                    AppDelegate.ui.updatePatchUnpatch()
-                }
-            }
-
             Divider()
 
             Button {
@@ -114,15 +102,17 @@ struct StatusMenuView: View {
 
             Divider()
 
-            HStack {
-                Circle()
-                    .fill(stateColor)
-                    .frame(width: 8, height: 8)
+            Label {
                 Text(config.isClientConnected ? "Client Connected" : "No Client")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            } icon: {
+                Image(nsImage: Self.coloredDot(config.isClientConnected ? .systemGreen : .systemGray))
             }
-            .padding(.vertical, 2)
+
+            Label {
+                Text("Status: \(config.injectionState.rawValue)")
+            } icon: {
+                Image(nsImage: Self.coloredDot(stateNSColor))
+            }
 
             Divider()
 
@@ -141,6 +131,26 @@ struct StatusMenuView: View {
         case .ready: return .purple
         case .error: return .yellow
         }
+    }
+
+    private var stateNSColor: NSColor {
+        switch config.injectionState {
+        case .ok: return .systemOrange
+        case .idle: return .systemBlue
+        case .busy: return .systemGreen
+        case .ready: return .systemPurple
+        case .error: return .systemYellow
+        }
+    }
+
+    private static func coloredDot(_ color: NSColor, size: CGFloat = 10) -> NSImage {
+        let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
+            color.setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            return true
+        }
+        image.isTemplate = false
+        return image
     }
 
 }

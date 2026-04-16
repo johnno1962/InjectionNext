@@ -64,14 +64,42 @@ class FrontendServer: SimpleSocket {
             if Fstat(path: compressed)?.st_size ?? 0 != 0,
                let stream = Popen(cmd: "gunzip <"+compressed),
                let cached = stream.readAll().data(using: .utf8) {
-                let stored = try JSONDecoder().decode(
-                    [String: NextCompiler.Compilation].self, from: cached)
-                for source in stored.keys.sorted() {
-                    guard let compile = stored[source] else { continue }
-                    recompiler.store(compilation: compile, for: source)
+                // Decode entry-by-entry so one malformed/stale entry doesn't
+                // nuke the whole cache (e.g. old format missing `arguments`).
+                let decoder = JSONDecoder()
+                var skipped = 0
+                if let raw = try JSONSerialization
+                    .jsonObject(with: cached) as? [String: Any] {
+                    for source in raw.keys.sorted() {
+                        guard let value = raw[source],
+                              JSONSerialization.isValidJSONObject(value) else {
+                            skipped += 1
+                            continue
+                        }
+                        do {
+                            let entryData = try JSONSerialization
+                                .data(withJSONObject: value)
+                            let compile = try decoder.decode(
+                                NextCompiler.Compilation.self, from: entryData)
+                            recompiler.store(compilation: compile, for: source)
+                        } catch {
+                            skipped += 1
+                        }
+                    }
+                } else {
+                    // Fallback to strict decode if top-level isn't a dict.
+                    let stored = try decoder.decode(
+                        [String: NextCompiler.Compilation].self, from: cached)
+                    for source in stored.keys.sorted() {
+                        guard let compile = stored[source] else { continue }
+                        recompiler.store(compilation: compile, for: source)
+                    }
                 }
-                recompiler.modified = false
-                print("Loaded \(recompiler.compilations.count) \(platform) commands.")
+                // Keep modified=true if we had to drop entries so the next
+                // write flushes a clean cache.
+                recompiler.modified = skipped > 0
+                let suffix = skipped > 0 ? " (\(skipped) stale skipped)" : ""
+                print("Loaded \(recompiler.compilations.count) \(platform) commands\(suffix).")
             }
         } catch {
             InjectionServer.error("Unable to read commands cache: \(error).")
@@ -255,8 +283,21 @@ extension AppDelegate {
                     }
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
                                     to: FrontendServer.patchedURL)
-                    try fm.copyItem(at: feeder,
-                                    to: FrontendServer.unpatchedURL)
+                    // Substitute the placeholder with the running app's
+                    // feedcommands path so salt in InjectionNextSalt.h
+                    // matches between the app and the helper binary.
+                    let template = try String(contentsOf: feeder, encoding: .utf8)
+                    let feedPath = Bundle.main.url(forResource: "feedcommands",
+                                                   withExtension: nil)?.path
+                        ?? "/Applications/InjectionNext.app/Contents/Resources/feedcommands"
+                    let rendered = template
+                        .replacingOccurrences(of: "__FEEDCOMMANDS_PATH__",
+                                              with: feedPath)
+                    try rendered.write(to: FrontendServer.unpatchedURL,
+                                       atomically: true, encoding: .utf8)
+                    // Preserve executable perms that copyItem would have kept.
+                    try fm.setAttributes([.posixPermissions: 0o755],
+                                         ofItemAtPath: FrontendServer.unpatchedURL.path)
                     for binary in linksToMove {
                         let link = FrontendServer.binURL
                             .appendingPathComponent(binary)

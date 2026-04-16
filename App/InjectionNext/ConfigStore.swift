@@ -436,60 +436,22 @@ enum ProjectDiscovery {
     private static func showProjectPicker(projects: [DiscoveredProject],
                                            directory: String,
                                            config: ConfigStore) -> String? {
-        let alert = NSAlert()
-        alert.messageText = "Multiple Projects Found"
-        alert.informativeText = "Choose which project to open in Xcode from:\n\(URL(fileURLWithPath: directory).lastPathComponent)"
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "Open")
-        alert.addButton(withTitle: "Browse…")
-        alert.addButton(withTitle: "Cancel")
-
-        let width: CGFloat = 380
-
-        let popup = NSPopUpButton(frame: .zero, pullsDown: false)
-        popup.translatesAutoresizingMaskIntoConstraints = false
-        for project in projects {
-            let prefix = project.isWorkspace ? "⚙️  " : "🔨  "
-            popup.addItem(withTitle: prefix + project.name)
-        }
-
-        if let savedIdx = projects.firstIndex(where: { $0.path == config.defaultProjectFile }) {
-            popup.selectItem(at: savedIdx)
-        }
-
-        let checkbox = NSButton(checkboxWithTitle: "Always open this project", target: nil, action: nil)
-        checkbox.translatesAutoresizingMaskIntoConstraints = false
-        checkbox.state = config.autoOpenDefaultProject ? .on : .off
-
-        let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: 60))
-        container.addSubview(popup)
-        container.addSubview(checkbox)
-
-        NSLayoutConstraint.activate([
-            popup.topAnchor.constraint(equalTo: container.topAnchor),
-            popup.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            popup.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-
-            checkbox.topAnchor.constraint(equalTo: popup.bottomAnchor, constant: 12),
-            checkbox.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 2),
-            checkbox.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-        ])
-
-        alert.accessoryView = container
+        let picker = ProjectPickerWindow(
+            projects: projects,
+            directory: directory,
+            initialSelection: config.defaultProjectFile,
+            rememberChoice: config.autoOpenDefaultProject
+        )
         NSApp.activate(ignoringOtherApps: true)
+        let result = picker.runModal()
 
-        let response = alert.runModal()
+        switch result {
+        case .launch(let path, let remember):
+            config.defaultProjectFile = path
+            config.autoOpenDefaultProject = remember
+            return path
 
-        if response == .alertFirstButtonReturn {
-            let selectedIdx = popup.indexOfSelectedItem
-            guard selectedIdx >= 0 && selectedIdx < projects.count else { return nil }
-            let chosen = projects[selectedIdx].path
-            config.defaultProjectFile = chosen
-            config.autoOpenDefaultProject = checkbox.state == .on
-            return chosen
-        }
-
-        if response == .alertSecondButtonReturn {
+        case .newWatcher(let remember):
             let open = NSOpenPanel()
             open.prompt = "Select Project or Workspace"
             open.directoryURL = URL(fileURLWithPath: directory)
@@ -497,17 +459,179 @@ enum ProjectDiscovery {
             open.canChooseFiles = true
             open.allowedContentTypes = [.folder]
             open.allowsOtherFileTypes = true
-            if open.runModal() == .OK, let url = open.url,
-               url.pathExtension == "xcodeproj" || url.pathExtension == "xcworkspace" {
-                let chosen = url.path
-                config.defaultProjectFile = chosen
-                config.autoOpenDefaultProject = checkbox.state == .on
-                return chosen
+            guard open.runModal() == .OK, let url = open.url,
+                  url.pathExtension == "xcodeproj" || url.pathExtension == "xcworkspace" else {
+                return nil
             }
+            let chosen = url.path
+            config.defaultProjectFile = chosen
+            config.autoOpenDefaultProject = remember
+            return chosen
+
+        case .cancel:
             return nil
         }
+    }
+}
 
-        return nil
+// MARK: - Project Picker Window
+
+private enum ProjectPickerResult {
+    case launch(path: String, remember: Bool)
+    case newWatcher(remember: Bool)
+    case cancel
+}
+
+@MainActor
+private final class ProjectPickerWindow: NSObject {
+    private let window: NSPanel
+    private let popup = NSPopUpButton(frame: .zero, pullsDown: false)
+    private let checkbox = NSButton(checkboxWithTitle: "Always open this project",
+                                    target: nil, action: nil)
+    private let projects: [DiscoveredProject]
+    private var result: ProjectPickerResult = .cancel
+
+    init(projects: [DiscoveredProject],
+         directory: String,
+         initialSelection: String,
+         rememberChoice: Bool) {
+        self.projects = projects
+
+        let width: CGFloat = 440
+        window = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: width, height: 10),
+            styleMask: [.titled, .fullSizeContentView],
+            backing: .buffered, defer: false)
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.isMovableByWindowBackground = true
+        window.hidesOnDeactivate = false
+        window.level = .modalPanel
+
+        super.init()
+
+        let iconView = NSImageView()
+        iconView.image = NSApp.applicationIconImage
+        iconView.imageScaling = .scaleProportionallyUpOrDown
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            iconView.widthAnchor.constraint(equalToConstant: 56),
+            iconView.heightAnchor.constraint(equalToConstant: 56),
+        ])
+
+        let title = NSTextField(labelWithString: "Multiple Projects Found")
+        title.font = .systemFont(ofSize: 15, weight: .semibold)
+
+        let subtitle = NSTextField(wrappingLabelWithString:
+            "Choose which project to open in Xcode from: "
+            + URL(fileURLWithPath: directory).lastPathComponent)
+        subtitle.font = .systemFont(ofSize: 12)
+        subtitle.textColor = .secondaryLabelColor
+
+        for project in projects {
+            let prefix = project.isWorkspace ? "⚙️  " : "🔨  "
+            popup.addItem(withTitle: prefix + project.name)
+        }
+        if let idx = projects.firstIndex(where: { $0.path == initialSelection }) {
+            popup.selectItem(at: idx)
+        }
+
+        checkbox.state = rememberChoice ? .on : .off
+
+        let newWatcher = Self.makeButton(title: "+ New Watcher",
+                                          action: #selector(newWatcherClicked))
+        let cancel = Self.makeButton(title: "Cancel",
+                                      action: #selector(cancelClicked),
+                                      keyEquivalent: "\u{1b}")
+        let launch = Self.makeButton(title: "Launch",
+                                      action: #selector(launchClicked),
+                                      keyEquivalent: "\r",
+                                      prominent: true)
+        [newWatcher, cancel, launch].forEach { $0.target = self }
+
+        let buttonRow = NSStackView(views: [newWatcher, cancel, launch])
+        buttonRow.orientation = .horizontal
+        buttonRow.spacing = 10
+        buttonRow.distribution = .fillEqually
+
+        let textStack = NSStackView(views: [title, subtitle])
+        textStack.orientation = .vertical
+        textStack.alignment = .leading
+        textStack.spacing = 4
+
+        let header = NSStackView(views: [iconView, textStack])
+        header.orientation = .horizontal
+        header.alignment = .centerY
+        header.spacing = 14
+
+        let content = NSStackView(views: [header, popup, checkbox, buttonRow])
+        content.orientation = .vertical
+        content.alignment = .leading
+        content.spacing = 14
+        content.edgeInsets = NSEdgeInsets(top: 22, left: 22, bottom: 20, right: 22)
+        content.translatesAutoresizingMaskIntoConstraints = false
+        content.setCustomSpacing(18, after: header)
+        content.setCustomSpacing(8, after: popup)
+        content.setCustomSpacing(18, after: checkbox)
+
+        let root = NSView()
+        root.addSubview(content)
+        NSLayoutConstraint.activate([
+            content.topAnchor.constraint(equalTo: root.topAnchor),
+            content.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            content.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+
+            popup.widthAnchor.constraint(equalToConstant: width - 44),
+            buttonRow.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -44),
+        ])
+
+        window.contentView = root
+        window.defaultButtonCell = (launch.cell as? NSButtonCell)
+        window.initialFirstResponder = launch
+    }
+
+    private static func makeButton(title: String,
+                                    action: Selector,
+                                    keyEquivalent: String = "",
+                                    prominent: Bool = false) -> NSButton {
+        let b = NSButton(title: title, target: nil, action: action)
+        b.bezelStyle = .rounded
+        b.keyEquivalent = keyEquivalent
+        b.controlSize = .large
+        if prominent, #available(macOS 11.0, *) {
+            b.hasDestructiveAction = false
+            b.bezelColor = .controlAccentColor
+        }
+        return b
+    }
+
+    func runModal() -> ProjectPickerResult {
+        window.center()
+        NSApp.runModal(for: window)
+        window.orderOut(nil)
+        return result
+    }
+
+    @objc private func launchClicked() {
+        let idx = popup.indexOfSelectedItem
+        guard idx >= 0 && idx < projects.count else {
+            result = .cancel
+            NSApp.stopModal()
+            return
+        }
+        result = .launch(path: projects[idx].path, remember: checkbox.state == .on)
+        NSApp.stopModal()
+    }
+
+    @objc private func newWatcherClicked() {
+        result = .newWatcher(remember: checkbox.state == .on)
+        NSApp.stopModal()
+    }
+
+    @objc private func cancelClicked() {
+        result = .cancel
+        NSApp.stopModal()
     }
 }
 

@@ -13,6 +13,7 @@
 //  instance to process and inject when edited file is saved.
 //
 import Foundation
+import AppKit
 import SwiftRegex
 import Fortify
 import Popen
@@ -23,6 +24,133 @@ class MonitorXcode {
     static weak var runningXcode: MonitorXcode?
     // The service to recompile and inject a source file.
     static var recompiler = FrontendServer.frontendRecompiler(for: "Xcode")
+
+    struct RunningXcodeMatch {
+        let pid: pid_t
+        let app: NSRunningApplication
+        let workspacePaths: [String]
+    }
+
+    /// When InjectionNext reuses an already-running Xcode instead of
+    /// spawning one, we don't own its stdout. We still mirror the UI
+    /// state (menu icon + `isXcodeRunning`) here and clear it when
+    /// that Xcode terminates.
+    private(set) static var attachedExternal: NSRunningApplication?
+    private static var attachedObserver: NSObjectProtocol?
+
+    @MainActor
+    static func attach(to match: RunningXcodeMatch) {
+        if attachedExternal?.processIdentifier == match.pid { return }
+        detachExternal()
+        attachedExternal = match.app
+        ConfigStore.shared.isXcodeRunning = true
+        AppDelegate.ui?.setMenuIcon(.ready)
+
+        attachedObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didTerminateApplicationNotification,
+            object: nil, queue: .main
+        ) { note in
+            guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey]
+                    as? NSRunningApplication,
+                  app.processIdentifier == attachedExternal?.processIdentifier
+            else { return }
+            detachExternal()
+            ConfigStore.shared.isXcodeRunning = false
+            AppDelegate.ui?.setMenuIcon(.idle)
+        }
+    }
+
+    static func detachExternal() {
+        if let obs = attachedObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(obs)
+        }
+        attachedObserver = nil
+        attachedExternal = nil
+    }
+
+    static var isXcodeActive: Bool {
+        runningXcode != nil ||
+            (attachedExternal.map { !$0.isTerminated } ?? false)
+    }
+
+    /// Marker env var set when InjectionNext launches Xcode.
+    static let injectionEnvMarker = "RUNNING_VIA_INJECTION_NEXT=1"
+
+    /// Returns a running Xcode with the given project/workspace already open.
+    /// Detection order: AppleScript (workspace documents) → lsof fallback
+    /// (for when Automation permission hasn't been granted yet).
+    /// If `project` is `nil`, returns the first Xcode launched by
+    /// InjectionNext (based on the env marker).
+    static func existingInjectionXcode(matching project: String? = nil)
+        -> RunningXcodeMatch? {
+        let xcodes = NSRunningApplication
+            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
+        guard !xcodes.isEmpty else { return nil }
+
+        let scripted = openedWorkspacePaths()
+
+        if let project = project {
+            let target = (project as NSString).standardizingPath
+            for app in xcodes {
+                let pid = app.processIdentifier
+                guard pid > 0 else { continue }
+                let hasProject = scripted.contains(where: { pathMatches($0, target) })
+                    || lsofHasOpenFile(pid: pid, path: target)
+                if hasProject {
+                    return RunningXcodeMatch(
+                        pid: pid, app: app, workspacePaths: scripted)
+                }
+            }
+            return nil
+        }
+
+        for app in xcodes {
+            let pid = app.processIdentifier
+            guard pid > 0,
+                  let env = Popen(cmd: "ps eww -o command= -p \(pid) 2>/dev/null")?
+                      .readAll(),
+                  env.contains(injectionEnvMarker) else { continue }
+            return RunningXcodeMatch(pid: pid, app: app, workspacePaths: scripted)
+        }
+        return nil
+    }
+
+    private static func pathMatches(_ lhs: String, _ rhs: String) -> Bool {
+        let l = (lhs as NSString).standardizingPath
+        let r = (rhs as NSString).standardizingPath
+        return l == r || l.hasPrefix(r) || r.hasPrefix(l)
+    }
+
+    /// Paths of workspace documents currently open in Xcode (best effort).
+    /// Requires user-granted Automation permission; returns `[]` otherwise.
+    private static func openedWorkspacePaths() -> [String] {
+        let src = """
+        tell application id "com.apple.dt.Xcode"
+            set out to ""
+            repeat with d in workspace documents
+                try
+                    set out to out & (path of d) & linefeed
+                end try
+            end repeat
+            return out
+        end tell
+        """
+        var err: NSDictionary?
+        guard let s = NSAppleScript(source: src)?
+                .executeAndReturnError(&err).stringValue else { return [] }
+        return s.split(whereSeparator: \.isNewline).map(String.init)
+    }
+
+    /// Cheap fallback: does this pid have the given project path open?
+    /// Xcode keeps the `.xcodeproj` / `.xcworkspace` directory as an open
+    /// file descriptor for as long as the document is loaded.
+    private static func lsofHasOpenFile(pid: pid_t, path: String) -> Bool {
+        guard let out = Popen(
+            cmd: "/usr/sbin/lsof -p \(pid) -Fn 2>/dev/null")?.readAll()
+        else { return false }
+        let needle = (path as NSString).standardizingPath
+        return out.range(of: needle) != nil
+    }
 
     func debug(_ what: Any..., separator: String = " ") {
         #if DEBUG
@@ -46,7 +174,9 @@ class MonitorXcode {
         else if let xcodeStdout = Popen(cmd: """
             export SOURCEKIT_LOGGING=0
             export RUNNING_VIA_INJECTION_NEXT=1
-            '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)
+            '\(Defaults.xcodePath)/Contents/MacOS/Xcode' \
+            -ApplePersistenceIgnoreState YES \
+            -NSQuitAlwaysKeepsWindows NO 2>&1 \(args)
             """) {
             Self.runningXcode = self
             DispatchQueue.main.async { ConfigStore.shared.isXcodeRunning = true }

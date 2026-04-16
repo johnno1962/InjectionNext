@@ -8,5 +8,5 @@
 
 FRONTEND="$0"
 "$FRONTEND.save" "$@" &&
-if [ "$2" = "-c" ]; then "/Applications/InjectionNext.app/Contents/Resources/feedcommands" \
+if [ "$2" = "-c" ]; then "__FEEDCOMMANDS_PATH__" \
     "2.0" "$(/usr/bin/env)" "$FRONTEND.save" "$@" >>/tmp/feedcommands.log 2>&1 & fi

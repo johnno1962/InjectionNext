@@ -76,15 +76,16 @@ final class LogManager: ObservableObject {
         guard !trimmed.isEmpty else { return }
         let entry = LogEntry(timestamp: Date(), message: trimmed, level: level)
 
-        lock.lock()
-        entries.append(entry)
-        if entries.count > maxEntries {
-            entries.removeFirst(entries.count - maxEntries)
+        performOnMain { [weak self] in
+            guard let self else { return }
+            self.lock.lock()
+            self.entries.append(entry)
+            if self.entries.count > self.maxEntries {
+                self.entries.removeFirst(self.entries.count - self.maxEntries)
+            }
+            self.remember(signature: trimmed)
+            self.lock.unlock()
         }
-        remember(signature: trimmed)
-        lock.unlock()
-
-        publish()
     }
 
     /// Back-compat entry point used by legacy call sites that pass a raw string.
@@ -93,11 +94,13 @@ final class LogManager: ObservableObject {
     }
 
     func clear() {
-        lock.lock()
-        entries.removeAll()
-        recentSignatures.removeAll()
-        lock.unlock()
-        publish()
+        performOnMain { [weak self] in
+            guard let self else { return }
+            self.lock.lock()
+            self.entries.removeAll()
+            self.recentSignatures.removeAll()
+            self.lock.unlock()
+        }
     }
 
     var count: Int {
@@ -195,16 +198,21 @@ final class LogManager: ObservableObject {
             lock.unlock()
             return
         }
-        let inferred = inferLevel(from: cleaned, default: level)
-        let entry = LogEntry(timestamp: Date(), message: cleaned, level: inferred)
-        entries.append(entry)
-        if entries.count > maxEntries {
-            entries.removeFirst(entries.count - maxEntries)
-        }
-        remember(signature: cleaned)
         lock.unlock()
 
-        publish()
+        let inferred = inferLevel(from: cleaned, default: level)
+        let entry = LogEntry(timestamp: Date(), message: cleaned, level: inferred)
+
+        performOnMain { [weak self] in
+            guard let self else { return }
+            self.lock.lock()
+            self.entries.append(entry)
+            if self.entries.count > self.maxEntries {
+                self.entries.removeFirst(self.entries.count - self.maxEntries)
+            }
+            self.remember(signature: cleaned)
+            self.lock.unlock()
+        }
     }
 
     private func remember(signature: String) {
@@ -247,11 +255,26 @@ final class LogManager: ObservableObject {
                 level: .alert)
         }
 
+        // Signal handlers MUST be async-signal-safe: no malloc, no locks,
+        // no Swift runtime beyond StaticString. Calling LogManager.append
+        // (string formatting + NSLock + DispatchQueue.main.async) deadlocks
+        // when a signal fires while another thread holds the malloc
+        // unfair_lock — you get _os_unfair_lock_recursive_abort instead of
+        // the real crash.
         for sig in [SIGABRT, SIGILL, SIGSEGV, SIGFPE, SIGBUS] {
             signal(sig) { which in
-                let name = LogManager.signalName(which)
-                LogManager.shared.append("Signal \(name) (#\(which))", level: .alert)
-                // Re-raise so the default crash handling still runs.
+                let msg: StaticString
+                switch which {
+                case SIGABRT: msg = "*** SIGABRT\n"
+                case SIGILL:  msg = "*** SIGILL\n"
+                case SIGSEGV: msg = "*** SIGSEGV\n"
+                case SIGFPE:  msg = "*** SIGFPE\n"
+                case SIGBUS:  msg = "*** SIGBUS\n"
+                default:      msg = "*** fatal signal\n"
+                }
+                msg.withUTF8Buffer { buf in
+                    _ = Darwin.write(STDERR_FILENO, buf.baseAddress, buf.count)
+                }
                 Darwin.signal(which, SIG_DFL)
                 Darwin.raise(which)
             }
@@ -270,15 +293,13 @@ final class LogManager: ObservableObject {
         }
     }
 
-    // MARK: - Publishing
+    // MARK: - Main-thread hop
 
-    private func publish() {
+    private func performOnMain(_ work: @escaping () -> Void) {
         if Thread.isMainThread {
-            objectWillChange.send()
+            work()
         } else {
-            DispatchQueue.main.async { [weak self] in
-                self?.objectWillChange.send()
-            }
+            DispatchQueue.main.async(execute: work)
         }
     }
 }
