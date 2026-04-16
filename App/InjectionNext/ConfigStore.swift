@@ -440,6 +440,7 @@ enum ProjectDiscovery {
         alert.informativeText = "Choose which project to open in Xcode from:\n\(URL(fileURLWithPath: directory).lastPathComponent)"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "Open")
+        alert.addButton(withTitle: "Browse…")
         alert.addButton(withTitle: "Cancel")
 
         let width: CGFloat = 380
@@ -476,16 +477,36 @@ enum ProjectDiscovery {
         alert.accessoryView = container
         NSApp.activate(ignoringOtherApps: true)
 
-        guard alert.runModal() == .alertFirstButtonReturn else { return nil }
+        let response = alert.runModal()
 
-        let selectedIdx = popup.indexOfSelectedItem
-        guard selectedIdx >= 0 && selectedIdx < projects.count else { return nil }
+        if response == .alertFirstButtonReturn {
+            let selectedIdx = popup.indexOfSelectedItem
+            guard selectedIdx >= 0 && selectedIdx < projects.count else { return nil }
+            let chosen = projects[selectedIdx].path
+            config.defaultProjectFile = chosen
+            config.autoOpenDefaultProject = checkbox.state == .on
+            return chosen
+        }
 
-        let chosen = projects[selectedIdx].path
-        config.defaultProjectFile = chosen
-        config.autoOpenDefaultProject = checkbox.state == .on
+        if response == .alertSecondButtonReturn {
+            let open = NSOpenPanel()
+            open.prompt = "Select Project or Workspace"
+            open.directoryURL = URL(fileURLWithPath: directory)
+            open.canChooseDirectories = false
+            open.canChooseFiles = true
+            open.allowedContentTypes = [.folder]
+            open.allowsOtherFileTypes = true
+            if open.runModal() == .OK, let url = open.url,
+               url.pathExtension == "xcodeproj" || url.pathExtension == "xcworkspace" {
+                let chosen = url.path
+                config.defaultProjectFile = chosen
+                config.autoOpenDefaultProject = checkbox.state == .on
+                return chosen
+            }
+            return nil
+        }
 
-        return chosen
+        return nil
     }
 }
 
