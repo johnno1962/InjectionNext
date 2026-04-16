@@ -55,6 +55,8 @@ class InjectionHybrid: InjectionBase {
     static var lastInjected = [String: TimeInterval]()
     /// Last queue of file changes
     static var pendingFilesChanged = [String]()
+    /// Lock protecting pendingFilesChanged (avoids DispatchQueue.main.sync deadlock)
+    static let pendingLock = NSLock()
     /// Repository locked state - stops processing until app reconnects
     static var isRepositoryLocked = false
     /// Path to detected git lock file - used to check if git operation still active
@@ -81,40 +83,9 @@ class InjectionHybrid: InjectionBase {
         if source.hasSuffix(".swift") || source.hasSuffix(".m") || source.hasSuffix(".mm") || source.hasSuffix(".cpp") {
             InjectionEventTracker.shared.emit(fileName, status: "detecting")
         }
-        guard MonitorXcode.runningXcode == nil else { return }
-        // Detect git lock files - record path for later checking
-        if source.hasSuffix(".lock") &&
-           source.contains("/.git/") {
-            Self.gitLockPath = source
-            return
-        }
-
-        // Skip processing if repository is already locked
-        if Self.isRepositoryLocked {
-            log("""
-                File processing stopped due to git lock. \
-                Please relaunch your app to resume injection.
-                """)
-            return
-        }
-
-        // Check if source file is changing while git lock still exists
-        if let lockPath = Self.gitLockPath {
-            if FileManager.default.fileExists(atPath: lockPath) {
-                // Source files changing while git lock exists = branch switch/merge/rebase
-                Self.isRepositoryLocked = true
-                Self.pendingFilesChanged.removeAll()
-                Self.gitLockPath = nil
-                log("""
-                    Git operation in progress (branch switch/merge/rebase detected). \
-                    File processing stopped. Please relaunch your app to resume injection.
-                    """)
-                return
-            } else {
-                // Lock file is gone - was probably just a commit
-                Self.gitLockPath = nil
-            }
-        }
+        // File-watcher injection is allowed even when Xcode is running (Cursor/Bazel workflow)
+        // Skip git lock files silently — don't block injection on Xcode builds
+        if source.hasSuffix(".lock") && source.contains("/.git/") { return }
 
         let now = Date.timeIntervalSinceReferenceDate
         guard !AppDelegate.watchers.isEmpty, now - (
@@ -123,36 +94,29 @@ class InjectionHybrid: InjectionBase {
         }
         Self.lastInjected[source] = now
 
+        Self.pendingLock.lock()
         Self.pendingFilesChanged.append(source)
+        Self.pendingLock.unlock()
         NextCompiler.compileQueue.async {
             self.injectNext()
         }
     }
 
     func injectNext() {
-        guard let source = (DispatchQueue.main.sync { () -> String? in
+        guard let source = ({ () -> String? in
+            Self.pendingLock.lock()
+            defer { Self.pendingLock.unlock() }
             guard let source = Self.pendingFilesChanged.first else { return nil }
             Self.pendingFilesChanged.removeAll(where: { $0 == source })
             if !Self.pendingFilesChanged.isEmpty {
                 NextCompiler.compileQueue.async { self.injectNext() }
             }
             return source
-        }) else { return }
+        }()) else { return }
 
         autoreleasepool {
-        var recompiler = MonitorXcode.recompiler
-        let platform = FrontendServer.clientPlatform
-        if recompiler.canCompile(source: source, for: platform),
-           recompiler.inject(source: source) { return }
-
-        recompiler = logParsingCompiler
-        if source.hasSuffix(".swift") &&
-            AppDelegate.ui.updatePatchUnpatch() == .patched {
-            let proxyCompiler = FrontendServer.frontendRecompiler(for: platform)
-            if proxyCompiler.canCompile(source: source) {
-                recompiler = proxyCompiler
-            }
-        }
+        // Always use Bazel/log-parsing path for Cursor file-watcher workflow
+        let recompiler = logParsingCompiler
 
         if let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")

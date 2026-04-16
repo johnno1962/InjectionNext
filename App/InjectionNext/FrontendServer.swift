@@ -143,22 +143,7 @@ class FrontendServer: SimpleSocket {
         let update = NextCompiler.Compilation(arguments: parser.args,
             swiftFiles: parser.swiftFiles, workingDir: projectRoot, env: env)
 
-        DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
-//                MonitorXcode.runningXcode == nil &&
-                AppDelegate.alreadyWatching(projectRoot) == nil {
-                let open = NSOpenPanel()
-//                open.titleVisibility = .visible
-//                open.title = "InjectionNext: add directory"
-                open.prompt = "InjectionNext - Watch Directory?"
-                open.directoryURL = URL(fileURLWithPath: projectRoot)
-                open.canChooseDirectories = true
-                open.canChooseFiles = false
-                if open.runModal() == .OK, let url = open.url {
-                    AppDelegate.ui.watch(path: url.path)
-                }
-            }
-        }
+        // Directory watching is handled via watch_project MCP/ControlServer — skip dialog
 
         NextCompiler.compileQueue.async {
             let recompiler = Self.frontendRecompiler(for: parser.platform)

@@ -163,6 +163,9 @@ class ControlServer {
                 return
             }
 
+            // Prevent Xcode subprocess from inheriting this socket
+            fcntl(self.serverSocket, F_SETFD, FD_CLOEXEC)
+
             var reuse: Int32 = 1
             setsockopt(self.serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
 
@@ -315,6 +318,14 @@ class ControlServer {
 
         case "clear_injection_events":
             return clearInjectionEvents()
+
+        case "set_app_target":
+            guard let target = params["target"] as? String else {
+                return .fail("Missing 'target' parameter")
+            }
+            BazelActionQueryHandler.cachedAppTarget = target
+            setenv("INJECTION_BAZEL_TARGET", target, 1)
+            return .ok(["app_target": target])
 
         default:
             return .fail("Unknown action: \(action)")

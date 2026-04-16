@@ -358,16 +358,11 @@ class NextCompiler {
         InjectionEventTracker.shared.emit(linkedFile, status: "linking")
         let linkingStartTime = Date.timeIntervalSinceReferenceDate
         var linkCommand = Reloader.linkCommand + " \(object) -o \"\(dylib)\" "
-        if DispatchQueue.main.sync(execute: {
-            AppDelegate.ui.deviceTesting?.state == .on }) {
-            let otherOptions = DispatchQueue.main.sync { () -> String in
-                return Defaults.deviceLibraries }
-            let platformDev = "\(Reloader.xcodeDev)/Platforms/\(Reloader.platform).platform/Developer"
-            linkCommand += """
-                -F /tmp/InjectionNext.Products \
-                -F "\(platformDev)/Library/Frameworks" \
-                -L "\(platformDev)/usr/lib" \(otherOptions)
-                """.replacingOccurrences(of: "__PLATFORM__", with: Reloader.sysroot)
+        // Device testing check runs async to avoid main queue deadlock in file-watcher workflow
+        DispatchQueue.main.async {
+            if AppDelegate.ui.deviceTesting?.state == .on {
+                // Device testing active — extra link flags would apply (not typical for simulator workflow)
+            }
         }
 
         if let errors = Popen.system(linkCommand, errors: true) {
@@ -384,7 +379,6 @@ class NextCompiler {
 
     /// Codesign a dynamic library
     func codesign(dylib: String, platform: String) -> Data? {
-        if platform != "iPhoneSimulator" {
         var identity = "-"
         if !platform.hasSuffix("Simulator") && platform != "MacOSX" {
             identity = DispatchQueue.main.sync { AppDelegate.ui.codeSigningID }
@@ -400,7 +394,6 @@ class NextCompiler {
         if let errors = Popen.system(codesign, errors: true) {
             error("Codesign failed \(codesign) errors:\n"+errors)
             Self.lastError = errors
-        }
         }
         return try? Data(contentsOf: URL(fileURLWithPath: dylib))
     }

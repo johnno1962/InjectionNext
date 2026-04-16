@@ -3,7 +3,7 @@
 	url = https://github.com/johnno1962/fishhook
 [submodule "DLKit"]
 	path = DLKit
-	url = https://github.com/johnno1962/DLKit
+	url = https://github.com/maatheusgois-dd/DLKit
 [submodule "InjectionLite"]
 	path = InjectionLite
 	url = https://github.com/maatheusgois-dd/InjectionLite.git
