@@ -8,6 +8,7 @@ The Bazel aquery path queries the wrong output base (`execroot/_main/bazel-out/f
 - [ ] **3. Strip `-emit-object` in all code paths**
 `swift-frontend -emit-object` silently ignores `-o` and produces no output. The fix (`-emit-object` → `-c`) needs to be in both `BazelAQueryParser.prepareFinalCommand` AND `LogParser.prepareFinalCommand` AND `FrontendServer.CompilationArgParser` (for the stored args).
 
+
 ---
 
 ### Medium Priority
