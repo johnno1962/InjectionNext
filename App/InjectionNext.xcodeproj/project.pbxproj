@@ -16,9 +16,23 @@
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
+		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
+		AA1000012F09000000000001 /* InjectionNextApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000002F09000000000001 /* InjectionNextApp.swift */; };
+		AA1000032F09000000000002 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000022F09000000000002 /* ConfigStore.swift */; };
+		AA1000052F09000000000003 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000042F09000000000003 /* StatusMenuView.swift */; };
+		AA1000072F09000000000004 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000062F09000000000004 /* SettingsView.swift */; };
+		AA1000092F09000000000005 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000082F09000000000005 /* GeneralSettingsView.swift */; };
+		AA10000B2F09000000000006 /* XcodeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000A2F09000000000006 /* XcodeSettingsView.swift */; };
+		AA10000D2F09000000000007 /* BuildSystemSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000C2F09000000000007 /* BuildSystemSettingsView.swift */; };
+		AA10000F2F09000000000008 /* CompilerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000E2F09000000000008 /* CompilerSettingsView.swift */; };
+		AA1000112F09000000000009 /* InjectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000102F09000000000009 /* InjectionSettingsView.swift */; };
+		AA1000132F0900000000000A /* DevicesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000122F0900000000000A /* DevicesSettingsView.swift */; };
+		AA1000152F0900000000000B /* TracingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000142F0900000000000B /* TracingSettingsView.swift */; };
+		AA1000172F0900000000000C /* FileWatcherSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000162F0900000000000C /* FileWatcherSettingsView.swift */; };
+		AA1000192F0900000000000D /* NetworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000182F0900000000000D /* NetworkSettingsView.swift */; };
+		AA10001B2F0900000000000E /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10001A2F0900000000000E /* AdvancedSettingsView.swift */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
-		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -81,9 +95,7 @@
 		BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */; };
 		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
-		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
 		BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
-		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
 		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
@@ -96,7 +108,6 @@
 		BBB64FEC1FD585D50020BE47 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB64FEB1FD585D50020BE47 /* WebKit.framework */; };
 		BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCA02011FB0F10300E45F0F /* AppDelegate.swift */; };
 		BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02031FB0F10300E45F0F /* Assets.xcassets */; };
-		BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02051FB0F10300E45F0F /* MainMenu.xib */; };
 		BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBCA02591FB112F500E45F0F /* App.icns in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02581FB112F500E45F0F /* App.icns */; };
 		BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */; };
@@ -169,9 +180,23 @@
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
 		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Unhider.swift; path = ../../InjectionLite/Sources/InjectionImpl/Unhider.swift; sourceTree = "<group>"; };
+		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
+		AA1000002F09000000000001 /* InjectionNextApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionNextApp.swift; sourceTree = "<group>"; };
+		AA1000022F09000000000002 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
+		AA1000042F09000000000003 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
+		AA1000062F09000000000004 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA1000082F09000000000005 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		AA10000A2F09000000000006 /* XcodeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeSettingsView.swift; sourceTree = "<group>"; };
+		AA10000C2F09000000000007 /* BuildSystemSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildSystemSettingsView.swift; sourceTree = "<group>"; };
+		AA10000E2F09000000000008 /* CompilerSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompilerSettingsView.swift; sourceTree = "<group>"; };
+		AA1000102F09000000000009 /* InjectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionSettingsView.swift; sourceTree = "<group>"; };
+		AA1000122F0900000000000A /* DevicesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesSettingsView.swift; sourceTree = "<group>"; };
+		AA1000142F0900000000000B /* TracingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracingSettingsView.swift; sourceTree = "<group>"; };
+		AA1000162F0900000000000C /* FileWatcherSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherSettingsView.swift; sourceTree = "<group>"; };
+		AA1000182F0900000000000D /* NetworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSettingsView.swift; sourceTree = "<group>"; };
+		AA10001A2F0900000000000E /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -230,10 +255,8 @@
 		BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x64.s; sourceTree = "<group>"; };
 		BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x86.s; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
-		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
-		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
@@ -245,7 +268,6 @@
 		BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InjectionNext.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBCA02011FB0F10300E45F0F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BBCA02031FB0F10300E45F0F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BBCA02061FB0F10300E45F0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BBCA02081FB0F10400E45F0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InjectionNext.entitlements; sourceTree = "<group>"; };
 		BBCA02581FB112F500E45F0F /* App.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = App.icns; sourceTree = "<group>"; };
@@ -309,6 +331,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA10001C2F09000000000010 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA1000042F09000000000003 /* StatusMenuView.swift */,
+				AA1000062F09000000000004 /* SettingsView.swift */,
+				AA1000082F09000000000005 /* GeneralSettingsView.swift */,
+				AA10000A2F09000000000006 /* XcodeSettingsView.swift */,
+				AA10000C2F09000000000007 /* BuildSystemSettingsView.swift */,
+				AA10000E2F09000000000008 /* CompilerSettingsView.swift */,
+				AA1000102F09000000000009 /* InjectionSettingsView.swift */,
+				AA1000122F0900000000000A /* DevicesSettingsView.swift */,
+				AA1000142F0900000000000B /* TracingSettingsView.swift */,
+				AA1000162F0900000000000C /* FileWatcherSettingsView.swift */,
+				AA1000182F0900000000000D /* NetworkSettingsView.swift */,
+				AA10001A2F0900000000000E /* AdvancedSettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BB42F8E02EB626F100FDBBCC /* SwiftTrace */ = {
 			isa = PBXGroup;
 			children = (
@@ -498,15 +539,16 @@
 		BBCA01FF1FB0F10300E45F0F /* InjectionNext */ = {
 			isa = PBXGroup;
 			children = (
-				BB16653925E9A5F0001407AE /* main.m */,
+				AA1000002F09000000000001 /* InjectionNextApp.swift */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
+				AA1000022F09000000000002 /* ConfigStore.swift */,
+				AA10001C2F09000000000010 /* Views */,
 				BB4654802C257F110080EC40 /* NextCompiler.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
 				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
 				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
-				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				AA0000002F08000000000001 /* ControlServer.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
@@ -518,7 +560,6 @@
 				BBCA025F1FB122C300E45F0F /* InjectionOK.tif */,
 				BBE490D91FB2C643003D41BB /* InjectionBusy.tif */,
 				BBE490DA1FB2C643003D41BB /* InjectionError.tif */,
-				BBCA02051FB0F10300E45F0F /* MainMenu.xib */,
 				BBCA02081FB0F10400E45F0F /* Info.plist */,
 				BBCA02581FB112F500E45F0F /* App.icns */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
@@ -700,7 +741,6 @@
 				BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */,
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
 				222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */,
-				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
 				BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -783,7 +823,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
+				AA1000012F09000000000001 /* InjectionNextApp.swift in Sources */,
+				AA1000032F09000000000002 /* ConfigStore.swift in Sources */,
+				AA1000052F09000000000003 /* StatusMenuView.swift in Sources */,
+				AA1000072F09000000000004 /* SettingsView.swift in Sources */,
+				AA1000092F09000000000005 /* GeneralSettingsView.swift in Sources */,
+				AA10000B2F09000000000006 /* XcodeSettingsView.swift in Sources */,
+				AA10000D2F09000000000007 /* BuildSystemSettingsView.swift in Sources */,
+				AA10000F2F09000000000008 /* CompilerSettingsView.swift in Sources */,
+				AA1000112F09000000000009 /* InjectionSettingsView.swift in Sources */,
+				AA1000132F0900000000000A /* DevicesSettingsView.swift in Sources */,
+				AA1000152F0900000000000B /* TracingSettingsView.swift in Sources */,
+				AA1000172F0900000000000C /* FileWatcherSettingsView.swift in Sources */,
+				AA1000192F0900000000000D /* NetworkSettingsView.swift in Sources */,
+				AA10001B2F0900000000000E /* AdvancedSettingsView.swift in Sources */,
 				BB42F93F2EB63CD800FDBBCC /* Common.swift in Sources */,
 				BB42F94C2EB63E4F00FDBBCC /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
@@ -792,7 +845,6 @@
 				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */,
-				BB16653A25E9A5F2001407AE /* main.m in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
 				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,
@@ -886,17 +938,6 @@
 			targetProxy = BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		BBCA02051FB0F10300E45F0F /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BBCA02061FB0F10300E45F0F /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BB439B821FABA64300B4F50B /* Debug */ = {
@@ -1039,8 +1080,10 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -1067,8 +1110,10 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -1094,7 +1139,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1118,7 +1163,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1138,9 +1183,11 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c17;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1189,9 +1236,11 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c17;
 				GENERATE_INFOPLIST_FILE = YES;

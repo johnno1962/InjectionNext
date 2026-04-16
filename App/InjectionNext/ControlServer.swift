@@ -325,15 +325,15 @@ class ControlServer {
 
     private func getStatus() -> ActionResult {
         var result = [String: Any]()
+        let config = ConfigStore.shared
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
             result["xcode_running"] = MonitorXcode.runningXcode != nil
-            result["xcode_path"] = Defaults.xcodePath
-            result["compiler_intercepted"] = delegate.updatePatchUnpatch() == .patched
-            result["devices_enabled"] = delegate.enableDevicesItem.state == .on
+            result["xcode_path"] = config.xcodePath
+            result["compiler_intercepted"] = AppDelegate.ui.updatePatchUnpatch() == .patched
+            result["devices_enabled"] = config.devicesEnabled
             result["watching_directories"] = Array(AppDelegate.watchers.keys)
             result["has_connected_client"] = InjectionServer.currentClient != nil
-            result["auto_restart_xcode"] = Defaults.xcodeRestart
+            result["auto_restart_xcode"] = config.xcodeRestart
             result["last_error"] = NextCompiler.lastError
         }
         return .ok(result)
@@ -344,7 +344,7 @@ class ControlServer {
             return .fail("Path does not exist: \(path)")
         }
         DispatchQueue.main.sync {
-            Reloader.xcodeDev = Defaults.xcodePath + "/Contents/Developer"
+            Reloader.xcodeDev = ConfigStore.shared.xcodePath + "/Contents/Developer"
             AppDelegate.ui.watch(path: path)
         }
         return .ok(["watching": path])
@@ -354,8 +354,7 @@ class ControlServer {
         DispatchQueue.main.sync {
             AppDelegate.watchers.removeAll()
             AppDelegate.lastWatched = nil
-            AppDelegate.ui.watchDirectoryItem.state = .off
-            AppDelegate.ui.refreshWatchProjectMenuItem()
+            ConfigStore.shared.updateWatchingDirectories()
         }
         return .ok()
     }
@@ -366,14 +365,13 @@ class ControlServer {
                 _ = MonitorXcode()
             }
         }
-        return .ok(["xcode_path": Defaults.xcodePath])
+        return .ok(["xcode_path": ConfigStore.shared.xcodePath])
     }
 
     private func interceptCompiler() -> ActionResult {
         var state = ""
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
-            let currentState = delegate.updatePatchUnpatch()
+            let currentState = AppDelegate.ui.updatePatchUnpatch()
             state = currentState == .patched ? "patched" : "unpatched"
         }
         return .ok(["compiler_state": state,
@@ -382,10 +380,10 @@ class ControlServer {
 
     private func enableDevices(enable: Bool) -> ActionResult {
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
-            let currentlyEnabled = delegate.enableDevicesItem.state == .on
-            if enable != currentlyEnabled {
-                delegate.deviceEnable(delegate.enableDevicesItem)
+            let config = ConfigStore.shared
+            if enable != config.devicesEnabled {
+                AppDelegate.ui.applyDeviceSettings(enabled: enable)
+                config.devicesEnabled = enable
             }
         }
         return .ok(["devices_enabled": enable])
@@ -413,7 +411,7 @@ class ControlServer {
 
     private func prepareSwiftUIProject() -> ActionResult {
         DispatchQueue.main.sync {
-            AppDelegate.ui.prepareProject(AppDelegate.ui.patchCompilerItem)
+            AppDelegate.ui.prepareProject(NSMenuItem())
         }
         return .ok()
     }
@@ -423,8 +421,7 @@ class ControlServer {
             return .fail("Xcode not found at: \(path)")
         }
         DispatchQueue.main.sync {
-            Defaults.xcodeDefault = path
-            AppDelegate.ui.selectXcodeItem.toolTip = path
+            ConfigStore.shared.xcodePath = path
             AppDelegate.ui.updatePatchUnpatch()
         }
         return .ok(["xcode_path": path])

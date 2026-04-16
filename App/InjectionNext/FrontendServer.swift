@@ -244,7 +244,7 @@ class FrontendServer: SimpleSocket {
 
 extension AppDelegate {
 
-    @IBAction func patchCompiler(_ sender: NSMenuItem) {
+    func patchCompiler(_ sender: NSMenuItem) {
         let fm = FileManager.default
         do {
             let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
@@ -305,7 +305,7 @@ extension AppDelegate {
             .fileExists(atPath: FrontendServer.patched) ?
             FrontendServer.State.patched : .unpatched
         DispatchQueue.main.async {
-            self.patchCompilerItem?.title = state.rawValue
+            self.patchCompilerItem.title = state.rawValue
             if state == .patched {
                 _ = FrontendServer.startOnce
             }
