@@ -2,7 +2,21 @@
 
 ### The fourth evolution of Code Injection for Xcode
 
-This fork ([**maatheusgois-dd/InjectionNext**](https://github.com/maatheusgois-dd/InjectionNext)) pins the **InjectionLite** submodule to [**maatheusgois-dd/InjectionLite**](https://github.com/maatheusgois-dd/InjectionLite) (see `.gitmodules`). Clone with `git clone --recurse-submodules …` or run `git submodule update --init --recursive` after clone; use `git submodule sync` if submodule remotes are stale.
+This fork ([**maatheusgois-dd/InjectionNext**](https://github.com/maatheusgois-dd/InjectionNext)) pins the **InjectionLite** submodule to [**maatheusgois-dd/InjectionLite**](https://github.com/maatheusgois-dd/InjectionLite) and the **DLKit** submodule to [**maatheusgois-dd/DLKit**](https://github.com/maatheusgois-dd/DLKit) (see `.gitmodules`). Clone with `git clone --recurse-submodules …` or run `git submodule update --init --recursive` after clone; use `git submodule sync` if submodule remotes are stale. A `make sync` target is also provided.
+
+### What's new in this fork (vs. [johnno1962/InjectionNext](https://github.com/johnno1962/InjectionNext))
+
+- **SwiftUI rewrite of the app UI.** The AppKit/XIB status bar, settings and project-picker screens were migrated to SwiftUI (`App/InjectionNext/Views/*`, `InjectionNextApp.swift`, `StatusMenuView`, `SettingsView`, `CompilerSettingsView`, `BuildSystemSettingsView`, `ConsoleView`).
+- **In-app console + `LogManager`.** stdout/stderr are captured into a live console window inside the app, with log-spam deduplication, Xcode CAS/SIGPIPE warnings, and quieter default output.
+- **Project picker with Browse.** When a workspace has multiple `xcodeproj`/`xcworkspace` files, a proper picker dialog appears; includes a Browse option to pick any project, and the flow reuses an already-running Xcode when possible. A "Select Project" action was added to the status bar.
+- **Build-system settings UI.** Auto-detects the project build system (Xcode / SPM / Bazel), lets you override it, and honors that override everywhere (including a "skip SDK filter when no client connected" hybrid fallback and skipping Bazel paths when Xcode/SPM is forced).
+- **Settings polish.** Env-variable rows show example values; new red status asset; app icon migrated from `App.icns` to an `AppIcon` asset catalog set.
+- **MCP server for AI-driven control.** A Model Context Protocol server exposes InjectionNext to agents, plus an injection event tracker for observability and a log buffer wired to `Recompiler` events.
+- **CI + release.** GitHub Actions workflow to build and publish releases on tags (with fixes for tag outputs and MCP README link).
+- **Compiler/runtime fixes.** Filter whole-module-optimization flags from captured compiler arguments; start `ControlServer` before any alert can block the main thread; improved `ControlServer` debug logging; fix watch-project menu title when directories are watched; `@MainActor` annotations on `launchXcodeWithProject`/`runXcode`; safer signal handlers.
+- **Xcode 26.3 support.** Includes the Bazel-path fix for Xcode 26.3 and related log-parsing updates.
+- **Submodules.** `InjectionLite` and `DLKit` are pinned to fork branches so fixes (e.g. `foreignReference` sweep, Reloader regex centralization) can be shipped without waiting on upstream.
+- **Developer ergonomics.** `Makefile` with `build`/`install`/`run`/`sync` targets; silenced safe warnings (`var`→`let`, unused `fcntl`, MainActor hops); build-number bumps.
 
 Using a feature of Apple's linker this implementation of Code Injection
 allows you to update the implementation (i.e. body) of functions in your
