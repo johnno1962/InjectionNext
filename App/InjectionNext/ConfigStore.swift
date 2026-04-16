@@ -81,6 +81,7 @@ final class ConfigStore: ObservableObject {
         let tiffName = "Injection" + injectionState.rawValue
         if let path = Bundle.main.path(forResource: tiffName, ofType: "tif"),
            let image = NSImage(contentsOfFile: path) {
+            image.size = NSSize(width: 18, height: 18)
             return image
         }
         return NSImage(systemSymbolName: "bolt.fill", accessibilityDescription: "InjectionNext")!
