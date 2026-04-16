@@ -27,19 +27,43 @@ struct InjectionSettingsView: View {
                             open.canChooseFiles = false
                             if open.runModal() == .OK, let url = open.url {
                                 config.projectPath = url.path
+                                config.defaultProjectFile = ""
+                                Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
+                                AppDelegate.ui?.watch(path: url.path)
+                                config.updateWatchingDirectories()
                             }
                         }
                         if !config.projectPath.isEmpty {
                             Button("Clear") {
                                 config.projectPath = ""
+                                config.defaultProjectFile = ""
+                                config.autoOpenDefaultProject = false
                             }
+                        }
+                    }
+                }
+                if !config.projectPath.isEmpty {
+                    let projects = ProjectDiscovery.discoverProjects(in: config.projectPath)
+                    if projects.count > 1 {
+                        Picker("Default Project File", selection: $config.defaultProjectFile) {
+                            Text("Ask every time").tag("")
+                            ForEach(projects) { project in
+                                Text(project.name).tag(project.path)
+                            }
+                        }
+
+                        Toggle("Always open default project", isOn: $config.autoOpenDefaultProject)
+                    } else if projects.count == 1 {
+                        LabeledContent("Project File") {
+                            Text(projects[0].name)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
             } header: {
                 Label("Project", systemImage: "folder")
             } footer: {
-                Text("Set a default project path to auto-open in Xcode on launch. Equivalent to: defaults write com.johnholdsworth.InjectionNext projectPath /path")
+                Text("Set a project directory. If it contains multiple .xcodeproj/.xcworkspace files, you can pick a default or be asked each time Xcode launches.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

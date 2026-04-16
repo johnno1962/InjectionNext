@@ -99,12 +99,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if config.autoLaunchXcode && MonitorXcode.runningXcode == nil {
-            _ = MonitorXcode()
-        }
-
         if let project = Defaults.projectPath {
-            _ = MonitorXcode(args: " '\(project)'")
+            launchXcodeWithProject(directory: project, config: config)
+        } else if config.autoLaunchXcode && MonitorXcode.runningXcode == nil {
+            _ = MonitorXcode()
         }
     }
 
@@ -136,9 +134,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Run Xcode
 
     func runXcode(_ sender: Any) {
-        if MonitorXcode.runningXcode == nil {
+        guard MonitorXcode.runningXcode == nil else { return }
+        let config = ConfigStore.shared
+        if let project = Defaults.projectPath {
+            launchXcodeWithProject(directory: project, config: config)
+        } else {
             _ = MonitorXcode()
         }
+    }
+
+    /// Discovers .xcodeproj/.xcworkspace files, shows a picker if needed,
+    /// launches Xcode with the chosen project, and auto-watches the directory.
+    func launchXcodeWithProject(directory: String, config: ConfigStore) {
+        guard MonitorXcode.runningXcode == nil else { return }
+        guard let resolved = ProjectDiscovery.resolveProject(
+            in: directory, config: config) else { return }
+
+        _ = MonitorXcode(args: " '\(resolved)'")
+
+        Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
+        watch(path: directory)
+        config.updateWatchingDirectories()
     }
 
     func deviceEnable(_ sender: NSMenuItem?) {
