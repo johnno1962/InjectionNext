@@ -80,30 +80,10 @@ struct ConsoleView: View {
     // MARK: - Content
 
     private var content: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 1) {
-                    ForEach(filtered) { entry in
-                        ConsoleLine(entry: entry)
-                            .id(entry.id)
-                    }
-                }
-                .padding(.vertical, 6)
-                .padding(.horizontal, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .onChange(of: filtered.last?.id) { newID in
-                guard autoScroll, let newID else { return }
-                withAnimation(.easeOut(duration: 0.15)) {
-                    proxy.scrollTo(newID, anchor: .bottom)
-                }
-            }
-            .onAppear {
-                if let lastID = filtered.last?.id {
-                    proxy.scrollTo(lastID, anchor: .bottom)
-                }
-            }
-        }
+        LogTextView(entries: filtered, autoScroll: autoScroll)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     // MARK: - Footer
@@ -132,33 +112,100 @@ struct ConsoleView: View {
     }
 }
 
-// MARK: - Line
+// MARK: - Selectable log text view
 
-private struct ConsoleLine: View {
-    let entry: LogEntry
+/// NSTextView-backed log pane so users can select arbitrary text across
+/// multiple lines (SwiftUI's `.textSelection(.enabled)` is per-Text only).
+private struct LogTextView: NSViewRepresentable {
+    let entries: [LogEntry]
+    let autoScroll: Bool
 
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text("[\(LogManager.timeFormatter.string(from: entry.timestamp))]")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(.secondary)
+    func makeNSView(context: Context) -> NSScrollView {
+        let scroll = NSTextView.scrollableTextView()
+        scroll.hasVerticalScroller = true
+        scroll.hasHorizontalScroller = false
+        scroll.autohidesScrollers = true
+        scroll.drawsBackground = false
+        scroll.backgroundColor = .clear
 
-            Text(entry.message)
-                .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(color(for: entry.level))
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+        guard let tv = scroll.documentView as? NSTextView else { return scroll }
+        tv.isEditable = false
+        tv.isSelectable = true
+        tv.isRichText = true
+        tv.drawsBackground = false
+        tv.backgroundColor = .clear
+        tv.textContainerInset = NSSize(width: 0, height: 0)
+        tv.isAutomaticQuoteSubstitutionEnabled = false
+        tv.isAutomaticDashSubstitutionEnabled = false
+        tv.isAutomaticTextReplacementEnabled = false
+        tv.isAutomaticSpellingCorrectionEnabled = false
+        tv.isAutomaticLinkDetectionEnabled = false
+        tv.isGrammarCheckingEnabled = false
+        tv.textContainer?.lineFragmentPadding = 0
+        tv.textContainer?.widthTracksTextView = true
+        tv.isHorizontallyResizable = false
+        tv.isVerticallyResizable = true
+        tv.autoresizingMask = [.width]
+        return scroll
+    }
+
+    func updateNSView(_ scroll: NSScrollView, context: Context) {
+        guard let tv = scroll.documentView as? NSTextView,
+              let storage = tv.textStorage else { return }
+
+        let attr = Self.render(entries: entries)
+
+        // Preserve selection if user has one, otherwise we'll optionally scroll
+        // to the bottom. Equality check avoids resetting the view every tick
+        // when nothing actually changed.
+        if storage.length != attr.length || storage.string != attr.string {
+            let hadSelection = tv.selectedRange().length > 0
+            let previousSelection = tv.selectedRange()
+
+            storage.beginEditing()
+            storage.setAttributedString(attr)
+            storage.endEditing()
+
+            if hadSelection,
+               previousSelection.location + previousSelection.length <= attr.length {
+                tv.setSelectedRange(previousSelection)
+            } else if autoScroll {
+                tv.scrollToEndOfDocument(nil)
+            }
+        } else if autoScroll, tv.selectedRange().length == 0 {
+            tv.scrollToEndOfDocument(nil)
         }
     }
 
-    private func color(for level: LogLevel) -> Color {
+    private static func render(entries: [LogEntry]) -> NSAttributedString {
+        let out = NSMutableAttributedString()
+        let mono = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        let monoSmall = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+
+        for (idx, entry) in entries.enumerated() {
+            let stamp = "[\(LogManager.timeFormatter.string(from: entry.timestamp))] "
+            out.append(NSAttributedString(string: stamp, attributes: [
+                .font: monoSmall,
+                .foregroundColor: NSColor.secondaryLabelColor,
+            ]))
+            out.append(NSAttributedString(string: entry.message, attributes: [
+                .font: mono,
+                .foregroundColor: nsColor(for: entry.level),
+            ]))
+            if idx < entries.count - 1 {
+                out.append(NSAttributedString(string: "\n"))
+            }
+        }
+        return out
+    }
+
+    private static func nsColor(for level: LogLevel) -> NSColor {
         switch level {
-        case .debug:   return .secondary
-        case .info:    return .primary
-        case .warning: return .orange
-        case .error:   return .red
-        case .alert:   return .pink
+        case .debug:   return .secondaryLabelColor
+        case .info:    return .labelColor
+        case .warning: return .systemOrange
+        case .error:   return .systemRed
+        case .alert:   return .systemPink
         }
     }
 }

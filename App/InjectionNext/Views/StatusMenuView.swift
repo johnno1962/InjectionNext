@@ -114,17 +114,14 @@ struct StatusMenuView: View {
 
             Divider()
 
-            if #available(macOS 14.0, *) {
-                SettingsLink {
-                    Text("Settings...")
-                }
-                .keyboardShortcut(",", modifiers: .command)
-            } else {
-                Button("Settings...") {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                }
-                .keyboardShortcut(",", modifiers: .command)
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "settings")
+                bringSettingsToFront()
+            } label: {
+                Label("Settings...", systemImage: "gearshape")
             }
+            .keyboardShortcut(",", modifiers: .command)
 
             Divider()
 
@@ -140,12 +137,37 @@ struct StatusMenuView: View {
                 Image(nsImage: Self.coloredDot(stateNSColor))
             }
 
+            Label {
+                Text(buildSystemStatusText)
+            } icon: {
+                Image(systemName: (config.effectiveBuildSystem ?? .auto).symbolName)
+            }
+            .help(buildSystemHelpText)
+
+            if config.buildSystem != .auto {
+                Text("  Overridden in Settings (\(config.buildSystem.shortName))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Divider()
 
             Button("Quit InjectionNext") {
                 NSApp.terminate(nil)
             }
             .keyboardShortcut("q", modifiers: .command)
+        }
+    }
+
+    @MainActor
+    private func bringSettingsToFront() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            NSApp.activate(ignoringOtherApps: true)
+            for window in NSApp.windows where window.identifier?.rawValue == "settings" {
+                window.collectionBehavior.insert(.moveToActiveSpace)
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+            }
         }
     }
 
@@ -186,23 +208,29 @@ struct StatusMenuView: View {
         }
     }
 
-    private var stateColor: Color {
-        switch config.injectionState {
-        case .ok: return .orange
-        case .idle: return .blue
-        case .busy: return .green
-        case .ready: return .purple
-        case .error: return .yellow
+    private var buildSystemStatusText: String {
+        if let effective = config.effectiveBuildSystem {
+            return "Build: \(effective.shortName)"
         }
+        return "Build: None"
+    }
+
+    private var buildSystemHelpText: String {
+        if config.buildSystem == .auto {
+            return config.effectiveBuildSystem == nil
+                ? "No project selected. Override in Settings > Build System."
+                : "Auto-detected from project. Override in Settings > Build System."
+        }
+        return "Manually overridden in Settings > Build System."
     }
 
     private var stateNSColor: NSColor {
         switch config.injectionState {
-        case .ok: return .systemOrange
         case .idle: return .systemBlue
-        case .busy: return .systemGreen
-        case .ready: return .systemPurple
-        case .error: return .systemYellow
+        case .ok: return .systemOrange
+        case .busy: return .systemPurple
+        case .ready: return .systemGreen
+        case .error: return .systemRed
         }
     }
 

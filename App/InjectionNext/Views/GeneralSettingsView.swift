@@ -64,11 +64,11 @@ struct GeneralSettingsView: View {
 
     private var stateColor: Color {
         switch config.injectionState {
-        case .ok: return .orange
         case .idle: return .blue
-        case .busy: return .green
-        case .ready: return .purple
-        case .error: return .yellow
+        case .ok: return .orange
+        case .busy: return .purple
+        case .ready: return .green
+        case .error: return .red
         }
     }
 }

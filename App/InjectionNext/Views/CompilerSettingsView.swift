@@ -29,22 +29,24 @@ struct CompilerSettingsView: View {
                 }
 
                 LabeledContent("Frontend Binary") {
-                    Text(FrontendServer.unpatchedURL.path)
+                    Text(FrontendServer.unpatchedURL.path.trimmingCharacters(in: .whitespacesAndNewlines))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
                         .truncationMode(.middle)
                         .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .help(FrontendServer.unpatchedURL.path)
                 }
 
                 if currentState == .patched {
                     LabeledContent("Saved Binary") {
-                        Text(FrontendServer.patched)
+                        Text(FrontendServer.patched.trimmingCharacters(in: .whitespacesAndNewlines))
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            .lineLimit(2)
                             .truncationMode(.middle)
                             .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .help(FrontendServer.patched)
                     }
                 }
             } header: {

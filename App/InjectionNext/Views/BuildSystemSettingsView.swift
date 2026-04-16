@@ -19,15 +19,25 @@ struct BuildSystemSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+
+                LabeledContent("Detected") {
+                    Text(config.detectedBuildSystem?.rawValue ?? "None (no project selected)")
+                        .foregroundStyle(config.detectedBuildSystem == nil ? .secondary : .primary)
+                }
+
+                LabeledContent("Effective") {
+                    Text(config.effectiveBuildSystem?.rawValue ?? "None")
+                        .foregroundStyle(config.effectiveBuildSystem == nil ? .secondary : .primary)
+                }
             } header: {
                 Label("Build System", systemImage: "wrench.and.screwdriver")
             } footer: {
-                Text("Select the build system used by your project. This affects how InjectionNext discovers compilation commands and recompiles files.")
+                Text("Auto detects the build system from the selected project (Xcode/Bazel/SPM). Pick a specific value to override detection.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            if config.buildSystem == .bazel {
+            if config.effectiveBuildSystem == .bazel {
                 Section {
                     LabeledContent("Bazel / Bazelisk Path") {
                         HStack {
