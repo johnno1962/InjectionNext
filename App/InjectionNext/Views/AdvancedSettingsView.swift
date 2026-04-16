@@ -56,15 +56,15 @@ struct AdvancedSettingsView: View {
                         .font(.headline)
 
                     Group {
-                        envRow("INJECTION_HOST", "IP for device connection")
-                        envRow("INJECTION_DIRECTORIES", "Directories to watch")
-                        envRow("INJECTION_PROJECT_ROOT", "Project root for file watching")
-                        envRow("INJECTION_PRESERVE_STATICS", "Preserve static vars")
-                        envRow("BUILD_WORKSPACE_DIRECTORY", "Bazel workspace directory")
-                        envRow("INJECTION_TRACE", "Enable function tracing")
-                        envRow("INJECTION_DETAIL", "Verbose binding log")
-                        envRow("INJECTION_BENCH", "Enable benchmarking")
-                        envRow("INJECTION_HIDE_XCODE_ALERT", "Suppress initial alert")
+                        envRow("INJECTION_HOST", "IP for device connection", "192.168.1.42")
+                        envRow("INJECTION_DIRECTORIES", "Directories to watch", "~/Projects/MyApp,~/Projects/Shared")
+                        envRow("INJECTION_PROJECT_ROOT", "Project root for file watching", "~/Projects/MyApp")
+                        envRow("INJECTION_PRESERVE_STATICS", "Preserve static vars", "1")
+                        envRow("BUILD_WORKSPACE_DIRECTORY", "Bazel workspace directory", "~/Projects/MyApp")
+                        envRow("INJECTION_TRACE", "Enable function tracing", "1")
+                        envRow("INJECTION_DETAIL", "Verbose binding log", "1")
+                        envRow("INJECTION_BENCH", "Enable benchmarking", "1")
+                        envRow("INJECTION_HIDE_XCODE_ALERT", "Suppress initial alert", "1")
                     }
                 }
             } header: {
@@ -95,15 +95,22 @@ struct AdvancedSettingsView: View {
         .formStyle(.grouped)
     }
 
-    private func envRow(_ key: String, _ desc: String) -> some View {
-        HStack {
-            Text(key)
-                .font(.caption.monospaced())
-                .foregroundStyle(.primary)
+    private func envRow(_ key: String, _ desc: String, _ example: String) -> some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(key)
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.primary)
+                Text("e.g. \(example)")
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(.tertiary)
+                    .textSelection(.enabled)
+            }
             Spacer()
             Text(desc)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
