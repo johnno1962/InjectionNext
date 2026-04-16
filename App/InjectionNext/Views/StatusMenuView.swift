@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct StatusMenuView: View {
     @ObservedObject var config: ConfigStore
@@ -29,6 +30,31 @@ struct StatusMenuView: View {
                         Image(systemName: "checkmark")
                     }
                 }
+            }
+
+            Divider()
+
+            Button {
+                selectProject()
+            } label: {
+                HStack {
+                    Text("Select Project...")
+                    if !config.defaultProjectFile.isEmpty {
+                        Spacer()
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+
+            if !config.defaultProjectFile.isEmpty {
+                Button("Clear Selected Project") {
+                    config.defaultProjectFile = ""
+                    config.autoOpenDefaultProject = false
+                }
+
+                Text("  \(URL(fileURLWithPath: config.defaultProjectFile).lastPathComponent)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Divider()
@@ -120,6 +146,43 @@ struct StatusMenuView: View {
                 NSApp.terminate(nil)
             }
             .keyboardShortcut("q", modifiers: .command)
+        }
+    }
+
+    @MainActor
+    private func selectProject() {
+        let directory = config.watchingDirectories.first
+            ?? (config.projectPath.isEmpty ? NSHomeDirectory() : config.projectPath)
+
+        let open = NSOpenPanel()
+        open.prompt = "Select Project or Workspace"
+        open.directoryURL = URL(fileURLWithPath: directory)
+        open.canChooseDirectories = false
+        open.canChooseFiles = true
+        open.treatsFilePackagesAsDirectories = false
+        open.allowsMultipleSelection = false
+        var types: [UTType] = []
+        if let t = UTType("com.apple.xcode.project") { types.append(t) }
+        if let t = UTType("com.apple.dt.document.workspace") { types.append(t) }
+        open.allowedContentTypes = types
+        NSApp.activate(ignoringOtherApps: true)
+
+        guard open.runModal() == .OK, let url = open.url else { return }
+        let ext = url.pathExtension
+        guard ext == "xcodeproj" || ext == "xcworkspace" else { return }
+
+        let chosen = url.path
+        let parent = url.deletingLastPathComponent().path
+
+        config.projectPath = parent
+        config.defaultProjectFile = chosen
+        config.autoOpenDefaultProject = true
+
+        if MonitorXcode.runningXcode == nil {
+            _ = MonitorXcode(args: " '\(chosen)'")
+            Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
+            AppDelegate.ui.watch(path: parent)
+            config.updateWatchingDirectories()
         }
     }
 
