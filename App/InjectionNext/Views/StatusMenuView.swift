@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @ObservedObject var config: ConfigStore
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -90,15 +91,11 @@ struct StatusMenuView: View {
 
             Divider()
 
-            Button("Show Last Error") {
-                let error = NextCompiler.lastError ?? "No error."
-                let alert = NSAlert()
-                alert.messageText = "Last Compilation Error"
-                alert.informativeText = error
-                alert.alertStyle = .informational
-                alert.addButton(withTitle: "OK")
+            Button {
                 NSApp.activate(ignoringOtherApps: true)
-                alert.runModal()
+                openWindow(id: "console")
+            } label: {
+                Label("Open Console…", systemImage: "terminal")
             }
 
             Divider()

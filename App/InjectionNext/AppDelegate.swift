@@ -64,6 +64,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         Self.ui = self
 
+        LogManager.shared.startCapturing()
+
         Recompiler.onCompilationEvent = { file, status, detail in
             InjectionEventTracker.shared.emit(file, status: status, detail: detail)
         }

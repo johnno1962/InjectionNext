@@ -77,58 +77,6 @@ class InjectionEventTracker {
     }
 }
 
-// MARK: - Log Buffer
-
-class LogBuffer {
-
-    static let shared = LogBuffer()
-
-    struct Entry {
-        let timestamp: TimeInterval
-        let message: String
-        let level: String
-    }
-
-    private let lock = NSLock()
-    private var entries = [Entry]()
-    private let maxEntries = 2000
-
-    func append(_ message: String, level: String = "info") {
-        lock.lock()
-        defer { lock.unlock() }
-        entries.append(Entry(
-            timestamp: Date().timeIntervalSince1970,
-            message: message,
-            level: level
-        ))
-        if entries.count > maxEntries {
-            entries.removeFirst(entries.count - maxEntries)
-        }
-    }
-
-    func get(since: TimeInterval = 0, limit: Int = 200) -> [[String: Any]] {
-        lock.lock()
-        defer { lock.unlock() }
-        let filtered = entries.filter { $0.timestamp > since }
-        let sliced = filtered.suffix(limit)
-        return sliced.map {
-            ["timestamp": $0.timestamp, "message": $0.message, "level": $0.level]
-        }
-    }
-
-    func clear() {
-        lock.lock()
-        defer { lock.unlock() }
-        entries.removeAll()
-    }
-
-    var count: Int {
-        lock.lock()
-        defer { lock.unlock() }
-        return entries.count
-    }
-}
-
 // MARK: - Control Server
 
 class ControlServer {

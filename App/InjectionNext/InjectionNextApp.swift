@@ -22,5 +22,11 @@ struct InjectionNextApp: App {
         Settings {
             SettingsView(config: config)
         }
+
+        Window("InjectionNext Console", id: "console") {
+            ConsoleView()
+        }
+        .defaultSize(width: 900, height: 520)
+        .windowResizability(.contentMinSize)
     }
 }
