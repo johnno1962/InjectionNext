@@ -442,9 +442,12 @@ enum ProjectDiscovery {
         alert.addButton(withTitle: "Open")
         alert.addButton(withTitle: "Cancel")
 
-        let popup = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 350, height: 28), pullsDown: false)
+        let width: CGFloat = 380
+
+        let popup = NSPopUpButton(frame: .zero, pullsDown: false)
+        popup.translatesAutoresizingMaskIntoConstraints = false
         for project in projects {
-            let prefix = project.isWorkspace ? "⚙️ " : "🔨 "
+            let prefix = project.isWorkspace ? "⚙️  " : "🔨  "
             popup.addItem(withTitle: prefix + project.name)
         }
 
@@ -453,15 +456,24 @@ enum ProjectDiscovery {
         }
 
         let checkbox = NSButton(checkboxWithTitle: "Always open this project", target: nil, action: nil)
+        checkbox.translatesAutoresizingMaskIntoConstraints = false
         checkbox.state = config.autoOpenDefaultProject ? .on : .off
 
-        let stack = NSStackView(views: [popup, checkbox])
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 8
-        stack.setFrameSize(NSSize(width: 350, height: 56))
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: 60))
+        container.addSubview(popup)
+        container.addSubview(checkbox)
 
-        alert.accessoryView = stack
+        NSLayoutConstraint.activate([
+            popup.topAnchor.constraint(equalTo: container.topAnchor),
+            popup.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            popup.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+
+            checkbox.topAnchor.constraint(equalTo: popup.bottomAnchor, constant: 12),
+            checkbox.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 2),
+            checkbox.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+        ])
+
+        alert.accessoryView = container
         NSApp.activate(ignoringOtherApps: true)
 
         guard alert.runModal() == .alertFirstButtonReturn else { return nil }
