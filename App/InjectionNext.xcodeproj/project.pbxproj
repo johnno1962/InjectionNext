@@ -82,7 +82,7 @@
 		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
 		BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
-		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
+		BB6A56F02C50E73600C92112 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* ConfigStore.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
 		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
@@ -226,7 +226,7 @@
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
-		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
+		BB6A56EF2C50E73600C92112 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
@@ -494,7 +494,7 @@
 				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
 				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
-				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
+				BB6A56EF2C50E73600C92112 /* ConfigStore.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				AA0000002F08000000000001 /* ControlServer.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
@@ -759,7 +759,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
+				BB6A56F02C50E73600C92112 /* ConfigStore.swift in Sources */,
 				BB42F93F2EB63CD800FDBBCC /* Common.swift in Sources */,
 				BB42F94C2EB63E4F00FDBBCC /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
@@ -1070,7 +1070,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1094,7 +1094,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1264,8 +1264,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnno1962/DLKit";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.5.6;
+				branch = main;
+				kind = branch;
 			};
 		};
 		BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */ = {
