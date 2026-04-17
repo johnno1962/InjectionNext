@@ -172,17 +172,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func deviceEnable(_ sender: NSMenuItem?) {
-        var openPort = ""
         var newState = ConfigStore.shared.devicesEnabled
         if sender != nil {
             newState.toggle()
             ConfigStore.shared.devicesEnabled = newState
         }
-        if newState {
+        applyDeviceSettings(enabled: newState, restartServer: sender != nil)
+    }
+
+    /// Starts or restarts the injection server using the given enabled state.
+    /// Called from SwiftUI (`DevicesSettingsView`) and menu toggles.
+    func applyDeviceSettings(enabled: Bool, restartServer: Bool = true) {
+        var openPort = ""
+        if enabled {
             _ = startHostLocatingServerOnce
             openPort = "*"
         }
-        if sender != nil { InjectionServer.stopLastServer() }
+        if restartServer { InjectionServer.stopLastServer() }
         InjectionServer.startServer(openPort+INJECTION_ADDRESS)
     }
 

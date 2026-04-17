@@ -20,6 +20,17 @@
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000A1 /* InjectionNextApp.swift */; };
 		AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* StatusMenuView.swift */; };
+		AAAA000000000000000000C2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C1 /* SettingsView.swift */; };
+		AAAA000000000000000000C4 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C3 /* GeneralSettingsView.swift */; };
+		AAAA000000000000000000C6 /* XcodeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C5 /* XcodeSettingsView.swift */; };
+		AAAA000000000000000000C8 /* BuildSystemSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */; };
+		AAAA000000000000000000CA /* CompilerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C9 /* CompilerSettingsView.swift */; };
+		AAAA000000000000000000CC /* InjectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CB /* InjectionSettingsView.swift */; };
+		AAAA000000000000000000CE /* DevicesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CD /* DevicesSettingsView.swift */; };
+		AAAA000000000000000000D0 /* FileWatcherSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CF /* FileWatcherSettingsView.swift */; };
+		AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D1 /* NetworkSettingsView.swift */; };
+		AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D3 /* TracingSettingsView.swift */; };
+		AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D5 /* AdvancedSettingsView.swift */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -167,6 +178,17 @@
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		AAAA000000000000000000A1 /* InjectionNextApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionNextApp.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000B1 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C3 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C5 /* XcodeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildSystemSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C9 /* CompilerSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompilerSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CB /* InjectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CD /* DevicesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CF /* FileWatcherSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D1 /* NetworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D3 /* TracingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracingSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D5 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -487,6 +509,17 @@
 			isa = PBXGroup;
 			children = (
 				AAAA000000000000000000B1 /* StatusMenuView.swift */,
+				AAAA000000000000000000C1 /* SettingsView.swift */,
+				AAAA000000000000000000C3 /* GeneralSettingsView.swift */,
+				AAAA000000000000000000C5 /* XcodeSettingsView.swift */,
+				AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */,
+				AAAA000000000000000000C9 /* CompilerSettingsView.swift */,
+				AAAA000000000000000000CB /* InjectionSettingsView.swift */,
+				AAAA000000000000000000CD /* DevicesSettingsView.swift */,
+				AAAA000000000000000000CF /* FileWatcherSettingsView.swift */,
+				AAAA000000000000000000D1 /* NetworkSettingsView.swift */,
+				AAAA000000000000000000D3 /* TracingSettingsView.swift */,
+				AAAA000000000000000000D5 /* AdvancedSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -777,6 +810,17 @@
 				BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */,
 				AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */,
 				AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */,
+				AAAA000000000000000000C2 /* SettingsView.swift in Sources */,
+				AAAA000000000000000000C4 /* GeneralSettingsView.swift in Sources */,
+				AAAA000000000000000000C6 /* XcodeSettingsView.swift in Sources */,
+				AAAA000000000000000000C8 /* BuildSystemSettingsView.swift in Sources */,
+				AAAA000000000000000000CA /* CompilerSettingsView.swift in Sources */,
+				AAAA000000000000000000CC /* InjectionSettingsView.swift in Sources */,
+				AAAA000000000000000000CE /* DevicesSettingsView.swift in Sources */,
+				AAAA000000000000000000D0 /* FileWatcherSettingsView.swift in Sources */,
+				AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */,
+				AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */,
+				AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
 				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,

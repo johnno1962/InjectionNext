@@ -18,5 +18,11 @@ struct InjectionNextApp: App {
         } label: {
             Image(nsImage: config.statusIcon)
         }
+
+        Window("InjectionNext Settings", id: "settings") {
+            SettingsView(config: config)
+        }
+        .defaultSize(width: 640, height: 480)
+        .windowResizability(.contentMinSize)
     }
 }
