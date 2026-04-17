@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2217BE812C0A65C20032A832 /* Fortify in Frameworks */ = {isa = PBXBuildFile; productRef = 2217BE802C0A65C20032A832 /* Fortify */; };
-		222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */ = {isa = PBXBuildFile; fileRef = 222BC9442C157C3200780A41 /* InjectionReady.tif */; };
 		224E57FB2C08978F00B71C79 /* SwiftRegex in Frameworks */ = {isa = PBXBuildFile; productRef = 224E57FA2C08978F00B71C79 /* SwiftRegex */; };
 		224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FD2C08BBE300B71C79 /* InjectionServer.swift */; };
 		224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */; };
@@ -98,17 +97,12 @@
 		BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02031FB0F10300E45F0F /* Assets.xcassets */; };
 		BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02051FB0F10300E45F0F /* MainMenu.xib */; };
 		BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
-		BBCA02591FB112F500E45F0F /* App.icns in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02581FB112F500E45F0F /* App.icns */; };
-		BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */; };
-		BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025F1FB122C300E45F0F /* InjectionOK.tif */; };
 		BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBBEC42D1FC56522004188B3 /* XCTest.framework */; };
 		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
 		BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */; };
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
-		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
-		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
@@ -164,7 +158,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		222BC9442C157C3200780A41 /* InjectionReady.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionReady.tif; sourceTree = "<group>"; };
 		224E57FC2C08BAE200B71C79 /* InjectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionClient.h; path = ../../Sources/InjectionNextC/include/InjectionClient.h; sourceTree = "<group>"; };
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
@@ -248,9 +241,6 @@
 		BBCA02061FB0F10300E45F0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BBCA02081FB0F10400E45F0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InjectionNext.entitlements; sourceTree = "<group>"; };
-		BBCA02581FB112F500E45F0F /* App.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = App.icns; sourceTree = "<group>"; };
-		BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionIdle.tif; sourceTree = "<group>"; };
-		BBCA025F1FB122C300E45F0F /* InjectionOK.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionOK.tif; sourceTree = "<group>"; };
 		BBCCC3B02C73A6AD00E71F81 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/WatchOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		BBDD84132C4FE749000F3124 /* macOSInjection.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSInjection.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InjectionNext.swift; path = ../../Sources/InjectionNext/InjectionNext.swift; sourceTree = "<group>"; };
@@ -260,8 +250,6 @@
 		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
 		BBDD84592C4FF645000F3124 /* ClientBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ClientBoot.mm; path = ../../Sources/InjectionNextC/ClientBoot.mm; sourceTree = "<group>"; };
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
-		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
-		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
 		BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftRefs.swift; sourceTree = "<group>"; };
@@ -513,14 +501,8 @@
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
 				BBCA02031FB0F10300E45F0F /* Assets.xcassets */,
-				BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */,
-				222BC9442C157C3200780A41 /* InjectionReady.tif */,
-				BBCA025F1FB122C300E45F0F /* InjectionOK.tif */,
-				BBE490D91FB2C643003D41BB /* InjectionBusy.tif */,
-				BBE490DA1FB2C643003D41BB /* InjectionError.tif */,
 				BBCA02051FB0F10300E45F0F /* MainMenu.xib */,
 				BBCA02081FB0F10400E45F0F /* Info.plist */,
-				BBCA02581FB112F500E45F0F /* App.icns */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
 				BB42F9542EB63EFF00FDBBCC /* InjectionBazel */,
@@ -692,16 +674,10 @@
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
 				BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
-				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
-				BBCA02591FB112F500E45F0F /* App.icns in Resources */,
-				BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */,
 				BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */,
 				BBF6572F2DAFF00200638170 /* QUICK.md in Resources */,
-				BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */,
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
-				222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */,
 				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
-				BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
