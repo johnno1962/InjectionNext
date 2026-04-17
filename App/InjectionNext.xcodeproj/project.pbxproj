@@ -16,8 +16,6 @@
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
 		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
-		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
-		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000A1 /* InjectionNextApp.swift */; };
 		AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* StatusMenuView.swift */; };
 		AAAA000000000000000000C2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C1 /* SettingsView.swift */; };
@@ -33,6 +31,8 @@
 		AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D5 /* AdvancedSettingsView.swift */; };
 		AAAA000000000000000000E2 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E1 /* LogManager.swift */; };
 		AAAA000000000000000000E4 /* ConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E3 /* ConsoleView.swift */; };
+		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
+		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -176,8 +176,6 @@
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
 		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Unhider.swift; path = ../../InjectionLite/Sources/InjectionImpl/Unhider.swift; sourceTree = "<group>"; };
 		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
-		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		AAAA000000000000000000A1 /* InjectionNextApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionNextApp.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000B1 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -193,6 +191,8 @@
 		AAAA000000000000000000D5 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000E1 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000E3 /* ConsoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleView.swift; sourceTree = "<group>"; };
+		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -323,6 +323,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AAAA000000000000000000B0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AAAA000000000000000000B1 /* StatusMenuView.swift */,
+				AAAA000000000000000000C1 /* SettingsView.swift */,
+				AAAA000000000000000000C3 /* GeneralSettingsView.swift */,
+				AAAA000000000000000000C5 /* XcodeSettingsView.swift */,
+				AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */,
+				AAAA000000000000000000C9 /* CompilerSettingsView.swift */,
+				AAAA000000000000000000CB /* InjectionSettingsView.swift */,
+				AAAA000000000000000000CD /* DevicesSettingsView.swift */,
+				AAAA000000000000000000CF /* FileWatcherSettingsView.swift */,
+				AAAA000000000000000000D1 /* NetworkSettingsView.swift */,
+				AAAA000000000000000000D3 /* TracingSettingsView.swift */,
+				AAAA000000000000000000D5 /* AdvancedSettingsView.swift */,
+				AAAA000000000000000000E3 /* ConsoleView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BB42F8E02EB626F100FDBBCC /* SwiftTrace */ = {
 			isa = PBXGroup;
 			children = (
@@ -507,26 +527,6 @@
 				BBB040631FB1798A007DDD0A /* ScriptingBridge.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		AAAA000000000000000000B0 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				AAAA000000000000000000B1 /* StatusMenuView.swift */,
-				AAAA000000000000000000C1 /* SettingsView.swift */,
-				AAAA000000000000000000C3 /* GeneralSettingsView.swift */,
-				AAAA000000000000000000C5 /* XcodeSettingsView.swift */,
-				AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */,
-				AAAA000000000000000000C9 /* CompilerSettingsView.swift */,
-				AAAA000000000000000000CB /* InjectionSettingsView.swift */,
-				AAAA000000000000000000CD /* DevicesSettingsView.swift */,
-				AAAA000000000000000000CF /* FileWatcherSettingsView.swift */,
-				AAAA000000000000000000D1 /* NetworkSettingsView.swift */,
-				AAAA000000000000000000D3 /* TracingSettingsView.swift */,
-				AAAA000000000000000000D5 /* AdvancedSettingsView.swift */,
-				AAAA000000000000000000E3 /* ConsoleView.swift */,
-			);
-			path = Views;
 			sourceTree = "<group>";
 		};
 		BBCA01FF1FB0F10300E45F0F /* InjectionNext */ = {
@@ -1064,6 +1064,7 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1092,6 +1093,7 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1115,6 +1117,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = "";
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
@@ -1124,6 +1127,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INJECTION_NEXT_APP";
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
@@ -1137,8 +1141,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = InjectionNext/InjectionNext.entitlements;
 				CODE_SIGN_IDENTITY = "Developer ID Application";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = "";
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
@@ -1148,6 +1154,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INJECTION_NEXT_APP";
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionNext/InjectionNext-Bridging-Header.h";
@@ -1163,9 +1170,11 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c17;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1214,9 +1223,11 @@
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c17;
 				GENERATE_INFOPLIST_FILE = YES;
