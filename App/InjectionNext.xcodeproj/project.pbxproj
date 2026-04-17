@@ -1319,10 +1319,10 @@
 		};
 		22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/johnno1962/DLKit";
+			repositoryURL = "https://github.com/maatheusgois-dd/DLKit";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.5.6;
+				branch = "maatheusgois-dd/dlopen-mode-override";
+				kind = branch;
 			};
 		};
 		BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */ = {
