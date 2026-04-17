@@ -136,8 +136,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _ = MonitorXcode(args: " '\(project)'")
         }
 
+        LogManager.shared.startCapturing()
         if Defaults.mcpServer {
-            LogBuffer.shared = LogBuffer()
             ControlServer.start()
         }
     }

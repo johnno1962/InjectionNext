@@ -31,6 +31,8 @@
 		AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D1 /* NetworkSettingsView.swift */; };
 		AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D3 /* TracingSettingsView.swift */; };
 		AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D5 /* AdvancedSettingsView.swift */; };
+		AAAA000000000000000000E2 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E1 /* LogManager.swift */; };
+		AAAA000000000000000000E4 /* ConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E3 /* ConsoleView.swift */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -189,6 +191,8 @@
 		AAAA000000000000000000D1 /* NetworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSettingsView.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000D3 /* TracingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracingSettingsView.swift; sourceTree = "<group>"; };
 		AAAA000000000000000000D5 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000E1 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000E3 /* ConsoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleView.swift; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -520,6 +524,7 @@
 				AAAA000000000000000000D1 /* NetworkSettingsView.swift */,
 				AAAA000000000000000000D3 /* TracingSettingsView.swift */,
 				AAAA000000000000000000D5 /* AdvancedSettingsView.swift */,
+				AAAA000000000000000000E3 /* ConsoleView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -539,6 +544,7 @@
 				BB6A56EF2C50E73600C92112 /* ConfigStore.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				AA0000002F08000000000001 /* ControlServer.swift */,
+				AAAA000000000000000000E1 /* LogManager.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -821,6 +827,8 @@
 				AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */,
 				AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */,
 				AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */,
+				AAAA000000000000000000E2 /* LogManager.swift in Sources */,
+				AAAA000000000000000000E4 /* ConsoleView.swift in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
 				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,

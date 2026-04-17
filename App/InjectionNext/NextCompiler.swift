@@ -25,7 +25,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
-    LogBuffer.shared?.append(msg, level: "info")
+    LogBuffer.shared.append(msg, level: "info")
     for client in InjectionServer.currentClients {
         client?.sendCommand(.log, with: msg)
     }
