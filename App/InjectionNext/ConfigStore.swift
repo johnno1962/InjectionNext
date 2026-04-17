@@ -9,6 +9,8 @@
 import SwiftUI
 import Combine
 import Popen
+import DLKit
+import Darwin
 
 // MARK: - Enums
 
@@ -57,6 +59,34 @@ enum TraceMode: String, CaseIterable, Identifiable {
     case injected = "Injected Functions"
     case all = "All Functions"
     var id: String { rawValue }
+}
+
+/// Preset flag combinations passed to `dlopen` when DLKit loads an
+/// injected dylib. Exposed as `DLKit.dlOpenMode` for overrides.
+enum DLOpenMode: String, CaseIterable, Identifiable {
+    /// Recommended default: bind symbols lazily, expose globally so
+    /// later injections can resolve each other's symbols.
+    case lazyGlobal = "Lazy + Global (default)"
+    /// Eager resolution: fail fast when a symbol is missing. Still
+    /// globally visible so injected modules can cross-reference.
+    case nowGlobal  = "Now + Global"
+    var id: String { rawValue }
+
+    var flags: Int32 {
+        switch self {
+        case .lazyGlobal: return RTLD_LAZY | RTLD_GLOBAL
+        case .nowGlobal:  return RTLD_NOW  | RTLD_GLOBAL
+        }
+    }
+
+    var helpText: String {
+        switch self {
+        case .lazyGlobal:
+            return "RTLD_LAZY | RTLD_GLOBAL — resolves symbols on first use. Best for normal hot-reload."
+        case .nowGlobal:
+            return "RTLD_NOW | RTLD_GLOBAL — resolves every symbol at load time; surfaces missing symbols immediately (useful when diagnosing failed injections)."
+        }
+    }
 }
 
 // MARK: - Xcode Installation
@@ -304,6 +334,12 @@ final class ConfigStore: ObservableObject {
     @Published var benchmarking: Bool {
         didSet { ud.set(benchmarking, forKey: "benchmarking") }
     }
+    @Published var dlOpenMode: DLOpenMode {
+        didSet {
+            ud.set(dlOpenMode.rawValue, forKey: "dlOpenMode")
+            DLKit.dlOpenMode = dlOpenMode.flags
+        }
+    }
 
     // MARK: - Init
 
@@ -356,6 +392,8 @@ final class ConfigStore: ObservableObject {
         // Advanced
         self.verboseLogging = ud.bool(forKey: "verboseLogging")
         self.benchmarking = ud.bool(forKey: "benchmarking")
+        self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .lazyGlobal
+        DLKit.dlOpenMode = self.dlOpenMode.flags
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
@@ -462,6 +500,7 @@ final class ConfigStore: ObservableObject {
         injectionHost = "127.0.0.1"
         verboseLogging = false
         benchmarking = false
+        dlOpenMode = .lazyGlobal
     }
 }
 

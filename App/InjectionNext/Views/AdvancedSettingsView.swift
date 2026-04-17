@@ -26,6 +26,25 @@ struct AdvancedSettingsView: View {
             }
 
             Section {
+                Picker("dlopen Mode", selection: $config.dlOpenMode) {
+                    ForEach(DLOpenMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .help(config.dlOpenMode.helpText)
+
+                Text(config.dlOpenMode.helpText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Label("Dynamic Loader", systemImage: "square.stack.3d.up")
+            } footer: {
+                Text("Flags passed to dlopen() when DLKit loads each injected dylib. Change this only if injections are failing to resolve symbols or you want eager error reporting. Maps to DLKit.dlOpenMode.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
                 LabeledContent("Last Compilation Error") {
                     Text(NextCompiler.lastError ?? "None")
                         .font(.caption)
