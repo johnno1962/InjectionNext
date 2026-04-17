@@ -62,4 +62,5 @@ struct Defaults {
             userDefaults.string(forKey: projectPathDefault)
         }
     }
+    static var mcpServer = userDefaults.bool(forKey: "mcpServer")
 }

@@ -25,6 +25,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = prefix+msg
     #endif
     print(msg)
+    LogBuffer.shared?.append(msg, level: "info")
     for client in InjectionServer.currentClients {
         client?.sendCommand(.log, with: msg)
     }
@@ -288,7 +289,18 @@ class NextCompiler {
              "-plugin-path", toolchain+"/usr/lib/swift/host/plugins",
              "-plugin-path", toolchain+"/usr/local/lib/swift/host/plugins"] :
             ["-c", source, "-Xclang", "-fno-validate-pch"]) + baseOptionsToAdd
-        var arguments = stored.arguments
+        let wmoFlags: Set<String> = [
+            "-whole-module-optimization",
+            "-internalize-at-link",
+            "-no-serialize-debugging-options"
+        ]
+        var arguments = [String]()
+        var skipNext = false
+        for arg in stored.arguments where !wmoFlags.contains(arg) {
+            if skipNext { skipNext = false; continue }
+            if arg == "-o" { skipNext = true; continue }
+            arguments.append(arg)
+        }
         if let target = InjectionServer.currentClient?.arch, target != "arm64" {
             // Simulator running in Rosetta.
             for i in 0..<arguments.count {

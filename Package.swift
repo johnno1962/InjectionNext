@@ -9,7 +9,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "InjectionNext",
-            targets: ["InjectionNext"]),
+            targets: ["InjectionBundle"]),
         // To avoid duplicate symbols if other
         // packages use e.g. DLKit or fishhook
 //        .library(
@@ -21,13 +21,13 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "InjectionNext", dependencies: ["InjectionNextC"],
-            swiftSettings: [.define("DEBUG_ONLY")]),
+            name: "InjectionBundle", dependencies: ["InjectionNextC"],
+            path: "Sources/InjectionNext", swiftSettings: [.define("DEBUG_ONLY")]),
         .target(
             name: "InjectionNextC",
             cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]),
         .testTarget(
             name: "InjectionNextTests",
-            dependencies: ["InjectionNext"]),
+            dependencies: ["InjectionBundle"]),
     ]
 )

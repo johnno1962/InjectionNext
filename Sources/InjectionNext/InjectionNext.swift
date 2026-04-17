@@ -94,6 +94,10 @@ open class InjectionNext: SimpleSocket {
             writeCommand(InjectionResponse.bazelTarget.rawValue,
                          with: String(cString: bazelTarget))
         }
+        if let executable = Bundle.main.executablePath {
+            writeCommand(InjectionResponse.executable.rawValue,
+                         with: executable)
+        }
 
         Reloader.injectionQueue.sync {
             tracingOptions()

@@ -33,7 +33,7 @@ class MonitorXcode {
     init(args: String = "") {
         var args = args
         #if DEBUG
-        args += " | tee \(Self.recompiler.tmpbase).log"
+        args += " | tee \(Reloader.tmpbase).log"
         #endif
         if !FileManager.default.fileExists(atPath: Defaults.xcodePath) {
             InjectionServer.error("""

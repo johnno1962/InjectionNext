@@ -19,20 +19,12 @@ import Popen
 
 class InjectionServer: SimpleSocket {
 
-    struct ActiveClient {
-        weak var connection: InjectionServer?
-    }
-
     /// So commands from differnt threads don't get mixed up
     static let clientQueue = DispatchQueue(label: "InjectionCommand")
-    static private var connected = [ActiveClient]()
+    static private var connected = [InjectionServer]()
     /// All access to `connected` serialised through clientQueue.
     static var currentClients: [InjectionServer?] {
-        let active = clientQueue.sync {
-            Self.connected.removeAll { $0.connection == nil }
-            return connected.compactMap(\.connection)
-        }
-        return active.isEmpty ? [nil] : active
+        return clientQueue.sync { connected.isEmpty ? [nil] : connected }
     }
     /// Current connection to client app. There can be only one.
     static var currentClient: InjectionServer? { currentClients.last ?? nil }
@@ -49,6 +41,7 @@ class InjectionServer: SimpleSocket {
 
     class func alert(_ msg: String) {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
+        LogBuffer.shared?.append("\(APP_NAME) \(msg)", level: "alert")
         lastAlert = NSAlert()
         lastAlert?.messageText = "\(self)"
         lastAlert?.informativeText = msg
@@ -61,6 +54,7 @@ class InjectionServer: SimpleSocket {
     @discardableResult
     override public class func error(_ message: String) -> Int32 {
         let msg = String(format:message, strerror(errno))
+        LogBuffer.shared?.append(msg, level: "error")
         DispatchQueue.main.async { alert(msg) }
         return -1
     }
@@ -75,6 +69,7 @@ class InjectionServer: SimpleSocket {
     // Write message into Xcode console of client app.
     open func log(_ msg: String) {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
+        LogBuffer.shared?.append(msg, level: "info")
         sendCommand(.log, with: APP_PREFIX+msg)
     }
     open func error(_ msg: String) {
@@ -144,7 +139,9 @@ class InjectionServer: SimpleSocket {
         } catch {
             self.error("\(self) error \(error)")
         }
-        Self.clientQueue.sync {} // flush messages
+        Self.clientQueue.sync {
+            Self.connected.removeAll { $0 === self }
+        } // flush messages and de-register
     }
 
     func processResponses() {
@@ -177,7 +174,7 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath = tmpPath
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     Self.clientQueue.async {
-                        Self.connected.append(ActiveClient(connection: self))
+                        Self.connected.append(self)
                     }
                 } else {
                     error("**** Bad tmp ****")
@@ -206,6 +203,11 @@ class InjectionServer: SimpleSocket {
                     }
                 } else {
                     error("**** Bad root ****")
+                }
+            case .executable:
+                if let executable = readString() {
+                    Reloader.appName = URL(fileURLWithPath:
+                                            executable).lastPathComponent
                 }
             case .detail:
                 if let detail = readString() {

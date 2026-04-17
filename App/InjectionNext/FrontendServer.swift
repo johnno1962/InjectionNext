@@ -48,7 +48,7 @@ class FrontendServer: SimpleSocket {
     static var clientPlatform: String {
         InjectionServer.currentClient?.platform ?? "iPhoneSimulator" }
     static func cacheURL(platform: String) -> URL {
-        return URL(fileURLWithPath: "/tmp/\(APP_NAME)_\(platform)_builds.json")
+        return URL(fileURLWithPath: Reloader.tmpbase+"_\(platform)_builds.json")
     }
     static private var recompilersLock = os_unfair_lock()
     static private var recompilers = [String: NextCompiler]()
@@ -225,7 +225,10 @@ class FrontendServer: SimpleSocket {
                         Unhider.packageFrameworks = arg+"/PackageFrameworks"
                     }
                 }
-                if arg.hasSuffix(".swift") && args.last != "-F" {
+                let pathArgFlags: Set<String> = ["-F", "-I", "-iquote", "-isystem"]
+                let isPathArgValue = pathArgFlags.contains(args.last ?? "")
+                    || arg.hasPrefix("-I") || arg.hasPrefix("-F")
+                if arg.hasSuffix(".swift") && !isPathArgValue {
                     swiftFiles += arg+"\n"
                     swiftFileCount += 1
                 } else if arg[Reloader.optionsToRemove] {

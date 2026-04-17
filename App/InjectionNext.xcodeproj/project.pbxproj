@@ -81,6 +81,7 @@
 		BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */; };
 		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
+		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
 		BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
@@ -229,6 +230,7 @@
 		BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x64.s; sourceTree = "<group>"; };
 		BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x86.s; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
+		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
@@ -506,6 +508,7 @@
 				CEC17029253ED117002E823F /* Experimental.swift */,
 				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
+				AA0000002F08000000000001 /* ControlServer.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
@@ -801,6 +804,7 @@
 				BB42F95E2EB63EFF00FDBBCC /* FilenameMatcher.swift in Sources */,
 				224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */,
 				22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */,
+				AA0000012F08000000000001 /* ControlServer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1091,7 +1095,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1115,7 +1119,7 @@
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1166,6 +1170,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1211,6 +1216,7 @@
 					"$(BUILT_PRODUCTS_DIR)/Popen.o",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionBundle;
+				PRODUCT_MODULE_NAME = InjectionBundle;
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
