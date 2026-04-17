@@ -304,7 +304,7 @@ class ControlServer {
             let delegate = AppDelegate.ui!
             let currentlyEnabled = delegate.enableDevicesItem.state == .on
             if enable != currentlyEnabled {
-                delegate.deviceEnable(delegate.enableDevicesItem)
+                delegate.deviceEnable(NSMenuItem())
             }
         }
         return .ok(["devices_enabled": enable])
@@ -343,7 +343,6 @@ class ControlServer {
         }
         DispatchQueue.main.sync {
             Defaults.xcodeDefault = path
-            AppDelegate.ui.selectXcodeItem.toolTip = path
             AppDelegate.ui.updatePatchUnpatch()
         }
         return .ok(["xcode_path": path])

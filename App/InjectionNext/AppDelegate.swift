@@ -5,9 +5,9 @@
 //  Created by John Holdsworth on 06/11/2017.
 //  Copyright © 2017 John Holdsworth. All rights reserved.
 //
-//  $Id: //depot/HotReloading/Sources/injectiond/AppDelegate.swift#76 $
-//
-//  Implementation Toolbar menu "UI".
+//  Slim AppDelegate: no XIB outlets. UI is provided by SwiftUI
+//  (InjectionNextApp + StatusMenuView). AppKit-era call sites keep
+//  compiling through read/write Compat shims that route to ConfigStore.
 //
 
 import Cocoa
@@ -15,11 +15,11 @@ import Popen
 import SwiftRegex
 
 enum InjectionState: String {
-    case ok = "OK" // Orange
-    case idle = "Idle" // Blue
-    case busy = "Busy" // Green
-    case ready = "Ready" // Purple
-    case error = "Error" // Yellow
+    case ok = "OK"      // Orange
+    case idle = "Idle"  // Blue
+    case busy = "Busy"  // Green
+    case ready = "Ready"// Purple
+    case error = "Error"// Yellow
 }
 
 @objc(AppDelegate)
@@ -27,84 +27,101 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     static var ui: AppDelegate!
 
-    // Status menu
-    @IBOutlet weak var statusMenu: NSMenu!
-    @IBOutlet var statusItem: NSStatusItem!
-    // Codesigning identity
-    @IBOutlet var identityField: NSTextField!
-    // Enable injection on devices
-    @IBOutlet var deviceTesting: NSButton!
-    // Testing libraries to link with
-    @IBOutlet var librariesField: NSTextField!
-    // Place to display last error that occured
-    @IBOutlet var lastErrorField: NSTextView!
-    // Restart XCode if crashed.
-    @IBOutlet weak var launchXcodeItem: NSMenuItem!
-    @IBOutlet weak var selectXcodeItem: NSMenuItem!
-    @IBOutlet weak var restartDeviceItem: NSMenuItem!
-    @IBOutlet weak var patchCompilerItem: NSMenuItem!
-    @IBOutlet weak var enableDevicesItem: NSMenuItem!
-    @IBOutlet weak var watchDirectoryItem: NSMenuItem!
-
-    // Interface to app's persistent state.
     @objc let defaults = Defaults.userDefaults
 
-    @IBOutlet weak var codeSignBox: NSComboBox!
+    // MARK: - Compatibility shims (route to ConfigStore)
 
-    /// Code signing ID as parsed from the code signing box. If the content of the box is not
-    /// parsable as SHA1 code signing ID, an empty string.
-    var codeSigningID: String { codeSignBox.stringValue.containedSHA1 ?? "" }
+    /// Mimics `launchXcodeItem.state` for MonitorXcode.
+    var launchXcodeItem: CompatMenuItem {
+        CompatMenuItem(
+            get: { ConfigStore.shared.isXcodeRunning ? .on : .off },
+            set: { ConfigStore.shared.isXcodeRunning = ($0 == .on) }
+        )
+    }
 
-    let userIDComboBoxDataSaver = UserIDComboBoxDataSaver()
+    /// Mimics `watchDirectoryItem.state` for ControlServer / InjectionHybrid.
+    var watchDirectoryItem: CompatMenuItem {
+        CompatMenuItem(
+            get: { AppDelegate.watchers.isEmpty ? .off : .on },
+            set: { _ in ConfigStore.shared.updateWatchingDirectories() }
+        )
+    }
+
+    /// Mimics `enableDevicesItem.state` for ControlServer.
+    var enableDevicesItem: CompatMenuItem {
+        CompatMenuItem(
+            get: { ConfigStore.shared.devicesEnabled ? .on : .off },
+            set: { ConfigStore.shared.devicesEnabled = ($0 == .on) }
+        )
+    }
+
+    /// Mimics `selectXcodeItem.toolTip` for ControlServer.
+    var selectXcodeItem: CompatMenuItem {
+        CompatMenuItem(get: { .off }, set: nil)
+    }
+
+    /// Mimics `patchCompilerItem` — a real orphan NSMenuItem so
+    /// `patchCompilerItem?.title = ...` and `prepareProject(item)` calls compile.
+    var patchCompilerItem: NSMenuItem { NSMenuItem() }
+
+    /// Mimics `restartDeviceItem.state`.
+    var restartDeviceItem: CompatMenuItem {
+        CompatMenuItem(
+            get: { ConfigStore.shared.xcodeRestart ? .on : .off },
+            set: { ConfigStore.shared.xcodeRestart = ($0 == .on) }
+        )
+    }
+
+    /// Mimics `deviceTesting?.state` for NextCompiler.
+    var deviceTesting: CompatButton? {
+        CompatButton(isOn: ConfigStore.shared.devicesEnabled)
+    }
+
+    /// Mimics `librariesField.stringValue` for NextCompiler.
+    var librariesField: CompatTextField {
+        CompatTextField(
+            get: { ConfigStore.shared.deviceLibraries },
+            set: { ConfigStore.shared.deviceLibraries = $0 }
+        )
+    }
+
+    /// Mimics `codeSignBox.stringValue.containedSHA1` for NextCompiler.
+    var codeSigningID: String {
+        ConfigStore.shared.codesigningIdentity ?? ""
+    }
+
+    // MARK: - Lifecycle
+
+    lazy var startHostLocatingServerOnce: () = {
+        InjectionServer.multicastServe(HOTRELOADING_MULTICAST,
+                                       port: HOTRELOADING_PORT)
+    }()
 
     @objc func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
         Self.ui = self
 
-        let appName = "InjectionNext"
+        // All TCP sockets in SimpleSocket are created with SO_NOSIGPIPE,
+        // so any SIGPIPE we see comes from stdout/stderr or one of the
+        // Popen(...) shell invocations writing to a broken pipe — in every
+        // case write() returns EPIPE and the caller handles it. Ignoring
+        // the signal outright avoids the async-signal-unsafe logging
+        // handler that used to crash with _os_unfair_lock_recursive_abort.
+        signal(SIGPIPE, SIG_IGN)
 
-        if Bundle.main.infoDictionary?["LSUIElement"] as? Bool != true {
-            NSApp.mainMenu?.item(withTitle: "File")?.submenu = statusMenu
-        } else {
-            let statusBar = NSStatusBar.system
-            statusItem = statusBar.statusItem(withLength: statusBar.thickness)
-            statusItem.highlightMode = true
-            statusItem.menu = statusMenu
-            statusItem.isEnabled = true
-            statusItem.title = appName
-            setMenuIcon(.idle)
-        }
+        setMenuIcon(.idle)
 
-        signal(SIGPIPE, { which in
-            print(APP_PREFIX+"⚠️ SIGPIPE #\(which)\n" +
-                  Thread.callStackSymbols.map { var frame = $0
-                        frame[#"(?:\S+\s+){3}(\S+)"#, 1] = {
-                            (groups: [String], stop) in
-                            return groups[1].swiftDemangle ?? groups[1] }
-                        return frame
-                    }.joined(separator: "\n")) })
+        // Populate the list of valid codesigning identities.
+        ConfigStore.shared.discoverCodesigningIdentities()
 
-        if let quit = statusMenu.item(at: statusMenu.items.count-1) {
-            quit.title = "Quit "+appName
-            if let build = Bundle.main
-                .infoDictionary?[kCFBundleVersionKey as String] {
-                quit.toolTip = "Quit (build #\(build))"
-            }
-        }
-
-        librariesField.stringValue = Defaults.deviceLibraries
-        let enableDevicesSticky = false
-        if !enableDevicesSticky || Defaults.codesigningIdentity == nil {
-            enableDevicesItem.state = .on
-        }
+        // Start injection server for on-device/sim connections.
         deviceEnable(nil)
+
         if let xcodePath = NSRunningApplication
             .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
             .first?.bundleURL?.path {
             if Defaults.xcodeDefault == nil {
                 Defaults.xcodeDefault = xcodePath
             }
-            selectXcodeItem.toolTip = Defaults.xcodePath
             if updatePatchUnpatch() == .unpatched &&
                 getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
                 InjectionServer.alert("""
@@ -114,18 +131,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     """)
             }
         }
- 
-        setupCodeSigningComboBox()
-        restartDeviceItem.state = Defaults.xcodeRestart ? .on : .off
-        selectXcodeItem.toolTip = Defaults.xcodePath
-
-//        #if DEBUG
-//        if NSHomeDirectory() == "/Users/johnholdsworth",
-//           let path = Bundle.main.path(forResource: "macOSInjection", ofType: "bundle"),
-//           let bundle = Bundle(path: path),
-//           bundle.load() {
-//        }
-//        #endif
 
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
@@ -137,17 +142,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    // MARK: - Status Icon (bridges to ConfigStore)
+
     func setMenuIcon(_ state: InjectionState) {
-        DispatchQueue.main.async {
-            let tiffName = "Injection"+state.rawValue
-            if let path = Bundle.main.path(forResource: tiffName, ofType: "tif"),
-                let image = NSImage(contentsOfFile: path) {
-    //            image.template = TRUE;
-                self.statusItem.image = image
-                self.statusItem.alternateImage = image
-            }
-        }
+        ConfigStore.shared.setInjectionState(state)
     }
+
+    // MARK: - Actions
 
     @IBAction func runXcode(_ sender: Any) {
         if MonitorXcode.runningXcode == nil {
@@ -162,7 +163,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         open.canChooseDirectories = false
         open.canChooseFiles = true
         if open.runModal() == .OK, let path = open.url?.path {
-            selectXcodeItem.toolTip = path
             Defaults.xcodeDefault = path
             updatePatchUnpatch()
             if Defaults.xcodeRestart {
@@ -171,18 +171,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    lazy var startHostLocatingServerOnce: () = {
-        InjectionServer.multicastServe(HOTRELOADING_MULTICAST,
-                                       port: HOTRELOADING_PORT)
-    }()
-
     @IBAction func deviceEnable(_ sender: NSMenuItem?) {
         var openPort = ""
-        if enableDevicesItem.state.toggle() == .on {
-            if sender != nil {
-                NSApplication.shared.activate(ignoringOtherApps: true)
-                codeSignBox.window?.makeKeyAndOrderFront(sender)
-            }
+        var newState = ConfigStore.shared.devicesEnabled
+        if sender != nil {
+            newState.toggle()
+            ConfigStore.shared.devicesEnabled = newState
+        }
+        if newState {
             _ = startHostLocatingServerOnce
             openPort = "*"
         }
@@ -200,17 +196,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 fi
                 """
             let pasteBoard = NSPasteboard.general
-            pasteBoard.declareTypes([.string], owner:nil)
-            pasteBoard.setString(buildPhase, forType:.string)
+            pasteBoard.declareTypes([.string], owner: nil)
+            pasteBoard.setString(buildPhase, forType: .string)
             InjectionServer.error("Run Script, Build Phase to " +
                   "copy testing libraries added to clipboard.")
         }
     }
 
     @IBAction func updateLibraries(_ sender: NSTextField) {
-        Defaults.deviceLibraries = librariesField.stringValue
+        Defaults.deviceLibraries = sender.stringValue
     }
-
 
     @IBAction func updateXcodeRestart(_ sender: NSMenuItem) {
         Defaults.xcodeRestart = sender.state.toggle() == .on
@@ -225,84 +220,74 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func showlastError(_ sender: NSMenuItem) {
-        lastErrorField.string = NextCompiler.lastError ?? "No error."
-        lastErrorField.window?.makeKeyAndOrderFront(sender)
-        NSApplication.shared.activate(ignoringOtherApps: true)
-    }
-
-    func setupCodeSigningComboBox() {
-        codeSignBox.removeAllItems()
-
-        codeSignBox.addItems(withObjectValues: userIDComboBoxDataSaver.validCodeSigningIDs)
-
-        if let savedID = userIDComboBoxDataSaver.savedID {
-            codeSignBox.stringValue = savedID
-        } else if let firstIdentity = userIDComboBoxDataSaver.validCodeSigningIDs.first {
-            codeSignBox.stringValue = firstIdentity
-        } else {
-            codeSignBox.stringValue = "No valid code signing IDs found"
-        }
-
-        codeSignBox.target = userIDComboBoxDataSaver
-        codeSignBox.action = #selector(UserIDComboBoxDataSaver.comboBoxValueDidChange(_:))
+        // Retained for MCP/script compatibility. SwiftUI consoles
+        // surface last errors via LogManager/ConsoleView instead.
+        _ = NextCompiler.lastError
     }
 }
+
+// MARK: - Compatibility Types
+
+/// Read/write shim mimicking `NSMenuItem` for code that still touches
+/// `.state` / `.toolTip` / `.title`. Writes are routed to ConfigStore
+/// via the supplied closures.
+final class CompatMenuItem {
+    private let getter: () -> NSControl.StateValue
+    private let setter: ((NSControl.StateValue) -> Void)?
+    var toolTip: String?
+    var title: String = ""
+
+    init(get: @escaping () -> NSControl.StateValue,
+         set: ((NSControl.StateValue) -> Void)? = nil) {
+        self.getter = get
+        self.setter = set
+    }
+
+    var state: NSControl.StateValue {
+        get { getter() }
+        set { setter?(newValue) }
+    }
+}
+
+/// Read shim mimicking `NSButton` for code that reads `.state`.
+final class CompatButton {
+    var state: NSControl.StateValue
+    init(isOn: Bool) { self.state = isOn ? .on : .off }
+}
+
+/// Read/write shim mimicking `NSTextField` for code that touches
+/// `.stringValue`. Writes are routed to ConfigStore.
+final class CompatTextField {
+    private let getter: () -> String
+    private let setter: ((String) -> Void)?
+
+    init(get: @escaping () -> String,
+         set: ((String) -> Void)? = nil) {
+        self.getter = get
+        self.setter = set
+    }
+
+    var stringValue: String {
+        get { getter() }
+        set { setter?(newValue) }
+    }
+}
+
+// MARK: - Helpers
 
 private extension String {
-    /// Returns the sha1 string contained in this string, or `nil` if no such string is contained.
+    /// Returns the sha1 string contained in this string, or `nil` if none.
     var containedSHA1: String? { self[#"([0-9A-F]{40})"#] }
-}
-
-class UserIDComboBoxDataSaver {
-
-    /// List of valid IDs.
-    let validCodeSigningIDs: [String] = {
-        var identities: [String] = []
-
-        let security = Topen(exec: "/usr/bin/security",
-                             arguments: ["find-identity", "-v", "-p", "codesigning"])
-
-        while let line = security.readLine() {
-            let components = line.split(separator: ")", maxSplits: 1)
-            if components.count >= 2 {
-                let identity = components[1]
-                identities.append(String(identity))
-            }
-        }
-
-        return identities
-    }()
-
-    /// Last savedID, if valid. `nil` otherwise.
-    var savedID: String? {
-        guard let savedValue = Defaults.codesigningIdentity else { return nil }
-
-        return validCodeSigningIDs.first(where: { $0.containedSHA1 == savedValue.containedSHA1} )
-    }
-
-    @objc func comboBoxValueDidChange(_ sender: NSComboBox) {
-        if let newValueSHA1 = sender.stringValue.containedSHA1,
-           validCodeSigningIDs.contains(where: { $0.containedSHA1 == newValueSHA1 }) {
-            Defaults.codesigningIdentity = newValueSHA1
-        } else {
-            NSLog("Selected value does not contain a valid ID")
-            return
-        }
-    }
 }
 
 private extension NSControl.StateValue {
     @discardableResult
     mutating func toggle() -> Self {
         switch self {
-        case .on:
-            self = .off
-        case .off:
-            self = .on
-        case .mixed:
-            self = .mixed
-        default:
-            break
+        case .on:  self = .off
+        case .off: self = .on
+        case .mixed: self = .mixed
+        default: break
         }
         return self
     }

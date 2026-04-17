@@ -18,7 +18,8 @@
 		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
-		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
+		AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000A1 /* InjectionNextApp.swift */; };
+		AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* StatusMenuView.swift */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -95,7 +96,6 @@
 		BBB64FEC1FD585D50020BE47 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB64FEB1FD585D50020BE47 /* WebKit.framework */; };
 		BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCA02011FB0F10300E45F0F /* AppDelegate.swift */; };
 		BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02031FB0F10300E45F0F /* Assets.xcassets */; };
-		BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02051FB0F10300E45F0F /* MainMenu.xib */; };
 		BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBBEC42D1FC56522004188B3 /* XCTest.framework */; };
 		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
@@ -165,7 +165,8 @@
 		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		AAAA000000000000000000A1 /* InjectionNextApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionNextApp.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B1 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -238,7 +239,6 @@
 		BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InjectionNext.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBCA02011FB0F10300E45F0F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BBCA02031FB0F10300E45F0F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BBCA02061FB0F10300E45F0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BBCA02081FB0F10400E45F0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InjectionNext.entitlements; sourceTree = "<group>"; };
 		BBCCC3B02C73A6AD00E71F81 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/WatchOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -483,11 +483,20 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		AAAA000000000000000000B0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AAAA000000000000000000B1 /* StatusMenuView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BBCA01FF1FB0F10300E45F0F /* InjectionNext */ = {
 			isa = PBXGroup;
 			children = (
-				BB16653925E9A5F0001407AE /* main.m */,
+				AAAA000000000000000000A1 /* InjectionNextApp.swift */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
+				AAAA000000000000000000B0 /* Views */,
 				BB4654802C257F110080EC40 /* NextCompiler.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
@@ -501,7 +510,6 @@
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
 				BBCA02031FB0F10300E45F0F /* Assets.xcassets */,
-				BBCA02051FB0F10300E45F0F /* MainMenu.xib */,
 				BBCA02081FB0F10400E45F0F /* Info.plist */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
@@ -677,7 +685,6 @@
 				BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */,
 				BBF6572F2DAFF00200638170 /* QUICK.md in Resources */,
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
-				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -768,7 +775,8 @@
 				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */,
-				BB16653A25E9A5F2001407AE /* main.m in Sources */,
+				AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */,
+				AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
 				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,
@@ -862,17 +870,6 @@
 			targetProxy = BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		BBCA02051FB0F10300E45F0F /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BBCA02061FB0F10300E45F0F /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BB439B821FABA64300B4F50B /* Debug */ = {
