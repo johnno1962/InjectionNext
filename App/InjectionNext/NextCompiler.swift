@@ -22,9 +22,8 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     #if INJECTION_III_APP
     msg = "⏳ "+msg
     #else
-    LogBuffer.shared.append(msg, level: "info")
     msg = prefix+msg
-    LogBuffer.shared?.append(msg, level: "info")
+    LogBuffer.shared.append(msg, level: "info")
     #endif
     print(msg)
     for client in InjectionServer.currentClients {
