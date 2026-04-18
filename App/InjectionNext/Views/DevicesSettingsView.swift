@@ -51,16 +51,23 @@ struct DevicesSettingsView: View {
             }
 
             Section {
+                Toggle("Enable Device Testing", isOn: $config.deviceTesting)
+                    .onChange(of: config.deviceTesting) { newValue in
+                        AppDelegate.ui?.deviceTestingToggled(enabled: newValue)
+                    }
+
                 TextField("Linker Libraries", text: $config.deviceLibraries)
                     .textFieldStyle(.roundedBorder)
+                    .disabled(!config.deviceTesting)
 
                 Button("Reset to Default") {
                     config.deviceLibraries = "-framework XCTest -lXCTestSwiftSupport"
                 }
+                .disabled(!config.deviceTesting)
             } header: {
-                Label("Device Libraries", systemImage: "books.vertical")
+                Label("Device Testing", systemImage: "testtube.2")
             } footer: {
-                Text("Additional linker flags for device testing (e.g. XCTest frameworks).")
+                Text("Only enable if you've added the copy_bundle.sh Run Script build phase to your target. When on, the injection dylib is linked with the libraries below (XCTest + helpers). Apps that don't link XCTest themselves will crash at dlopen (\"Library not loaded: @rpath/XCTest.framework/XCTest\") if this is on but copy_bundle.sh isn't shipping the frameworks.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

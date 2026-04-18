@@ -12,11 +12,12 @@ Tracking the path from today's `2.0_overhaul` to a tagged `2.0.0`.
   - `UI: SettingsView` — 10 panels (`General`, `Xcode`, `BuildSystem`, `Compiler`, `Injection`, `Devices`, `FileWatcher`, `Network`, `Tracing`, `Advanced`) observing `ConfigStore`; new `Window("settings")` scene.
   - `UI: LogManager + ConsoleView` — central `ObservableObject` logger with ring buffer, dedupe, uncaught-exception / fatal-signal capture, stdout/stderr hijack mirrored to the real fds; `Window("console")` scene; `LogBuffer` becomes a typealias of `LogManager` for back-compat.
 - [x] **Swift 6 / strict-concurrency audit** — nothing in the ported UI requires Swift 6; package/target language mode stays Swift 5.
+- [x] **Device Testing toggle** — split from `devicesEnabled`. Gates linking of `deviceLibraries` (XCTest + helpers) into the injection dylib. Prevents `Library not loaded: @rpath/XCTest.framework/XCTest` crashes on apps that don't ship `copy_bundle.sh`.
 
 ## Next
 
 - [ ] **Bump version to 2.0.0** — `MARKETING_VERSION`; tag after upstream merge.
-- [ ] **Fix red internal-Xcode icon when launching Xcode from the app (non log-parsing path)** — currently stays red until a compile event flips it; need to flip to idle/green once the `MonitorXcode` attach + log tap succeeds.
+- [ ] **Fix red internal-Xcode icon when launching Xcode from the app (non log-parsing path)** — currently stays red until a compile event flips it; need to flip to idle/green once the `MonitorXcode` attach + log tap succeeds. ERROR: - When a user-launched Xcode is already running, MonitorXcode() calls Popen with SOURCEKIT_LOGGING=1 … Xcode. The second Xcode process exits immediately (macOS single-instances the app and just activates the existing one)
 - [ ] **Re-sync submodules against latest heads** — after upstream merges, run `git submodule update --init --recursive` and bump pins in a dedicated commit.
 - [ ] **Settings / preferences refactor** — continue consolidating `ConfigStore` as the single source of truth; migrate any remaining `UserDefaults` direct reads in the backend (`MonitorXcode`, `NextCompiler`, `FrontendServer`).
 - [ ] **Logging + error surfacing improvements** — surface last compile error in the status menu; ring-buffer truncation indicator in the console; level filter persistence.

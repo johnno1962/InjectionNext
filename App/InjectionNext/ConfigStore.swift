@@ -304,6 +304,14 @@ final class ConfigStore: ObservableObject {
     @Published var deviceLibraries: String {
         didSet { ud.set(deviceLibraries, forKey: "libraries") }
     }
+    /// Opt-in: link `deviceLibraries` (XCTest + friends) into the injection
+    /// dylib. Off by default because apps that don't link XCTest themselves
+    /// will crash at dlopen with `Library not loaded: @rpath/XCTest.framework/XCTest`.
+    /// Enable only when `copy_bundle.sh` has been added as a Run Script build phase
+    /// so the test frameworks are shipped inside the app.
+    @Published var deviceTesting: Bool {
+        didSet { ud.set(deviceTesting, forKey: "deviceTesting") }
+    }
     @Published var availableIdentities: [String] = []
 
     // MARK: - Tracing
@@ -394,6 +402,7 @@ final class ConfigStore: ObservableObject {
         self.devicesEnabled = ud.bool(forKey: "devicesEnabled")
         self.codesigningIdentity = ud.string(forKey: "codesigningIdentity")
         self.deviceLibraries = ud.string(forKey: "libraries") ?? "-framework XCTest -lXCTestSwiftSupport"
+        self.deviceTesting = ud.bool(forKey: "deviceTesting")
 
         // Tracing
         self.traceMode = TraceMode(rawValue: ud.string(forKey: "traceMode") ?? "") ?? .off
@@ -511,6 +520,7 @@ final class ConfigStore: ObservableObject {
         devicesEnabled = false
         codesigningIdentity = nil
         deviceLibraries = "-framework XCTest -lXCTestSwiftSupport"
+        deviceTesting = false
         traceMode = .off
         traceFilter = ""
         traceFrameworks = ""
@@ -804,6 +814,10 @@ struct Defaults {
                 ConfigStore.shared.xcodePath = val
             }
         }
+    }
+    static var deviceTesting: Bool {
+        get { ConfigStore.shared.deviceTesting }
+        set { ConfigStore.shared.deviceTesting = newValue }
     }
     static var deviceLibraries: String {
         get { ConfigStore.shared.deviceLibraries }

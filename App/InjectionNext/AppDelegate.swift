@@ -72,9 +72,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
-    /// Mimics `deviceTesting?.state` for NextCompiler.
+    /// Mimics `deviceTesting?.state` for NextCompiler. Opt-in, *not* the same
+    /// as `devicesEnabled` — gates whether we link `deviceLibraries`
+    /// (XCTest + friends) into the injection dylib.
     var deviceTesting: CompatButton? {
-        CompatButton(isOn: ConfigStore.shared.devicesEnabled)
+        CompatButton(isOn: ConfigStore.shared.deviceTesting)
     }
 
     /// Mimics `librariesField.stringValue` for NextCompiler.
@@ -193,20 +195,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func testingEnable(_ sender: NSButton) {
-        if sender.state == .on, let script = Bundle.main
-            .url(forResource: "copy_bundle", withExtension: "sh") {
-            let buildPhase = """
-                export RESOURCES="\(script.deletingLastPathComponent().path)"
-                if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
-                    "$RESOURCES/\(script.lastPathComponent)"
-                fi
-                """
-            let pasteBoard = NSPasteboard.general
-            pasteBoard.declareTypes([.string], owner: nil)
-            pasteBoard.setString(buildPhase, forType: .string)
-            InjectionServer.error("Run Script, Build Phase to " +
-                  "copy testing libraries added to clipboard.")
-        }
+        deviceTestingToggled(enabled: sender.state == .on)
+    }
+
+    /// Called from the SwiftUI Device Testing toggle. When turning on, puts
+    /// the copy_bundle.sh Run Script snippet on the pasteboard so the user
+    /// can paste it into their target's Build Phases.
+    func deviceTestingToggled(enabled: Bool) {
+        guard enabled, let script = Bundle.main
+            .url(forResource: "copy_bundle", withExtension: "sh") else { return }
+        let buildPhase = """
+            export RESOURCES="\(script.deletingLastPathComponent().path)"
+            if [ -f "$RESOURCES/\(script.lastPathComponent)" ]; then
+                "$RESOURCES/\(script.lastPathComponent)"
+            fi
+            """
+        let pasteBoard = NSPasteboard.general
+        pasteBoard.declareTypes([.string], owner: nil)
+        pasteBoard.setString(buildPhase, forType: .string)
+        InjectionServer.error("Run Script, Build Phase to " +
+              "copy testing libraries added to clipboard.")
     }
 
     @IBAction func updateLibraries(_ sender: NSTextField) {
