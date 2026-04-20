@@ -23,7 +23,7 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = "⏳ "+msg
     #else
     msg = prefix+msg
-    LogBuffer.shared?.append(msg, level: "info")
+    LogBuffer.shared.append(msg, level: "info")
     #endif
     print(msg)
     for client in InjectionServer.currentClients {

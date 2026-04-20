@@ -305,7 +305,7 @@ extension AppDelegate {
             .fileExists(atPath: FrontendServer.patched) ?
             FrontendServer.State.patched : .unpatched
         DispatchQueue.main.async {
-            self.patchCompilerItem?.title = state.rawValue
+            self.patchCompilerItem.title = state.rawValue
             if state == .patched {
                 _ = FrontendServer.startOnce
             }
