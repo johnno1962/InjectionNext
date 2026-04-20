@@ -153,8 +153,63 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Actions
 
     @IBAction func runXcode(_ sender: Any) {
-        if MonitorXcode.runningXcode == nil {
-            _ = MonitorXcode()
+        guard MonitorXcode.runningXcode == nil else { return }
+
+        // If an Xcode is already running but wasn't launched by us
+        // (no RUNNING_VIA_INJECTION_NEXT=1 env marker), `Popen(... Xcode ...)`
+        // would spawn a shell child that exits immediately — macOS just
+        // activates the existing app. That leaves us with no SourceKit
+        // log stream, so the first client connect flips the menu icon
+        // to .error (red). Ask the user to quit it so we can relaunch
+        // it under our control with SOURCEKIT_LOGGING=1.
+        if let external = externalRunningXcode() {
+            guard confirmQuitExternalXcode() else { return }
+            external.terminate()
+            waitForXcodeToExit(external)
+        }
+
+        _ = MonitorXcode()
+    }
+
+    /// Returns a running Xcode that we did *not* spawn, or nil if either
+    /// no Xcode is running or the running one was launched by us.
+    func externalRunningXcode() -> NSRunningApplication? {
+        guard let xcode = NSRunningApplication
+            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
+            .first else { return nil }
+        // `ps eww -p <pid>` prints env vars of processes owned by the
+        // current user, which is exactly what we need here.
+        let pid = xcode.processIdentifier
+        if let env = Popen(cmd: "ps eww -p \(pid) -o command= 2>/dev/null")?
+            .readAll(), env.contains("RUNNING_VIA_INJECTION_NEXT=1") {
+            return nil
+        }
+        return xcode
+    }
+
+    /// Prompts the user to quit the externally-launched Xcode so we can
+    /// relaunch it with SourceKit logging enabled. Returns true on confirm.
+    func confirmQuitExternalXcode() -> Bool {
+        let alert = NSAlert()
+        alert.messageText = "Quit and relaunch Xcode?"
+        alert.informativeText = """
+            Xcode is already running but was not launched by InjectionNext. \
+            To parse its SourceKit logs (needed for compile-arg capture), \
+            InjectionNext needs to quit it and relaunch it with \
+            SOURCEKIT_LOGGING=1. Unsaved work will prompt you in Xcode.
+            """
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Quit & Relaunch")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+
+    /// Polls until the given running app reports terminated, up to ~15s.
+    func waitForXcodeToExit(_ app: NSRunningApplication) {
+        let deadline = Date().addingTimeInterval(15)
+        while !app.isTerminated && Date() < deadline {
+            RunLoop.current.run(mode: .default,
+                                before: Date().addingTimeInterval(0.1))
         }
     }
 
