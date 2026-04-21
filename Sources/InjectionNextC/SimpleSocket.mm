@@ -353,6 +353,9 @@ typedef ssize_t (*io_func)(int, void *, size_t);
     fclose(output);
     return pos == sz;
 }
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode {
+    return fdopen(clientSocket, mode);
+}
 
 - (void)dealloc {
     close(clientSocket);
