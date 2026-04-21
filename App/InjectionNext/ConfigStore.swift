@@ -294,8 +294,9 @@ final class ConfigStore: ObservableObject {
     }
     
     func updateEnvVars() {
+        let clients = InjectionServer.currentClients
         InjectionServer.clientQueue.async {
-            for client in InjectionServer.currentClients where client != nil {
+            for client in clients where client != nil {
                 self.sendEnvVars(to: client!)
             }
         }
