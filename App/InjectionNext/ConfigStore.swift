@@ -303,17 +303,22 @@ final class ConfigStore: ObservableObject {
     }
     
     func sendEnvVars(to client: InjectionServer) {
+        let unsetVar = "0"
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_DETAIL)
+        client.write(verboseLogging ? "1" : unsetVar)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_PRESERVE_STATICS)
-        client.write(preserveStatics ? "1" : "0")
+        client.write(preserveStatics ? "1" : unsetVar)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_SWEEP_DETAIL)
-        client.write(sweepDetail ? "1" : "0")
-        if sweepExclude != "" {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_SWEEP_EXCLUDE)
-            client.write(sweepExclude)
-        }
+        client.write(sweepDetail ? "1" : unsetVar)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_SWEEP_EXCLUDE)
+        client.write(sweepExclude != "" ? sweepExclude : unsetVar)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_BENCH)
+        client.write(benchmarking ? "1" : unsetVar)
     }
 
     // MARK: - Devices
@@ -375,10 +380,10 @@ final class ConfigStore: ObservableObject {
     // MARK: - Advanced
 
     @Published var verboseLogging: Bool {
-        didSet { ud.set(verboseLogging, forKey: "verboseLogging") }
+        didSet { ud.set(verboseLogging, forKey: "verboseLogging") ; updateEnvVars() }
     }
     @Published var benchmarking: Bool {
-        didSet { ud.set(benchmarking, forKey: "benchmarking") }
+        didSet { ud.set(benchmarking, forKey: "benchmarking"); updateEnvVars() }
     }
     @Published var dlOpenMode: DLOpenMode {
         didSet {
