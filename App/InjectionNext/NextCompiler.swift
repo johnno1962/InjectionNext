@@ -32,10 +32,16 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     return true
 }
 
+@discardableResult
 public func debug(_ what: Any..., prefix: String = "🐞 ", separator: String = " ") -> Bool {
     #if DEBUG
-    print(prefix+what.map {"\($0)"}.joined(separator: separator))
+    let show = true
+    #else
+    let show = isatty(STDIN_FILENO) != 0
     #endif
+    if show {
+        print(prefix+what.map {"\($0)"}.joined(separator: separator))
+    }
     return true
 }
 
