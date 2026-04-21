@@ -275,35 +275,36 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(autoOpenDefaultProject, forKey: "autoOpenDefaultProject") }
     }
     @Published var preserveStatics: Bool {
-        didSet { ud.set(preserveStatics, forKey: "preserveStatics") }
+        didSet { ud.set(preserveStatics, forKey: "preserveStatics"); updateEnvVars() }
     }
-    @Published var disableStandalone: Bool {
+    @Published var disableStandalone: Bool { // difficult to implement without connection.
         didSet { ud.set(disableStandalone, forKey: "disableStandalone") }
     }
-    @Published var genericsMode: GenericsMode {
+    @Published var genericsMode: GenericsMode { // difficult to implement early.
         didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode") }
     }
-    @Published var keyPathsMode: KeyPathsMode {
+    @Published var keyPathsMode: KeyPathsMode { // difficult to implement early.
         didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
     }
     @Published var sweepExclude: String {
-        didSet { ud.set(sweepExclude, forKey: "sweepExclude")
-                 updateSweepVars() }
+        didSet { ud.set(sweepExclude, forKey: "sweepExclude"); updateEnvVars() }
     }
     @Published var sweepDetail: Bool {
-        didSet { ud.set(sweepDetail, forKey: "sweepDetail")
-                 updateSweepVars() }
+        didSet { ud.set(sweepDetail, forKey: "sweepDetail"); updateEnvVars() }
     }
     
-    func updateSweepVars() {
+    func updateEnvVars() {
         InjectionServer.clientQueue.async {
             for client in InjectionServer.currentClients where client != nil {
-                self.sendSweepVars(to: client!)
+                self.sendEnvVars(to: client!)
             }
         }
     }
     
-    func sendSweepVars(to client: InjectionServer) {
+    func sendEnvVars(to client: InjectionServer) {
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_PRESERVE_STATICS)
+        client.write(preserveStatics ? "1" : "0")
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_SWEEP_DETAIL)
         client.write(sweepDetail ? "1" : "0")
@@ -335,7 +336,7 @@ final class ConfigStore: ObservableObject {
     }
     @Published var availableIdentities: [String] = []
 
-    // MARK: - Tracing
+    // MARK: - Tracing // difficult to implement as tracing happens early.
 
     @Published var traceMode: TraceMode {
         didSet { ud.set(traceMode.rawValue, forKey: "traceMode") }
@@ -448,9 +449,7 @@ final class ConfigStore: ObservableObject {
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
-           let runningXcode = NSRunningApplication
-            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
-            .first?.bundleURL?.path {
+           let runningXcode = MonitorXcode.externalXcode?.bundleURL?.path {
             self.xcodePath = runningXcode
         }
 

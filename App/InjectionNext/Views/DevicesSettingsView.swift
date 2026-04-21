@@ -55,10 +55,12 @@ struct DevicesSettingsView: View {
                     .onChange(of: config.deviceTesting) { newValue in
                         AppDelegate.ui?.deviceTestingToggled(enabled: newValue)
                     }
+                    .help("Enables injecting tests on a device.")
 
                 TextField("Linker Libraries", text: $config.deviceLibraries)
                     .textFieldStyle(.roundedBorder)
                     .disabled(!config.deviceTesting)
+                    .help("Libraries to be added to link injecting tests.")
 
                 Button("Reset to Default") {
                     config.deviceLibraries = "-framework XCTest -lXCTestSwiftSupport"

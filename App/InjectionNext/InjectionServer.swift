@@ -175,7 +175,7 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     Self.clientQueue.async {
                         Self.connected.append(self)
-                        ConfigStore.shared.sendSweepVars(to: self)
+                        ConfigStore.shared.sendEnvVars(to: self)
                     }
                 } else {
                     error("**** Bad tmp ****")
