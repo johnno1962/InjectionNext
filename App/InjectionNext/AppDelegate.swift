@@ -116,11 +116,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ConfigStore.shared.discoverCodesigningIdentities()
 
         // Start injection server for on-device/sim connections.
+        if updatePatchUnpatch() == .patched {
+            _ = FrontendServer.startOnce
+        }
         deviceEnable(nil)
 
-        if let xcodePath = NSRunningApplication
-            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
-            .first?.bundleURL?.path {
+        if let xcodePath = MonitorXcode.externalXcode?.bundleURL?.path {
             if Defaults.xcodeDefault == nil {
                 Defaults.xcodeDefault = xcodePath
             }
