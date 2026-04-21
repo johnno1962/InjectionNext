@@ -52,7 +52,7 @@ struct XcodeSettingsView: View {
                         .truncationMode(.middle)
                         .textSelection(.enabled)
                 }
-                .help("Currently select path to Xcode.app")
+                .help("Currently selected path to Xcode.app")
             } header: {
                 Label("Xcode Installation", systemImage: "hammer")
             }
