@@ -205,6 +205,9 @@ static int lastServerSocket;
     }
     return self;
 }
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode {
+    return fdopen(clientSocket, mode);
+}
 
 - (void)run {
     [self performSelectorInBackground:@selector(runInBackground) withObject:nil];
@@ -352,9 +355,6 @@ typedef ssize_t (*io_func)(int, void *, size_t);
         pos += chunk;
     fclose(output);
     return pos == sz;
-}
-- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode {
-    return fdopen(clientSocket, mode);
 }
 
 - (void)dealloc {

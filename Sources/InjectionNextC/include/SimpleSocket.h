@@ -23,7 +23,6 @@
 + (int)error:(NSString *_Nonnull)message;
 + (void)stopLastServer;
 
-- (instancetype _Nonnull)initSocket:(int)socket;
 + (instancetype _Nullable)connectTo:(NSString *_Nonnull)address;
 + (BOOL)parseV4Address:(NSString *_Nonnull)address into:(struct sockaddr_storage *_Nonnull)serverAddr;
 
@@ -33,6 +32,7 @@
                                   message:(const char *_Nonnull)format;
 
 - (instancetype _Nonnull)initSocket:(int)socket;
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode;
 
 - (void)run;
 - (void)runInBackground;
@@ -51,7 +51,6 @@
 - (BOOL)writeCommand:(int)command withString:(NSString *_Nullable)string;
 - (BOOL)sendFile:(NSString *_Nonnull)path;
 - (BOOL)recvFile:(NSString *_Nonnull)path;
-- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode;
 
 @end
 
