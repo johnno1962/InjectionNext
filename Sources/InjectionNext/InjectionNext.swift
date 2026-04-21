@@ -118,21 +118,49 @@ open class InjectionNext: SimpleSocket {
         SwiftTrace.injectableSymbol = Reloader.injectableSymbol
         SwiftTrace.defaultMethodExclusions += // CoreFoundation
             #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
+          + #"|InjectionBundle.|fast_dl"#
+        for name in [INJECTION_TRACE_LOOKUP, INJECTION_TRACE_FILTER, INJECTION_TRACE_ALL,
+                     INJECTION_TRACE_FRAMEWORKS, INJECTION_TRACE_UIKIT, INJECTION_TRACE] {
+            if let value = getenv(name) {
+                setVariable(name: name, to: String(cString: value), first: true)
+            }
+        }
+    }
+ 
+    func setVariable(name: String, to value: String, first: Bool) {
+        let wasSet = getenv(name) != nil
+        if name == INJECTION_DLOPEN_MODE, let mode = Int32(value) {
+            DLKit.dlOpenMode = mode
+        } else if name == INJECTION_TRACE_FILTER {
+            if value == UNSETENV_VALUE {
+                if wasSet {
+                    SwiftTrace.traceFilterInclude = "."
+                }
+            } else {
+                SwiftTrace.traceFilterInclude = value
+            }
+        }
+        if value == UNSETENV_VALUE {
+            unsetenv(name)
+            return
+        }
+        
+        setenv(name, value, 1)
+        if !first && wasSet {
+            return
+        }
+
+        switch name {
         /// Custom type lookup on tracing.
-        if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
-            if exclude[0] == UInt8(ascii: "|") {
-                SwiftTrace.defaultLookupExclusions += String(cString: exclude)
+        case INJECTION_TRACE_LOOKUP:
+            if value.hasPrefix("|") {
+                SwiftTrace.defaultLookupExclusions += value
             }
             SwiftTrace.typeLookup = true
-        }
-        if let filter = getenv(INJECTION_TRACE_FILTER) {
-            SwiftTrace.inclusionRegexp =
-                NSRegularExpression(regexp: String(cString: filter))
-        }
         /// Entire App bundle tracing.
-        if let exclude = getenv(INJECTION_TRACE_ALL) {
-            if exclude[0] == UInt8(ascii: "|") {
-                SwiftTrace.defaultMethodExclusions += String(cString: exclude)
+        case INJECTION_TRACE_ALL:
+            if value.hasPrefix("|") {
+                SwiftTrace.defaultMethodExclusions += value
             }
             SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
             appBundleImages { imageName, _, _ in
@@ -146,10 +174,9 @@ open class InjectionNext: SimpleSocket {
                 }
                 SwiftTrace.trace(bundlePath: imageName)
             }
-        }
         /// Trace calls to framework e.g. SwiftUI,SwiftUICore
-        if let which = getenv(INJECTION_TRACE_FRAMEWORKS) {
-            var frmwks = String(cString: which)
+        case INJECTION_TRACE_FRAMEWORKS:
+            var frmwks = value
             if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let dylib = DLKit.imageMap[frmwk] {
@@ -161,10 +188,9 @@ open class InjectionNext: SimpleSocket {
                     error("Invalid trace framework \(frmwk)")
                 }
             }
-        }
-        // Trace UIKit internals using swizzling
-        if let which = getenv(INJECTION_TRACE_UIKIT) {
-            var frmwks = String(cString: which)
+        /// Trace UIKit internals using swizzling
+        case INJECTION_TRACE_UIKIT:
+            var frmwks = value
             if frmwks == "" || frmwks == "1" { frmwks = "UIKitCore" }
             for frmwk in frmwks.components(separatedBy: ",") {
                 if let bundle = DLKit.imageMap[frmwk]?.imageName {
@@ -173,14 +199,15 @@ open class InjectionNext: SimpleSocket {
                     error("Invalid swizzle framework \(frmwk)")
                 }
             }
-        }
         /// Function and class method tracing on injection.
-        if getenv(INJECTION_TRACE) != nil {
+        case INJECTION_TRACE:
             Reloader.traceHook = { (injected, name) in
                 let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
                 detail("SwiftTracing \(name)")
                 return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
             }
+        default:
+            break
         }
     }
 
@@ -279,10 +306,18 @@ open class InjectionNext: SimpleSocket {
                         userInfo: metricsDict
                     )
                 }
+            case .setenv:
+                while let name = readString(), let value = readString() {
+                    setVariable(name: name, to: value, first: false)
+                    if readInt() != commandInt {
+                        break
+                    }
+                }
             case .EOF:
                 return
             default:
-                return error("**** @unknown case \(commandInt) ****")
+                return error("**** @unknown case \(commandInt) **** " +
+                             "Do you need to update the InjectionNext package?")
             }
         }
     }
