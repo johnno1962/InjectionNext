@@ -26,6 +26,7 @@ struct StatusMenuView: View {
                 Label("Settings...", systemImage: "gearshape")
             }
             .keyboardShortcut(",", modifiers: .command)
+            .help("Preferences Config")
 
             Button {
                 AppDelegate.ui?.runXcode(self)
@@ -38,6 +39,7 @@ struct StatusMenuView: View {
                     }
                 }
             }
+            .help("Launch Xcode in a way that logs how to recompile files")
 
             Divider()
 
@@ -60,6 +62,7 @@ struct StatusMenuView: View {
                     }
                 }
             }
+            .help("Add another directory that will be watched for source changes")
 
             if !config.watchingDirectories.isEmpty {
                 Button("Stop Watching") {
@@ -84,6 +87,7 @@ struct StatusMenuView: View {
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
             }
+            .help("Make public defualt argument generators for injecting default arguments")
 
             Divider()
 
@@ -93,6 +97,7 @@ struct StatusMenuView: View {
             } label: {
                 Label("Open Console…", systemImage: "terminal")
             }
+            .help("Open low level app logs")
 
             Divider()
 
@@ -107,6 +112,7 @@ struct StatusMenuView: View {
             } icon: {
                 Image(nsImage: Self.coloredDot(stateNSColor))
             }
+            .help("Status of \(APP_NAME).app")
 
             Label {
                 Text(buildSystemStatusText)

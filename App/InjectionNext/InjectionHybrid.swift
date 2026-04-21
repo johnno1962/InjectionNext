@@ -72,7 +72,7 @@ class InjectionHybrid: InjectionBase {
         super.init()
         // Extend FileWatcher pattern to detect git lock files
         FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock|o)$"#)
+            pattern: ConfigStore.shared.injectablePattern)
     }
 
     /// Called from file watcher when file is edited.

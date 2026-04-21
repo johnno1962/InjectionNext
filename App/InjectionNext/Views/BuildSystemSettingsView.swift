@@ -54,6 +54,7 @@ struct BuildSystemSettingsView: View {
                             }
                         }
                     }
+                    .help("Path to bazelisk binary")
 
                     TextField("Bazel Target (optional)", text: $config.bazelTarget)
                         .textFieldStyle(.roundedBorder)
@@ -62,6 +63,7 @@ struct BuildSystemSettingsView: View {
                     LabeledContent("Bazel Target") {
                         Text(config.bazelTarget.isEmpty ? "Auto-detected from client" : config.bazelTarget)
                             .foregroundStyle(config.bazelTarget.isEmpty ? .secondary : .primary)
+                            .help("Sepcify a bazel target to build")
                     }
                 } header: {
                     Label("Bazel Configuration", systemImage: "cube")
@@ -77,6 +79,7 @@ struct BuildSystemSettingsView: View {
                     HStack {
                         TextField("/usr/bin/xcrun", text: $config.xcrunPath)
                             .textFieldStyle(.roundedBorder)
+                            .help("Path to xcrun used by bazel support")
                         Button("Browse...") {
                             let open = NSOpenPanel()
                             open.prompt = "Select xcrun"

@@ -22,6 +22,7 @@ struct XcodeSettingsView: View {
                             browseButton
                         }
                     }
+                    .help("Path to Xcode launched by this app")
                 } else {
                     Picker("Xcode", selection: $config.xcodePath) {
                         ForEach(config.availableXcodes) { xcode in
@@ -32,6 +33,7 @@ struct XcodeSettingsView: View {
                     .onChange(of: config.xcodePath) { _ in
                         AppDelegate.ui?.updatePatchUnpatch()
                     }
+                    .help("Select path to valid Xcode")
 
                     HStack {
                         Spacer()
@@ -50,6 +52,7 @@ struct XcodeSettingsView: View {
                         .truncationMode(.middle)
                         .textSelection(.enabled)
                 }
+                .help("Currently select path to Xcode.app")
             } header: {
                 Label("Xcode Installation", systemImage: "hammer")
             }
@@ -57,7 +60,9 @@ struct XcodeSettingsView: View {
             Section {
                 Toggle("Auto-launch Xcode on app start", isOn: $config.autoLaunchXcode)
                 Toggle("Restart Xcode if it crashes", isOn: $config.xcodeRestart)
+                    .help("Restart Xcode if itdoes not exit cleanly")
                 Toggle("Hide initial Xcode alert", isOn: $config.hideXcodeAlert)
+                    .help("Supress initial hint to launch Xcode")
             } header: {
                 Label("Launch Behavior", systemImage: "play.circle")
             } footer: {
@@ -67,7 +72,7 @@ struct XcodeSettingsView: View {
             }
 
             Section {
-                LabeledContent("Xcode Running") {
+                LabeledContent("Launched Xcode") {
                     HStack {
                         Circle()
                             .fill(config.haveLaunchedXocde ? .green : .gray)
@@ -75,10 +80,12 @@ struct XcodeSettingsView: View {
                         Text(config.haveLaunchedXocde ? "Running" : "Not Running")
                     }
                 }
+                .help("Was Xcode launched by this app")
                 Button("Launch Xcode Now") {
                     AppDelegate.ui?.runXcode(self)
                 }
                 .disabled(config.haveLaunchedXocde)
+                .help("... if not launch it")
             } header: {
                 Label("Status", systemImage: "info.circle")
             }

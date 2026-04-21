@@ -17,6 +17,7 @@ struct DevicesSettingsView: View {
                     .onChange(of: config.devicesEnabled) { newValue in
                         AppDelegate.ui?.applyDeviceSettings(enabled: newValue)
                     }
+                    .help("Enable injection on a real device.")
             } header: {
                 Label("Device Support", systemImage: "iphone")
             } footer: {
@@ -41,6 +42,7 @@ struct DevicesSettingsView: View {
                                 .tag(identity.sha1Component ?? identity)
                         }
                     }
+                    .help("Identity to codesign dynamic libraries on real device injection")
                 }
 
                 Button("Refresh Identities") {

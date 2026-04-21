@@ -16,6 +16,7 @@ struct FileWatcherSettingsView: View {
                 LabeledContent("Injectable Pattern (regex)") {
                     TextField("Pattern", text: $config.injectablePattern)
                         .textFieldStyle(.roundedBorder)
+                        .help("Regular expresssion selecting injectable files")
                 }
 
                 Button("Reset to Default") {
@@ -39,6 +40,7 @@ struct FileWatcherSettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     Slider(value: $config.fileWatcherLatency, in: 0.05...1.0, step: 0.05)
+                        .help("Not implemented in FileWatcher (yet)?")
                 }
 
                 Button("Reset to Default (0.10s)") {

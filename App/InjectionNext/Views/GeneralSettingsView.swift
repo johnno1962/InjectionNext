@@ -30,8 +30,11 @@ struct GeneralSettingsView: View {
                         Text(config.injectionState.rawValue)
                     }
                 }
+                .help("App status")
                 LabeledContent("Launched Xcode", value: config.haveLaunchedXocde ? "Yes" : "No")
+                    .help("Was Xcode launched using this app")
                 LabeledContent("Client Connected", value: config.isClientConnected ? "Yes" : "No")
+                    .help("Is a client app currently connected")
 
                 if !config.watchingDirectories.isEmpty {
                     LabeledContent("Watching") {
@@ -44,6 +47,7 @@ struct GeneralSettingsView: View {
                             }
                         }
                     }
+                    .help("Directories currently being watched for source changes")
                 } else {
                     LabeledContent("Watching", value: "None")
                 }
