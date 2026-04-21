@@ -279,10 +279,19 @@ open class InjectionNext: SimpleSocket {
                         userInfo: metricsDict
                     )
                 }
+            case .setenv:
+                if let name = readString(), let value = readString() {
+                    if value != "0" {
+                        setenv(name, value, 1)
+                    } else {
+                        unsetenv(name)
+                    }
+                }
             case .EOF:
                 return
             default:
-                return error("**** @unknown case \(commandInt) ****")
+                return error("**** @unknown case \(commandInt) **** " +
+                             "Do you need to update the InjectionNext package?")
             }
         }
     }
