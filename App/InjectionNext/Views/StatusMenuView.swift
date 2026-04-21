@@ -26,7 +26,7 @@ struct StatusMenuView: View {
                 Label("Settings...", systemImage: "gearshape")
             }
             .keyboardShortcut(",", modifiers: .command)
-            .help("Preferences Config")
+            .help("Open Settings")
 
             Button {
                 AppDelegate.ui?.runXcode(self)
