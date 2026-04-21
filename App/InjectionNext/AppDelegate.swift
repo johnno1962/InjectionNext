@@ -62,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Mimics `patchCompilerItem` — a real orphan NSMenuItem so
     /// `patchCompilerItem?.title = ...` and `prepareProject(item)` calls compile.
-    var patchCompilerItem: NSMenuItem { NSMenuItem() }
+    var patchCompilerItem: NSMenuItem! { NSMenuItem() }
 
     /// Mimics `restartDeviceItem.state`.
     var restartDeviceItem: CompatMenuItem {
