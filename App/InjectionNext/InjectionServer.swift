@@ -167,7 +167,7 @@ class InjectionServer: SimpleSocket {
                 }
             case .tmpPath:
                 if let tmpPath = readString() {
-                    print("Tmp path: "+tmpPath)
+                    debug("Tmp path: "+tmpPath)
                     if tmpPath.contains("/Xcode/UserData/Previews/") {
                         return
                     }

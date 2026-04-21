@@ -71,7 +71,7 @@ class FrontendServer: SimpleSocket {
                     recompiler.store(compilation: compile, for: source)
                 }
                 recompiler.modified = false
-                print("Loaded \(recompiler.compilations.count) \(platform) commands.")
+                debug("Loaded \(recompiler.compilations.count) \(platform) commands.")
             }
         } catch {
             InjectionServer.error("Unable to read commands cache: \(error).")
@@ -90,7 +90,7 @@ class FrontendServer: SimpleSocket {
             if let error = Popen.system("gzip -f "+cache.path, errors: true) {
                 InjectionServer.error("Unable to zip commands cache: \(error)")
             } else {
-                print("Cached \(commands.count) \(platform) commands")
+                debug("Cached \(commands.count) \(platform) commands")
             }
             recompiler.modified = false
         } catch {
@@ -173,7 +173,7 @@ class FrontendServer: SimpleSocket {
                 }
                 #endif
 
-                print("Updating \(parser.args.count) args for \(parser.platform)/" +
+                debug("Updating \(parser.args.count) args for \(parser.platform)/" +
                       URL(fileURLWithPath: source).lastPathComponent)
                 recompiler.store(compilation: update, for: source)
             }
@@ -334,7 +334,7 @@ extension AppDelegate {
 
             """
         if changes?.pointee != before {
-            print("Patched", source)
+            debug("Patched", source)
         }
 
         if (patched.contains("class AppDelegate") ||

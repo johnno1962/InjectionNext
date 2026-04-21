@@ -41,12 +41,6 @@ class MonitorXcode {
             .first(where: { $0.processIdentifier > 0 })
     }
 
-    func debug(_ what: Any..., separator: String = " ") {
-        #if DEBUG
-        print(what, separator: separator)
-        #endif
-    }
-
     init?(args: String = "") {
         if Self.externalXcode != nil {
             InjectionServer.error("Xcode already running, cannot start another")
@@ -194,7 +188,7 @@ class MonitorXcode {
                     return
                 }
 
-                print("Updating \(parser.args.count) args with \(parser.swiftFileCount) swift files "+source+" "+line)
+                debug("Updating \(parser.args.count) args with \(parser.swiftFileCount) swift files "+source+" "+line)
                 let update = NextCompiler.Compilation(arguments: parser.args,
                     swiftFiles: parser.swiftFiles, workingDir: parser.workingDir)
 
@@ -204,7 +198,7 @@ class MonitorXcode {
             } else if line ==
                 "  key.request: source.request.indexer.editor-will-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
-                print("Injecting saved file "+source)
+                debug("Injecting saved file "+source)
                 DispatchQueue.main.async {
                     InjectionHybrid.lastInjected[source] = Date.timeIntervalSinceReferenceDate
                 }
