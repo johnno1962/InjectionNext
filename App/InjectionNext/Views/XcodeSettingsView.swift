@@ -62,7 +62,7 @@ struct XcodeSettingsView: View {
                 Toggle("Restart Xcode if it crashes", isOn: $config.xcodeRestart)
                     .help("Restart Xcode if itdoes not exit cleanly")
                 Toggle("Hide initial Xcode alert", isOn: $config.hideXcodeAlert)
-                    .help("Supress initial hint to launch Xcode")
+                    .help("Suppress initial hint to launch Xcode")
             } header: {
                 Label("Launch Behavior", systemImage: "play.circle")
             } footer: {
