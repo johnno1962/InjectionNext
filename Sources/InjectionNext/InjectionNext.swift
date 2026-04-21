@@ -114,10 +114,15 @@ open class InjectionNext: SimpleSocket {
         log("Connection lost, disconnecting.")
     }
     
-    func tracingOptions() {
+    lazy var setupTraceAdjustments: Void = {
         SwiftTrace.injectableSymbol = Reloader.injectableSymbol
         SwiftTrace.defaultMethodExclusions += // CoreFoundation
             #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
+          + #"|InjectionBundle.|fast_dl"#
+    }()
+    
+    func tracingOptions() {
+        _ = setupTraceAdjustments
         /// Custom type lookup on tracing.
         if let exclude = getenv(INJECTION_TRACE_LOOKUP) {
             if exclude[0] == UInt8(ascii: "|") {
@@ -126,8 +131,7 @@ open class InjectionNext: SimpleSocket {
             SwiftTrace.typeLookup = true
         }
         if let filter = getenv(INJECTION_TRACE_FILTER) {
-            SwiftTrace.inclusionRegexp =
-                NSRegularExpression(regexp: String(cString: filter))
+            SwiftTrace.traceFilterInclude = String(cString: filter)
         }
         /// Entire App bundle tracing.
         if let exclude = getenv(INJECTION_TRACE_ALL) {
@@ -281,10 +285,66 @@ open class InjectionNext: SimpleSocket {
                 }
             case .setenv:
                 if let name = readString(), let value = readString() {
-                    if value != "0" {
-                        setenv(name, value, 1)
-                    } else {
+                    if value == "0" {
                         unsetenv(name)
+                    } else {
+                        _ = setupTraceAdjustments
+                        if name == INJECTION_TRACE_FILTER {
+                            SwiftTrace.traceFilterInclude = value
+                        } else if getenv(name) == nil {
+                            switch name {
+                            case INJECTION_TRACE_LOOKUP:
+                                if value.hasPrefix("|") {
+                                    SwiftTrace.defaultLookupExclusions += value
+                                }
+                                SwiftTrace.typeLookup = true
+                            case INJECTION_TRACE_ALL:
+                                SwiftTrace.interposeEclusions = SwiftTrace.exclusionRegexp
+                                appBundleImages { imageName, _, _ in
+                                    if SwiftTrace.interposeMethods(inBundlePath: imageName) == 0,
+                                       strstr(imageName, "XCT") == nil {
+                                        self.error("""
+                                        Unable to interpose to trace image \
+                                        \(String(cString: imageName)), have you added \
+                                        "Other Linker Flags" -Xlinker -interposable
+                                        """)
+                                    }
+                                    SwiftTrace.trace(bundlePath: imageName)
+                                }
+                            case INJECTION_TRACE_FRAMEWORKS:
+                                var frmwks = value
+                                if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
+                                for frmwk in frmwks.components(separatedBy: ",") {
+                                    if let dylib = DLKit.imageMap[frmwk] {
+                                        Self.target = dylib
+                                        appBundleImages { path, header, slide in
+                                            rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
+                                        }
+                                    } else {
+                                        error("Invalid trace framework \(frmwk)")
+                                    }
+                                }
+                            case INJECTION_TRACE_UIKIT:
+                                var frmwks = value
+                                if frmwks == "" || frmwks == "1" { frmwks = "UIKitCore" }
+                                for frmwk in frmwks.components(separatedBy: ",") {
+                                    if let bundle = DLKit.imageMap[frmwk]?.imageName {
+                                        SwiftTrace.trace(bundlePath: bundle)
+                                    } else {
+                                        error("Invalid swizzle framework \(frmwk)")
+                                    }
+                                }
+                            case INJECTION_TRACE:
+                                Reloader.traceHook = { (injected, name) in
+                                    let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
+                                    detail("SwiftTracing \(name)")
+                                    return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
+                                }
+                            default:
+                                break
+                            }
+                        }
+                        setenv(name, value, 1)
                     }
                 }
             case .EOF:

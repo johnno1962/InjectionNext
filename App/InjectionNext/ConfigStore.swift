@@ -319,6 +319,36 @@ final class ConfigStore: ObservableObject {
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_BENCH)
         client.write(benchmarking ? "1" : unsetVar)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_TRACE_FILTER)
+        client.write(traceFilter != "" ? traceFilter : ".")
+        switch traceMode {
+        case .injected:
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE)
+            client.write("1")
+        case .all:
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_ALL)
+            client.write("1")
+        case .off:
+            break
+        }
+        if traceFrameworks != "" {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_FRAMEWORKS)
+            client.write(traceFrameworks)
+        }
+        if traceUIKit != "" {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_UIKIT)
+            client.write(traceUIKit)
+        }
+        if traceLookup {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_LOOKUP)
+            client.write(traceUIKit)
+        }
     }
 
     // MARK: - Devices
@@ -342,22 +372,22 @@ final class ConfigStore: ObservableObject {
     }
     @Published var availableIdentities: [String] = []
 
-    // MARK: - Tracing // difficult to implement as tracing happens early.
+    // MARK: - Tracing
 
     @Published var traceMode: TraceMode {
-        didSet { ud.set(traceMode.rawValue, forKey: "traceMode") }
+        didSet { ud.set(traceMode.rawValue, forKey: "traceMode"); updateEnvVars() }
     }
     @Published var traceFilter: String {
-        didSet { ud.set(traceFilter, forKey: "traceFilter") }
+        didSet { ud.set(traceFilter, forKey: "traceFilter"); updateEnvVars() }
     }
     @Published var traceFrameworks: String {
-        didSet { ud.set(traceFrameworks, forKey: "traceFrameworks") }
+        didSet { ud.set(traceFrameworks, forKey: "traceFrameworks"); updateEnvVars() }
     }
     @Published var traceLookup: Bool {
-        didSet { ud.set(traceLookup, forKey: "traceLookup") }
+        didSet { ud.set(traceLookup, forKey: "traceLookup"); updateEnvVars() }
     }
     @Published var traceUIKit: String {
-        didSet { ud.set(traceUIKit, forKey: "traceUIKit") }
+        didSet { ud.set(traceUIKit, forKey: "traceUIKit"); updateEnvVars() }
     }
 
     // MARK: - File Watcher
