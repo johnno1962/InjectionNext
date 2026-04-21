@@ -30,7 +30,7 @@ struct GeneralSettingsView: View {
                         Text(config.injectionState.rawValue)
                     }
                 }
-                LabeledContent("Xcode Running", value: config.haveLaunchedXocde ? "Yes" : "No")
+                LabeledContent("Launched Xcode", value: config.haveLaunchedXocde ? "Yes" : "No")
                 LabeledContent("Client Connected", value: config.isClientConnected ? "Yes" : "No")
 
                 if !config.watchingDirectories.isEmpty {

@@ -296,9 +296,8 @@ final class ConfigStore: ObservableObject {
     }
     
     func updateSweepVars() {
-        let clients = InjectionServer.currentClients
         InjectionServer.clientQueue.async {
-            for client in clients where client != nil {
+            for client in InjectionServer.currentClients where client != nil {
                 self.sendSweepVars(to: client!)
             }
         }
