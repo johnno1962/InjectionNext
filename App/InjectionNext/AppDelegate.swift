@@ -150,7 +150,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setMenuIcon(_ state: InjectionState) {
         DispatchQueue.main.async {
             ConfigStore.shared.setInjectionState(state)
-            ConfigStore.shared.isClientConnected = state == .ok
+            ConfigStore.shared.isClientConnected = InjectionServer.currentClient != nil
         }
     }
 
