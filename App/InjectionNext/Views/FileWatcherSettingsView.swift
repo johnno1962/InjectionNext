@@ -16,7 +16,7 @@ struct FileWatcherSettingsView: View {
                 LabeledContent("Injectable Pattern (regex)") {
                     TextField("Pattern", text: $config.injectablePattern)
                         .textFieldStyle(.roundedBorder)
-                        .help("Regular expresssion selecting injectable files")
+                        .help("Regular expression selecting injectable files")
                 }
 
                 Button("Reset to Default") {
