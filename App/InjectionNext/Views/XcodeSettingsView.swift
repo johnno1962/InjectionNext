@@ -75,16 +75,16 @@ struct XcodeSettingsView: View {
                 LabeledContent("Launched Xcode") {
                     HStack {
                         Circle()
-                            .fill(config.haveLaunchedXocde ? .green : .gray)
+                            .fill(config.haveLaunchedXcode ? .green : .gray)
                             .frame(width: 8, height: 8)
-                        Text(config.haveLaunchedXocde ? "Running" : "Not Running")
+                        Text(config.haveLaunchedXcode ? "Running" : "Not Running")
                     }
                 }
                 .help("Was Xcode launched by this app")
                 Button("Launch Xcode Now") {
                     AppDelegate.ui?.runXcode(self)
                 }
-                .disabled(config.haveLaunchedXocde)
+                .disabled(config.haveLaunchedXcode)
                 .help("... if not launch it")
             } header: {
                 Label("Status", systemImage: "info.circle")

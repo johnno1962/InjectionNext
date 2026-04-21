@@ -34,8 +34,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// Mimics `launchXcodeItem.state` for MonitorXcode.
     var launchXcodeItem: CompatMenuItem {
         CompatMenuItem(
-            get: { ConfigStore.shared.haveLaunchedXocde ? .on : .off },
-            set: { ConfigStore.shared.haveLaunchedXocde = ($0 == .on) }
+            get: { ConfigStore.shared.haveLaunchedXcode ? .on : .off },
+            set: { ConfigStore.shared.haveLaunchedXcode = ($0 == .on) }
         )
     }
 

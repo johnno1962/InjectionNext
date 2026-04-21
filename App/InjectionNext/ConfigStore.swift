@@ -138,7 +138,7 @@ final class ConfigStore: ObservableObject {
     // MARK: - Injection State (published, not persisted)
 
     @Published var injectionState: InjectionState = .idle
-    @Published var haveLaunchedXocde = false
+    @Published var haveLaunchedXcode = false
     @Published var isClientConnected = false
     @Published var watchingDirectories: [String] = []
 

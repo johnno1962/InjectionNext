@@ -24,7 +24,7 @@ class MonitorXcode {
     static weak var runningXcode: MonitorXcode? {
         didSet {
             DispatchQueue.main.async {
-                ConfigStore.shared.haveLaunchedXocde = runningXcode != nil
+                ConfigStore.shared.haveLaunchedXcode = runningXcode != nil
             }
         }
     }

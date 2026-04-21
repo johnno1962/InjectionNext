@@ -31,7 +31,7 @@ struct GeneralSettingsView: View {
                     }
                 }
                 .help("App status")
-                LabeledContent("Launched Xcode", value: config.haveLaunchedXocde ? "Yes" : "No")
+                LabeledContent("Launched Xcode", value: config.haveLaunchedXcode ? "Yes" : "No")
                     .help("Was Xcode launched using this app")
                 LabeledContent("Client Connected", value: config.isClientConnected ? "Yes" : "No")
                     .help("Is a client app currently connected")

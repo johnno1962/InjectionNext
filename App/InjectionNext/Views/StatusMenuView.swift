@@ -33,7 +33,7 @@ struct StatusMenuView: View {
             } label: {
                 HStack {
                     Text("Launch Xcode")
-                    if config.haveLaunchedXocde {
+                    if config.haveLaunchedXcode {
                         Spacer()
                         Image(systemName: "checkmark")
                     }
