@@ -147,7 +147,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Status Icon (bridges to ConfigStore)
 
     func setMenuIcon(_ state: InjectionState) {
-        ConfigStore.shared.setInjectionState(state)
+        DispatchQueue.main.async {
+            ConfigStore.shared.setInjectionState(state)
+            ConfigStore.shared.isClientConnected = state == .ok
+        }
     }
 
     // MARK: - Actions
