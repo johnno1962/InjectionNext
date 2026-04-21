@@ -63,7 +63,7 @@ struct BuildSystemSettingsView: View {
                     LabeledContent("Bazel Target") {
                         Text(config.bazelTarget.isEmpty ? "Auto-detected from client" : config.bazelTarget)
                             .foregroundStyle(config.bazelTarget.isEmpty ? .secondary : .primary)
-                            .help("Sepcify a bazel target to build")
+                            .help("Specify a bazel target to build")
                     }
                 } header: {
                     Label("Bazel Configuration", systemImage: "cube")
