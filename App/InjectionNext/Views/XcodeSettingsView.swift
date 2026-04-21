@@ -55,7 +55,6 @@ struct XcodeSettingsView: View {
             }
 
             Section {
-                Toggle("Auto-launch Xcode on app start", isOn: $config.autoLaunchXcode)
                 Toggle("Restart Xcode if it crashes", isOn: $config.xcodeRestart)
                 Toggle("Hide initial Xcode alert", isOn: $config.hideXcodeAlert)
             } header: {
@@ -70,15 +69,15 @@ struct XcodeSettingsView: View {
                 LabeledContent("Xcode Running") {
                     HStack {
                         Circle()
-                            .fill(config.isXcodeRunning ? .green : .gray)
+                            .fill(config.haveLaunchedXocde ? .green : .gray)
                             .frame(width: 8, height: 8)
-                        Text(config.isXcodeRunning ? "Running" : "Not Running")
+                        Text(config.haveLaunchedXocde ? "Running" : "Not Running")
                     }
                 }
                 Button("Launch Xcode Now") {
                     AppDelegate.ui?.runXcode(self)
                 }
-                .disabled(config.isXcodeRunning)
+                .disabled(config.haveLaunchedXocde)
             } header: {
                 Label("Status", systemImage: "info.circle")
             }

@@ -18,43 +18,25 @@ struct StatusMenuView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Divider()
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "settings")
+                bringSettingsToFront()
+            } label: {
+                Label("Settings...", systemImage: "gearshape")
+            }
+            .keyboardShortcut(",", modifiers: .command)
 
             Button {
                 AppDelegate.ui?.runXcode(self)
             } label: {
                 HStack {
                     Text("Launch Xcode")
-                    if config.isXcodeRunning {
+                    if config.haveLaunchedXocde {
                         Spacer()
                         Image(systemName: "checkmark")
                     }
                 }
-            }
-
-            Divider()
-
-            Button {
-                selectProject()
-            } label: {
-                HStack {
-                    Text("Select Project...")
-                    if !config.defaultProjectFile.isEmpty {
-                        Spacer()
-                        Image(systemName: "checkmark")
-                    }
-                }
-            }
-
-            if !config.defaultProjectFile.isEmpty {
-                Button("Clear Selected Project") {
-                    config.defaultProjectFile = ""
-                    config.autoOpenDefaultProject = false
-                }
-
-                Text("  \(URL(fileURLWithPath: config.defaultProjectFile).lastPathComponent)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Divider()
@@ -111,17 +93,6 @@ struct StatusMenuView: View {
             } label: {
                 Label("Open Console…", systemImage: "terminal")
             }
-
-            Divider()
-
-            Button {
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "settings")
-                bringSettingsToFront()
-            } label: {
-                Label("Settings...", systemImage: "gearshape")
-            }
-            .keyboardShortcut(",", modifiers: .command)
 
             Divider()
 

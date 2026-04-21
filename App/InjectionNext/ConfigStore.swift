@@ -138,7 +138,7 @@ final class ConfigStore: ObservableObject {
     // MARK: - Injection State (published, not persisted)
 
     @Published var injectionState: InjectionState = .idle
-    @Published var isXcodeRunning = false
+    @Published var haveLaunchedXocde = false
     @Published var isClientConnected = false
     @Published var watchingDirectories: [String] = []
 
@@ -287,10 +287,32 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
     }
     @Published var sweepExclude: String {
-        didSet { ud.set(sweepExclude, forKey: "sweepExclude") }
+        didSet { ud.set(sweepExclude, forKey: "sweepExclude")
+                 updateSweepVars() }
     }
     @Published var sweepDetail: Bool {
-        didSet { ud.set(sweepDetail, forKey: "sweepDetail") }
+        didSet { ud.set(sweepDetail, forKey: "sweepDetail")
+                 updateSweepVars() }
+    }
+    
+    func updateSweepVars() {
+        let clients = InjectionServer.currentClients
+        InjectionServer.clientQueue.async {
+            for client in clients where client != nil {
+                self.sendSweepVars(to: client!)
+            }
+        }
+    }
+    
+    func sendSweepVars(to client: InjectionServer) {
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_SWEEP_DETAIL)
+        client.write(sweepDetail ? "1" : "0")
+        if sweepExclude != "" {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_SWEEP_EXCLUDE)
+            client.write(sweepExclude)
+        }
     }
 
     // MARK: - Devices
@@ -485,7 +507,11 @@ final class ConfigStore: ObservableObject {
     // MARK: - Actions
 
     func setInjectionState(_ state: InjectionState) {
-        DispatchQueue.main.async { self.injectionState = state }
+        if Thread.isMainThread {
+            injectionState = state
+        } else {
+            DispatchQueue.main.async { [weak self] in self?.injectionState = state }
+        }
     }
 
     func updateWatchingDirectories() {

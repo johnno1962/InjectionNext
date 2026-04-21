@@ -13,62 +13,6 @@ struct InjectionSettingsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Project Path") {
-                    HStack {
-                        Text(config.projectPath.isEmpty ? "Not set" : config.projectPath)
-                            .foregroundStyle(config.projectPath.isEmpty ? .secondary : .primary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                        Spacer()
-                        Button("Browse...") {
-                            let open = NSOpenPanel()
-                            open.prompt = "Select Project"
-                            open.canChooseDirectories = true
-                            open.canChooseFiles = false
-                            if open.runModal() == .OK, let url = open.url {
-                                config.projectPath = url.path
-                                config.defaultProjectFile = ""
-                                Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
-                                AppDelegate.ui?.watch(path: url.path)
-                                config.updateWatchingDirectories()
-                            }
-                        }
-                        if !config.projectPath.isEmpty {
-                            Button("Clear") {
-                                config.projectPath = ""
-                                config.defaultProjectFile = ""
-                                config.autoOpenDefaultProject = false
-                            }
-                        }
-                    }
-                }
-                if !config.projectPath.isEmpty {
-                    let projects = ProjectDiscovery.discoverProjects(in: config.projectPath)
-                    if projects.count > 1 {
-                        Picker("Default Project File", selection: $config.defaultProjectFile) {
-                            Text("Ask every time").tag("")
-                            ForEach(projects) { project in
-                                Text(project.name).tag(project.path)
-                            }
-                        }
-
-                        Toggle("Always open default project", isOn: $config.autoOpenDefaultProject)
-                    } else if projects.count == 1 {
-                        LabeledContent("Project File") {
-                            Text(projects[0].name)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            } header: {
-                Label("Project", systemImage: "folder")
-            } footer: {
-                Text("Set a project directory. If it contains multiple .xcodeproj/.xcworkspace files, you can pick a default or be asked each time Xcode launches.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section {
                 if config.watchingDirectories.isEmpty {
                     Text("No directories being watched")
                         .foregroundStyle(.secondary)
