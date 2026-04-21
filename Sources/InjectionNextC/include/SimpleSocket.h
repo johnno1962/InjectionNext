@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <arpa/inet.h>
+#import <stdio.h>
 
 @interface SimpleSocket : NSObject {
 @protected

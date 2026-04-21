@@ -87,7 +87,7 @@ struct StatusMenuView: View {
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
             }
-            .help("Make public defualt argument generators for injecting default arguments")
+            .help("Make public generators for injecting default arguments")
 
             Divider()
 
