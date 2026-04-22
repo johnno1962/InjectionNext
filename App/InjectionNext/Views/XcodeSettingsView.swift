@@ -60,7 +60,7 @@ struct XcodeSettingsView: View {
             Section {
                 Toggle("Auto-launch Xcode on app start", isOn: $config.autoLaunchXcode)
                 Toggle("Restart Xcode if it crashes", isOn: $config.xcodeRestart)
-                    .help("Restart Xcode if itdoes not exit cleanly")
+                    .help("Restart Xcode if it does not exit cleanly")
                 Toggle("Hide initial Xcode alert", isOn: $config.hideXcodeAlert)
                     .help("Suppress initial hint to launch Xcode")
             } header: {
