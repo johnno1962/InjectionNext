@@ -131,16 +131,15 @@ class InjectionServer: SimpleSocket {
                         self.log("Repository lock cleared - injection resumed")
                     }
                 }
-                AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
-                AppDelegate.ui.setMenuIcon(MonitorXcode
-                    .runningXcode != nil ? .ready : .idle)
             }
         } catch {
             self.error("\(self) error \(error)")
         }
         Self.clientQueue.sync {
             Self.connected.removeAll { $0 === self }
+            AppDelegate.ui.setMenuIcon(MonitorXcode
+                .runningXcode != nil ? .ready : .idle)
         } // flush messages and de-register
     }
 
@@ -167,7 +166,7 @@ class InjectionServer: SimpleSocket {
                 }
             case .tmpPath:
                 if let tmpPath = readString() {
-                    print("Tmp path: "+tmpPath)
+                    debug("Tmp path: "+tmpPath)
                     if tmpPath.contains("/Xcode/UserData/Previews/") {
                         return
                     }
@@ -175,6 +174,8 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     Self.clientQueue.async {
                         Self.connected.append(self)
+                        AppDelegate.ui.setMenuIcon(.ok)
+                        ConfigStore.shared.sendEnvVars(to: self)
                     }
                 } else {
                     error("**** Bad tmp ****")

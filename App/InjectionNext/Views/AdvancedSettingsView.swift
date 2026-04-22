@@ -24,6 +24,7 @@ struct AdvancedSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .help("Log detail about the process of injecting the dynamic library")
 
             Section {
                 Picker("dlopen Mode", selection: $config.dlOpenMode) {

@@ -13,6 +13,46 @@ struct InjectionSettingsView: View {
     var body: some View {
         Form {
             Section {
+                if config.watchingDirectories.isEmpty {
+                    Text("No directories being watched")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(config.watchingDirectories, id: \.self) { dir in
+                        HStack {
+                            Image(systemName: "eye.fill")
+                                .foregroundStyle(.green)
+                            Text(dir)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                    }
+                }
+
+                Button("Add Watch Directory...") {
+                    let open = NSOpenPanel()
+                    open.prompt = "Watch Directory"
+                    open.canChooseDirectories = true
+                    open.canChooseFiles = false
+                    if open.runModal() == .OK, let url = open.url {
+                        Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
+                        AppDelegate.ui.watch(path: url.path)
+                        config.updateWatchingDirectories()
+                    }
+                }
+
+                if !config.watchingDirectories.isEmpty {
+                    Button("Stop All Watchers") {
+                        AppDelegate.watchers.removeAll()
+                        AppDelegate.lastWatched = nil
+                        config.updateWatchingDirectories()
+                    }
+                    .foregroundStyle(.red)
+                }
+            } header: {
+                Label("File Watchers", systemImage: "eye")
+            }
+
+            Section {
                 LabeledContent("Project Path") {
                     HStack {
                         Text(config.projectPath.isEmpty ? "Not set" : config.projectPath)
@@ -69,46 +109,6 @@ struct InjectionSettingsView: View {
             }
 
             Section {
-                if config.watchingDirectories.isEmpty {
-                    Text("No directories being watched")
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(config.watchingDirectories, id: \.self) { dir in
-                        HStack {
-                            Image(systemName: "eye.fill")
-                                .foregroundStyle(.green)
-                            Text(dir)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                        }
-                    }
-                }
-
-                Button("Add Watch Directory...") {
-                    let open = NSOpenPanel()
-                    open.prompt = "Watch Directory"
-                    open.canChooseDirectories = true
-                    open.canChooseFiles = false
-                    if open.runModal() == .OK, let url = open.url {
-                        Reloader.xcodeDev = config.xcodePath + "/Contents/Developer"
-                        AppDelegate.ui.watch(path: url.path)
-                        config.updateWatchingDirectories()
-                    }
-                }
-
-                if !config.watchingDirectories.isEmpty {
-                    Button("Stop All Watchers") {
-                        AppDelegate.watchers.removeAll()
-                        AppDelegate.lastWatched = nil
-                        config.updateWatchingDirectories()
-                    }
-                    .foregroundStyle(.red)
-                }
-            } header: {
-                Label("File Watchers", systemImage: "eye")
-            }
-
-            Section {
                 Toggle("Preserve Static Variables", isOn: $config.preserveStatics)
                 Toggle("Disable Standalone Mode", isOn: $config.disableStandalone)
             } header: {
@@ -140,9 +140,9 @@ struct InjectionSettingsView: View {
             }
 
             Section {
+                Toggle("Sweep Verbose Logging", isOn: $config.sweepDetail)
                 TextField("Sweep Exclude Regex", text: $config.sweepExclude)
                     .textFieldStyle(.roundedBorder)
-                Toggle("Sweep Verbose Logging", isOn: $config.sweepDetail)
             } header: {
                 Label("Object Sweep", systemImage: "rectangle.and.text.magnifyingglass")
             } footer: {

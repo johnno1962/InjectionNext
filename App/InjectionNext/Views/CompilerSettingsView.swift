@@ -69,6 +69,7 @@ struct CompilerSettingsView: View {
         }
         .formStyle(.grouped)
         .onAppear { refreshState() }
+        .help("Information about whether xcode-frontend logs compilations")
     }
 
     private func refreshState() {

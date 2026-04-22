@@ -18,44 +18,28 @@ struct StatusMenuView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Divider()
+            Button {
+                NSApp.activate(ignoringOtherApps: true)
+                openWindow(id: "settings")
+                bringSettingsToFront()
+            } label: {
+                Label("Settings...", systemImage: "gearshape")
+            }
+            .keyboardShortcut(",", modifiers: .command)
+            .help("Open Settings")
 
             Button {
                 AppDelegate.ui?.runXcode(self)
             } label: {
                 HStack {
                     Text("Launch Xcode")
-                    if config.isXcodeRunning {
+                    if config.haveLaunchedXcode {
                         Spacer()
                         Image(systemName: "checkmark")
                     }
                 }
             }
-
-            Divider()
-
-            Button {
-                selectProject()
-            } label: {
-                HStack {
-                    Text("Select Project...")
-                    if !config.defaultProjectFile.isEmpty {
-                        Spacer()
-                        Image(systemName: "checkmark")
-                    }
-                }
-            }
-
-            if !config.defaultProjectFile.isEmpty {
-                Button("Clear Selected Project") {
-                    config.defaultProjectFile = ""
-                    config.autoOpenDefaultProject = false
-                }
-
-                Text("  \(URL(fileURLWithPath: config.defaultProjectFile).lastPathComponent)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            .help("Launch Xcode in a way that logs how to recompile files")
 
             Divider()
 
@@ -78,6 +62,7 @@ struct StatusMenuView: View {
                     }
                 }
             }
+            .help("Add another directory that will be watched for source changes")
 
             if !config.watchingDirectories.isEmpty {
                 Button("Stop Watching") {
@@ -102,6 +87,7 @@ struct StatusMenuView: View {
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
             }
+            .help("Make public generators for injecting default arguments")
 
             Divider()
 
@@ -111,17 +97,7 @@ struct StatusMenuView: View {
             } label: {
                 Label("Open Console…", systemImage: "terminal")
             }
-
-            Divider()
-
-            Button {
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "settings")
-                bringSettingsToFront()
-            } label: {
-                Label("Settings...", systemImage: "gearshape")
-            }
-            .keyboardShortcut(",", modifiers: .command)
+            .help("Open low level app logs")
 
             Divider()
 
@@ -136,6 +112,7 @@ struct StatusMenuView: View {
             } icon: {
                 Image(nsImage: Self.coloredDot(stateNSColor))
             }
+            .help("Status of \(APP_NAME).app")
 
             Label {
                 Text(buildSystemStatusText)

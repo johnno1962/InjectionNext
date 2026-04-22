@@ -138,7 +138,7 @@ final class ConfigStore: ObservableObject {
     // MARK: - Injection State (published, not persisted)
 
     @Published var injectionState: InjectionState = .idle
-    @Published var isXcodeRunning = false
+    @Published var haveLaunchedXcode = false
     @Published var isClientConnected = false
     @Published var watchingDirectories: [String] = []
 
@@ -275,22 +275,79 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(autoOpenDefaultProject, forKey: "autoOpenDefaultProject") }
     }
     @Published var preserveStatics: Bool {
-        didSet { ud.set(preserveStatics, forKey: "preserveStatics") }
+        didSet { ud.set(preserveStatics, forKey: "preserveStatics"); updateEnvVars() }
     }
-    @Published var disableStandalone: Bool {
+    @Published var disableStandalone: Bool { // difficult to implement without connection.
         didSet { ud.set(disableStandalone, forKey: "disableStandalone") }
     }
-    @Published var genericsMode: GenericsMode {
+    @Published var genericsMode: GenericsMode { // difficult to implement early.
         didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode") }
     }
-    @Published var keyPathsMode: KeyPathsMode {
+    @Published var keyPathsMode: KeyPathsMode { // difficult to implement early.
         didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
     }
     @Published var sweepExclude: String {
-        didSet { ud.set(sweepExclude, forKey: "sweepExclude") }
+        didSet { ud.set(sweepExclude, forKey: "sweepExclude"); updateEnvVars() }
     }
     @Published var sweepDetail: Bool {
-        didSet { ud.set(sweepDetail, forKey: "sweepDetail") }
+        didSet { ud.set(sweepDetail, forKey: "sweepDetail"); updateEnvVars() }
+    }
+    
+    func updateEnvVars() {
+        let clients = InjectionServer.currentClients
+        InjectionServer.clientQueue.async {
+            for client in clients where client != nil {
+                self.sendEnvVars(to: client!)
+            }
+        }
+    }
+    
+    func sendEnvVars(to client: InjectionServer) {
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_DETAIL)
+        client.write(verboseLogging ? "1" : UNSETENV_VALUE)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_PRESERVE_STATICS)
+        client.write(preserveStatics ? "1" : UNSETENV_VALUE)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_SWEEP_DETAIL)
+        client.write(sweepDetail ? "1" : UNSETENV_VALUE)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_SWEEP_EXCLUDE)
+        client.write(sweepExclude != "" ? sweepExclude : UNSETENV_VALUE)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_BENCH)
+        client.write(benchmarking ? "1" : UNSETENV_VALUE)
+        client.writeCommand(InjectionCommand.setenv.rawValue,
+                            with: INJECTION_TRACE_FILTER)
+        client.write(traceFilter != "" ? traceFilter : ".")
+        switch traceMode {
+        case .injected:
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE)
+            client.write("1")
+        case .all:
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_ALL)
+            client.write("1")
+        case .off:
+            break
+        }
+        if traceFrameworks != "" {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_FRAMEWORKS)
+            client.write(traceFrameworks)
+        }
+        if traceUIKit != "" {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_UIKIT)
+            client.write(traceUIKit)
+        }
+        if traceLookup {
+            client.writeCommand(InjectionCommand.setenv.rawValue,
+                                with: INJECTION_TRACE_LOOKUP)
+            client.write("1")
+        }
     }
 
     // MARK: - Devices
@@ -317,19 +374,19 @@ final class ConfigStore: ObservableObject {
     // MARK: - Tracing
 
     @Published var traceMode: TraceMode {
-        didSet { ud.set(traceMode.rawValue, forKey: "traceMode") }
+        didSet { ud.set(traceMode.rawValue, forKey: "traceMode"); updateEnvVars() }
     }
     @Published var traceFilter: String {
-        didSet { ud.set(traceFilter, forKey: "traceFilter") }
+        didSet { ud.set(traceFilter, forKey: "traceFilter"); updateEnvVars() }
     }
     @Published var traceFrameworks: String {
-        didSet { ud.set(traceFrameworks, forKey: "traceFrameworks") }
+        didSet { ud.set(traceFrameworks, forKey: "traceFrameworks"); updateEnvVars() }
     }
     @Published var traceLookup: Bool {
-        didSet { ud.set(traceLookup, forKey: "traceLookup") }
+        didSet { ud.set(traceLookup, forKey: "traceLookup"); updateEnvVars() }
     }
     @Published var traceUIKit: String {
-        didSet { ud.set(traceUIKit, forKey: "traceUIKit") }
+        didSet { ud.set(traceUIKit, forKey: "traceUIKit"); updateEnvVars() }
     }
 
     // MARK: - File Watcher
@@ -352,10 +409,10 @@ final class ConfigStore: ObservableObject {
     // MARK: - Advanced
 
     @Published var verboseLogging: Bool {
-        didSet { ud.set(verboseLogging, forKey: "verboseLogging") }
+        didSet { ud.set(verboseLogging, forKey: "verboseLogging") ; updateEnvVars() }
     }
     @Published var benchmarking: Bool {
-        didSet { ud.set(benchmarking, forKey: "benchmarking") }
+        didSet { ud.set(benchmarking, forKey: "benchmarking"); updateEnvVars() }
     }
     @Published var dlOpenMode: DLOpenMode {
         didSet {
@@ -427,9 +484,7 @@ final class ConfigStore: ObservableObject {
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
-           let runningXcode = NSRunningApplication
-            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
-            .first?.bundleURL?.path {
+           let runningXcode = MonitorXcode.externalXcode?.bundleURL?.path {
             self.xcodePath = runningXcode
         }
 
@@ -485,7 +540,11 @@ final class ConfigStore: ObservableObject {
     // MARK: - Actions
 
     func setInjectionState(_ state: InjectionState) {
-        DispatchQueue.main.async { self.injectionState = state }
+        if Thread.isMainThread {
+            injectionState = state
+        } else {
+            DispatchQueue.main.async { [weak self] in self?.injectionState = state }
+        }
     }
 
     func updateWatchingDirectories() {

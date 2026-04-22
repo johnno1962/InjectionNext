@@ -34,8 +34,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// Mimics `launchXcodeItem.state` for MonitorXcode.
     var launchXcodeItem: CompatMenuItem {
         CompatMenuItem(
-            get: { ConfigStore.shared.isXcodeRunning ? .on : .off },
-            set: { ConfigStore.shared.isXcodeRunning = ($0 == .on) }
+            get: { ConfigStore.shared.haveLaunchedXcode ? .on : .off },
+            set: { ConfigStore.shared.haveLaunchedXcode = ($0 == .on) }
         )
     }
 
@@ -62,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Mimics `patchCompilerItem` — a real orphan NSMenuItem so
     /// `patchCompilerItem?.title = ...` and `prepareProject(item)` calls compile.
-    var patchCompilerItem: NSMenuItem { NSMenuItem() }
+    var patchCompilerItem: NSMenuItem! { NSMenuItem() }
 
     /// Mimics `restartDeviceItem.state`.
     var restartDeviceItem: CompatMenuItem {
@@ -116,11 +116,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ConfigStore.shared.discoverCodesigningIdentities()
 
         // Start injection server for on-device/sim connections.
+        if updatePatchUnpatch() == .patched {
+            _ = FrontendServer.startOnce
+        }
         deviceEnable(nil)
 
-        if let xcodePath = NSRunningApplication
-            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
-            .first?.bundleURL?.path {
+        if let xcodePath = MonitorXcode.externalXcode?.bundleURL?.path {
             if Defaults.xcodeDefault == nil {
                 Defaults.xcodeDefault = xcodePath
             }
@@ -138,8 +139,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _ = MonitorXcode(args: " '\(project)'")
         }
 
-        LogManager.shared.startCapturing()
         if Defaults.mcpServer {
+            LogManager.shared.startCapturing()
             ControlServer.start()
         }
     }
@@ -147,7 +148,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Status Icon (bridges to ConfigStore)
 
     func setMenuIcon(_ state: InjectionState) {
-        ConfigStore.shared.setInjectionState(state)
+        DispatchQueue.main.async {
+            ConfigStore.shared.setInjectionState(state)
+            ConfigStore.shared.isClientConnected = InjectionServer.currentClient != nil
+        }
     }
 
     // MARK: - Actions
