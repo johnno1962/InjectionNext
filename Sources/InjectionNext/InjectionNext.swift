@@ -119,9 +119,8 @@ open class InjectionNext: SimpleSocket {
         SwiftTrace.defaultMethodExclusions += // CoreFoundation
             #"|\[NS(Method|Tagged|Array|\w*Dict|Date|Data|Timer)|allocWithZone:|__unurl|_trueSelf"#
           + #"|InjectionBundle.|fast_dl"#
-        for name in [INJECTION_TRACE_LOOKUP, INJECTION_TRACE_LOOKUP, INJECTION_TRACE_FILTER,
-                     INJECTION_TRACE_ALL, INJECTION_TRACE_FRAMEWORKS, INJECTION_TRACE_UIKIT,
-                     INJECTION_TRACE] {
+        for name in [INJECTION_TRACE_LOOKUP, INJECTION_TRACE_FILTER, INJECTION_TRACE_ALL,
+                     INJECTION_TRACE_FRAMEWORKS, INJECTION_TRACE_UIKIT, INJECTION_TRACE] {
             if let value = getenv(name) {
                 setVariable(name: name, to: String(cString: value), first: true)
             }
