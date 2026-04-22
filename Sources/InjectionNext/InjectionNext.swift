@@ -285,7 +285,7 @@ open class InjectionNext: SimpleSocket {
                 }
             case .setenv:
                 if let name = readString(), let value = readString() {
-                    if value == "0" {
+                    if value == UNSETENV_VALUE {
                         unsetenv(name)
                     } else {
                         _ = setupTraceAdjustments

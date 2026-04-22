@@ -23,6 +23,7 @@ extern NSString *INJECTION_KEY;
 #define APP_NAME "InjectionNext"
 #define APP_PREFIX "🔥 "
 #define DYLIB_PREFIX "/eval_injection_" // Expected by DLKit.appImages
+#define UNSETENV_VALUE "__NULL__"
 
 @interface NSObject(HotReloading)
 + (void)runXCTestCase:(Class)aTestCase;

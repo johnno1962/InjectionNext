@@ -303,22 +303,21 @@ final class ConfigStore: ObservableObject {
     }
     
     func sendEnvVars(to client: InjectionServer) {
-        let unsetVar = "0"
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_DETAIL)
-        client.write(verboseLogging ? "1" : unsetVar)
+        client.write(verboseLogging ? "1" : UNSETENV_VALUE)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_PRESERVE_STATICS)
-        client.write(preserveStatics ? "1" : unsetVar)
+        client.write(preserveStatics ? "1" : UNSETENV_VALUE)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_SWEEP_DETAIL)
-        client.write(sweepDetail ? "1" : unsetVar)
+        client.write(sweepDetail ? "1" : UNSETENV_VALUE)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_SWEEP_EXCLUDE)
-        client.write(sweepExclude != "" ? sweepExclude : unsetVar)
+        client.write(sweepExclude != "" ? sweepExclude : UNSETENV_VALUE)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_BENCH)
-        client.write(benchmarking ? "1" : unsetVar)
+        client.write(benchmarking ? "1" : UNSETENV_VALUE)
         client.writeCommand(InjectionCommand.setenv.rawValue,
                             with: INJECTION_TRACE_FILTER)
         client.write(traceFilter != "" ? traceFilter : ".")
