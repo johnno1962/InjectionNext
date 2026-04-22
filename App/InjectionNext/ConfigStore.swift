@@ -347,7 +347,7 @@ final class ConfigStore: ObservableObject {
         if traceLookup {
             client.writeCommand(InjectionCommand.setenv.rawValue,
                                 with: INJECTION_TRACE_LOOKUP)
-            client.write(traceUIKit)
+            client.write("1")
         }
     }
 
