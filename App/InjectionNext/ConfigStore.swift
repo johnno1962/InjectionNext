@@ -302,51 +302,43 @@ final class ConfigStore: ObservableObject {
         }
     }
     
+    func sendVariable(to client: InjectionServer, name: String, value: String?) {
+        client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
+        client.write(value ?? UNSETENV_VALUE)
+    }
+    
     func sendEnvVars(to client: InjectionServer) {
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_DETAIL)
-        client.write(verboseLogging ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_PRESERVE_STATICS)
-        client.write(preserveStatics ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_SWEEP_DETAIL)
-        client.write(sweepDetail ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_SWEEP_EXCLUDE)
-        client.write(sweepExclude != "" ? sweepExclude : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_BENCH)
-        client.write(benchmarking ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_TRACE_FILTER)
-        client.write(traceFilter != "" ? traceFilter : ".")
+        sendVariable(to: client, name: INJECTION_DETAIL,
+                     value: verboseLogging ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_PRESERVE_STATICS,
+                     value: preserveStatics ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_SWEEP_DETAIL,
+                     value: sweepDetail ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_SWEEP_EXCLUDE,
+                     value: sweepExclude != "" ? sweepExclude : nil)
+        sendVariable(to: client, name: INJECTION_BENCH,
+                     value: benchmarking ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_TRACE_FILTER,
+                     value: traceFilter != "" ? traceFilter : nil)
         switch traceMode {
         case .injected:
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE)
-            client.write("1")
+            sendVariable(to: client, name: INJECTION_TRACE, value: "1")
         case .all:
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_ALL)
-            client.write("1")
+            sendVariable(to: client, name: INJECTION_TRACE_ALL, value: "1")
         case .off:
             break
         }
         if traceFrameworks != "" {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_FRAMEWORKS)
-            client.write(traceFrameworks)
+            sendVariable(to: client, name: INJECTION_TRACE_FRAMEWORKS,
+                         value: traceFrameworks)
         }
         if traceUIKit != "" {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_UIKIT)
-            client.write(traceUIKit)
+            sendVariable(to: client, name: INJECTION_TRACE_UIKIT,
+                         value: traceUIKit)
         }
         if traceLookup {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_LOOKUP)
-            client.write("1")
+            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
+                         value: "1")
         }
     }
 
