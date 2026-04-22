@@ -85,7 +85,7 @@ struct XcodeSettingsView: View {
                     AppDelegate.ui?.runXcode(self)
                 }
                 .disabled(config.haveLaunchedXcode)
-                .help("... if not launch it")
+                .help("Launch Xcode if it isn’t already running")
             } header: {
                 Label("Status", systemImage: "info.circle")
             }
