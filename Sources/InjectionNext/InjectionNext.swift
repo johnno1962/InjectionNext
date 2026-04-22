@@ -273,6 +273,13 @@ open class InjectionNext: SimpleSocket {
                     }
                     SwiftTrace.trace(bundlePath: imageName)
                 }
+                fallthrough
+            case INJECTION_TRACE:
+                Reloader.traceHook = { (injected, name) in
+                    let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
+                    detail("SwiftTracing \(name)")
+                    return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
+                }
             case INJECTION_TRACE_FRAMEWORKS:
                 var frmwks = value
                 if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
@@ -295,12 +302,6 @@ open class InjectionNext: SimpleSocket {
                     } else {
                         error("Invalid swizzle framework \(frmwk)")
                     }
-                }
-            case INJECTION_TRACE:
-                Reloader.traceHook = { (injected, name) in
-                    let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
-                    detail("SwiftTracing \(name)")
-                    return autoBitCast(SwiftTrace.trace(name: name, original: injected)) ?? injected
                 }
             default:
                 break
