@@ -75,7 +75,7 @@ class InjectionHybrid: InjectionBase {
             FileWatcher.INJECTABLE_PATTERN = try NSRegularExpression(
                 pattern: ConfigStore.shared.injectablePattern)
         } catch {
-            InjectionServer.error("Inavlid file pattern: \(error)")
+            InjectionServer.error("Invalid file pattern: \(error)")
         }
     }
 
