@@ -70,9 +70,13 @@ class InjectionHybrid: InjectionBase {
         setenv(INJECTION_DIRECTORIES, watchPaths, 1)
         Reloader.injectionQueue = .main
         super.init()
-        // Extend FileWatcher pattern to detect git lock files
-        FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: ConfigStore.shared.injectablePattern)
+        do {
+            // Extend FileWatcher pattern to detect git lock files
+            FileWatcher.INJECTABLE_PATTERN = try NSRegularExpression(
+                pattern: ConfigStore.shared.injectablePattern)
+        } catch {
+            InjectionServer.error("Inavlid file pattern: \(error)")
+        }
     }
 
     /// Called from file watcher when file is edited.
