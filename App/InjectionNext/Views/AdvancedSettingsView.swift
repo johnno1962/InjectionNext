@@ -16,7 +16,9 @@ struct AdvancedSettingsView: View {
         Form {
             Section {
                 Toggle("Verbose Logging", isOn: $config.verboseLogging)
+                    .help("Provide detailed logging of swizzling operations")
                 Toggle("Benchmarking", isOn: $config.benchmarking)
+                    .help("Print timings of various swizzling operations")
             } header: {
                 Label("Debug", systemImage: "ladybug")
             } footer: {
@@ -69,6 +71,7 @@ struct AdvancedSettingsView: View {
                 Button("Unhide Symbols") {
                     Unhider.startUnhide()
                 }
+                .help("Process object files to export generators used for default arguments")
 
                 Button("Reset Unhiding") {
                     Unhider.unhiddens.removeAll()

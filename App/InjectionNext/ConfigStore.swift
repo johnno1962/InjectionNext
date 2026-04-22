@@ -86,7 +86,7 @@ enum DLOpenMode: String, CaseIterable, Identifiable {
     /// Short one-liner shown under the picker.
     var shortDescription: String {
         switch self {
-        case .lazyGlobal: return "Default. Fast loads, symbols resolve on first call."
+        case .lazyGlobal: return "Fast loads, symbols resolve on first call."
         case .nowGlobal:  return "Eager + shared. Fails fast when symbols are missing."
         case .now:        return "Eager + isolated. No cross-injection symbol sharing."
         }
@@ -308,6 +308,11 @@ final class ConfigStore: ObservableObject {
     }
     
     func sendEnvVars(to client: InjectionServer) {
+        if let version = Bundle.main
+            .infoDictionary?["CFBundleShortVersionString"] as? String {
+            sendVariable(to: client, name: INJECTION_APP_VERSION,
+                         value: version)
+        }
         sendVariable(to: client, name: INJECTION_DETAIL,
                      value: verboseLogging ? "1" : nil)
         sendVariable(to: client, name: INJECTION_PRESERVE_STATICS,

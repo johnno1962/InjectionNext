@@ -26,19 +26,24 @@ struct TracingSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .help("Enable function/method invocation tracing.")
 
             if config.traceMode != .off {
                 Section {
                     TextField("Include Filter (regex)", text: $config.traceFilter)
                         .textFieldStyle(.roundedBorder)
+                        .help("function calls logged can be filted by this regex")
 
                     TextField("Frameworks to Trace (comma-separated)", text: $config.traceFrameworks)
                         .textFieldStyle(.roundedBorder)
+                        .help("Trace calls to system frameworks (1 = SwiftUI)")
 
                     TextField("UIKit Framework Name", text: $config.traceUIKit)
                         .textFieldStyle(.roundedBorder)
+                        .help("System frameworks to trace (1 = UIKit)")
 
                     Toggle("Expand Custom Types in Trace", isOn: $config.traceLookup)
+                        .help("App types used as arguments can be expanded")
                 } header: {
                     Label("Trace Filters", systemImage: "line.3.horizontal.decrease.circle")
                 } footer: {
