@@ -318,6 +318,8 @@ final class ConfigStore: ObservableObject {
                      value: sweepExclude != "" ? sweepExclude : nil)
         sendVariable(to: client, name: INJECTION_BENCH,
                      value: benchmarking ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
+                     value: String(dlOpenMode.flags))
         sendVariable(to: client, name: INJECTION_TRACE_FILTER,
                      value: traceFilter != "" ? traceFilter : nil)
         switch traceMode {
@@ -410,6 +412,7 @@ final class ConfigStore: ObservableObject {
         didSet {
             ud.set(dlOpenMode.rawValue, forKey: "dlOpenMode")
             DLKit.dlOpenMode = dlOpenMode.flags
+            updateEnvVars()
         }
     }
     /// Opt-in MCP server (ControlServer + LogBuffer). Default off; enable with:
@@ -471,7 +474,7 @@ final class ConfigStore: ObservableObject {
         self.verboseLogging = ud.bool(forKey: "verboseLogging")
         self.benchmarking = ud.bool(forKey: "benchmarking")
         self.mcpServer = ud.bool(forKey: "mcpServer")
-        self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .lazyGlobal
+        self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .nowGlobal
         DLKit.dlOpenMode = self.dlOpenMode.flags
 
         // Auto-detect running Xcode on launch

@@ -236,7 +236,9 @@ open class InjectionNext: SimpleSocket {
     }
     
     func setVariable(name: String, to value: String, first: Bool) {
-        if name == INJECTION_TRACE_FILTER {
+        if name == INJECTION_DLOPEN_MODE, let mode = Int32(value) {
+            DLKit.dlOpenMode = mode
+        } else if name == INJECTION_TRACE_FILTER {
             if value == UNSETENV_VALUE {
                 if getenv(name) != nil {
                     SwiftTrace.traceFilterInclude = "."
