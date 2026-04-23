@@ -54,7 +54,7 @@ struct InjectionSettingsView: View {
             .help("Directories being file watched for source file changes")
 
             /* not sure app should have a select project UI */
-            #if false
+            #if true
             Section {
                 LabeledContent("Project Path") {
                     HStack {
@@ -124,7 +124,7 @@ struct InjectionSettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            /* These are ralised before a connection exiexts o the app */
+            /* These are realised before a connection exiexts o the app */
             #if false
             Section {
                 Picker("Generics Injection", selection: $config.genericsMode) {

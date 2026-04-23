@@ -136,10 +136,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if let project = Defaults.projectPath {
-            _ = MonitorXcode(args: " '\(project)'")
-        } else if ConfigStore.shared.autoLaunchXcode {
-            _ = MonitorXcode()
+        if ConfigStore.shared.autoLaunchXcode {
+            let project = ConfigStore.shared.projectPath
+            _ = MonitorXcode(args: project != "" ? " '\(project)'" : "")
         }
 
         if Defaults.mcpServer {
