@@ -313,6 +313,8 @@ final class ConfigStore: ObservableObject {
             sendVariable(to: client, name: INJECTION_APP_VERSION,
                          value: version)
         }
+        sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
+                     value: String(dlOpenMode.flags))
         sendVariable(to: client, name: INJECTION_DETAIL,
                      value: verboseLogging ? "1" : nil)
         sendVariable(to: client, name: INJECTION_PRESERVE_STATICS,
@@ -323,15 +325,14 @@ final class ConfigStore: ObservableObject {
                      value: sweepExclude != "" ? sweepExclude : nil)
         sendVariable(to: client, name: INJECTION_BENCH,
                      value: benchmarking ? "1" : nil)
-        sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
-                     value: String(dlOpenMode.flags))
         sendVariable(to: client, name: INJECTION_TRACE_FILTER,
                      value: traceFilter != "" ? traceFilter : nil)
         switch traceMode {
-        case .injected:
-            sendVariable(to: client, name: INJECTION_TRACE, value: "1")
         case .all:
             sendVariable(to: client, name: INJECTION_TRACE_ALL, value: "1")
+            fallthrough
+        case .injected:
+            sendVariable(to: client, name: INJECTION_TRACE, value: "1")
         case .off:
             break
         }
@@ -347,6 +348,7 @@ final class ConfigStore: ObservableObject {
             sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
                          value: "1")
         }
+        client.write(InjectionCommand.setenv.rawValue+100)
     }
 
     // MARK: - Devices
