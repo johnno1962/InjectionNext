@@ -194,7 +194,7 @@ class ControlServer {
     private func getStatus() -> ActionResult {
         var result = [String: Any]()
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             result["xcode_running"] = MonitorXcode.runningXcode != nil
             result["xcode_path"] = Defaults.xcodePath
             result["compiler_intercepted"] = delegate.updatePatchUnpatch() == .patched
@@ -239,7 +239,7 @@ class ControlServer {
     private func interceptCompiler() -> ActionResult {
         var state = ""
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             let currentState = delegate.updatePatchUnpatch()
             state = currentState == .patched ? "patched" : "unpatched"
         }
@@ -249,7 +249,7 @@ class ControlServer {
 
     private func enableDevices(enable: Bool) -> ActionResult {
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             let currentlyEnabled = delegate.enableDevicesItem.state == .on
             if enable != currentlyEnabled {
                 delegate.deviceEnable(NSMenuItem())
