@@ -124,7 +124,7 @@ struct InjectionSettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            /* These are realised before a connection exiexts o the app */
+            /* These are realised before a connection exixts to the app */
             #if false
             Section {
                 Picker("Generics Injection", selection: $config.genericsMode) {
