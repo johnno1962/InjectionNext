@@ -45,6 +45,7 @@ typedef NS_ENUM(int, InjectionCommand) {
     InjectionSendFile,
     InjectionMetrics,
     InjectionSetenv,
+    InjectionEndenv,
 
     InjectionInvalid = 1000,
 

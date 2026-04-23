@@ -64,12 +64,12 @@ enum TraceMode: String, CaseIterable, Identifiable {
 /// Preset flag combinations passed to `dlopen` when DLKit loads an
 /// injected dylib. Exposed as `DLKit.dlOpenMode` for overrides.
 enum DLOpenMode: String, CaseIterable, Identifiable {
-    /// Recommended default: bind symbols lazily, expose globally so
+    /// Recommended: bind symbols lazily, expose globally so
     /// later injections can resolve each other's symbols.
-    case lazyGlobal = "Lazy + Global (default)"
+    case lazyGlobal = "Lazy + Global"
     /// Eager resolution, globally visible so injected modules can
     /// cross-reference each other.
-    case nowGlobal  = "Now + Global"
+    case nowGlobal  = "Now + Global (default)"
     /// Eager resolution, kept in the loader's local namespace — symbols
     /// are NOT merged into the global table. Strictest isolation.
     case now        = "Now (local only)"
@@ -348,7 +348,7 @@ final class ConfigStore: ObservableObject {
             sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
                          value: "1")
         }
-        client.write(InjectionCommand.setenv.rawValue+100)
+        client.write(InjectionCommand.endenv.rawValue)
     }
 
     // MARK: - Devices

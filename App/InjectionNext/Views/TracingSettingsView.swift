@@ -33,21 +33,21 @@ struct TracingSettingsView: View {
                     TextField("Include Filter (regex)",
                               text: $config.traceFilter)
                         .textFieldStyle(.roundedBorder)
-                        .help("Function calls logged can be filtered by this regex.")
+                        .help("Filter function call traces by this regex.")
 
-                    TextField("Calls to Frameworks to Trace\n(comma-separated, 1 = SwiftUI)",
+                    TextField("Trace calls to Frameworks\n(comma-separated, 1 = SwiftUI)",
                               text: $config.traceFrameworks)
                         .textFieldStyle(.roundedBorder)
-                        .help("Trace calls to system frameworks")
+                        .help("Trace calls to system/local frameworks")
 
-                    TextField("Trace Framework Named (1 = UIKit)",
+                    TextField("Trace Frameworks named (1 = UIKit)",
                               text: $config.traceUIKit)
                         .textFieldStyle(.roundedBorder)
                         .help("Objective-C system frameworks to trace")
 
                     Toggle("Expand Custom Types in Trace",
                            isOn: $config.traceLookup)
-                        .help("Expanded client App types used as arguments")
+                        .help("Expand App types used as arguments")
                 } header: {
                     Label("Trace Filters", systemImage: "line.3.horizontal.decrease.circle")
                 } footer: {
