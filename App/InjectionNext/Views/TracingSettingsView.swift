@@ -33,7 +33,7 @@ struct TracingSettingsView: View {
                     TextField("Include Filter (regex)",
                               text: $config.traceFilter)
                         .textFieldStyle(.roundedBorder)
-                        .help("function calls logged can be filted by this regex")
+                        .help("Function calls logged can be filtered by this regex.")
 
                     TextField("Calls to Frameworks to Trace\n(comma-separated, 1 = SwiftUI)",
                               text: $config.traceFrameworks)
