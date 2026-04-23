@@ -69,7 +69,7 @@ struct DevicesSettingsView: View {
                 }
                 .disabled(!config.deviceTesting)
             } header: {
-                Label("On-Device Testing", systemImage: "testtube.2")
+                Label("On-Device Test Injection", systemImage: "testtube.2")
             } footer: {
                 Text("Only enable if you've added the copy_bundle.sh Run Script build phase to your target. When on, the injection dylib is linked with the libraries below (XCTest + helpers). Apps that don't link XCTest themselves will crash at dlopen (\"Library not loaded: @rpath/XCTest.framework/XCTest\") if this is on but copy_bundle.sh isn't shipping the frameworks.")
                     .font(.caption)

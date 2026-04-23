@@ -53,8 +53,8 @@ struct InjectionSettingsView: View {
             }
             .help("Directories being file watched for source file changes")
 
-            /* not sure I want to make this easy to select */
-            #if true
+            /* not sure app should have a select project UI */
+            #if false
             Section {
                 LabeledContent("Project Path") {
                     HStack {

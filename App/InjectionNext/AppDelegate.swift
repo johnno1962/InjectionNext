@@ -115,7 +115,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Populate the list of valid codesigning identities.
         ConfigStore.shared.discoverCodesigningIdentities()
 
-        // Start injection server for on-device/sim connections.
+        // Start injection server(s) for on-device/sim connections.
         if updatePatchUnpatch() == .patched {
             _ = FrontendServer.startOnce
         }
@@ -126,7 +126,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 Defaults.xcodeDefault = xcodePath
             }
             if updatePatchUnpatch() == .unpatched &&
-                getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
+                getenv(INJECTION_HIDE_XCODE_ALERT) == nil &&
+                !ConfigStore.shared.hideXcodeAlert {
                 InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
@@ -137,6 +138,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if let project = Defaults.projectPath {
             _ = MonitorXcode(args: " '\(project)'")
+        } else if ConfigStore.shared.autoLaunchXcode {
+            _ = MonitorXcode()
         }
 
         if Defaults.mcpServer {

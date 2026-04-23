@@ -593,7 +593,7 @@ final class ConfigStore: ObservableObject {
         verboseLogging = false
         benchmarking = false
         mcpServer = false
-        dlOpenMode = .lazyGlobal
+        dlOpenMode = .nowGlobal
     }
 }
 
