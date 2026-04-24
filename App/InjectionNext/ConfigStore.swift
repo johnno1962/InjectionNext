@@ -64,12 +64,12 @@ enum TraceMode: String, CaseIterable, Identifiable {
 /// Preset flag combinations passed to `dlopen` when DLKit loads an
 /// injected dylib. Exposed as `DLKit.dlOpenMode` for overrides.
 enum DLOpenMode: String, CaseIterable, Identifiable {
-    /// Recommended default: bind symbols lazily, expose globally so
+    /// Recommended: bind symbols lazily, expose globally so
     /// later injections can resolve each other's symbols.
-    case lazyGlobal = "Lazy + Global (default)"
+    case lazyGlobal = "Lazy + Global"
     /// Eager resolution, globally visible so injected modules can
     /// cross-reference each other.
-    case nowGlobal  = "Now + Global"
+    case nowGlobal  = "Now + Global (default)"
     /// Eager resolution, kept in the loader's local namespace — symbols
     /// are NOT merged into the global table. Strictest isolation.
     case now        = "Now (local only)"
@@ -86,7 +86,7 @@ enum DLOpenMode: String, CaseIterable, Identifiable {
     /// Short one-liner shown under the picker.
     var shortDescription: String {
         switch self {
-        case .lazyGlobal: return "Default. Fast loads, symbols resolve on first call."
+        case .lazyGlobal: return "Fast loads, symbols resolve on first call."
         case .nowGlobal:  return "Eager + shared. Fails fast when symbols are missing."
         case .now:        return "Eager + isolated. No cross-injection symbol sharing."
         }
@@ -302,52 +302,53 @@ final class ConfigStore: ObservableObject {
         }
     }
     
+    func sendVariable(to client: InjectionServer, name: String, value: String?) {
+        client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
+        client.write(value ?? UNSETENV_VALUE)
+    }
+    
     func sendEnvVars(to client: InjectionServer) {
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_DETAIL)
-        client.write(verboseLogging ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_PRESERVE_STATICS)
-        client.write(preserveStatics ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_SWEEP_DETAIL)
-        client.write(sweepDetail ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_SWEEP_EXCLUDE)
-        client.write(sweepExclude != "" ? sweepExclude : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_BENCH)
-        client.write(benchmarking ? "1" : UNSETENV_VALUE)
-        client.writeCommand(InjectionCommand.setenv.rawValue,
-                            with: INJECTION_TRACE_FILTER)
-        client.write(traceFilter != "" ? traceFilter : ".")
+        if let version = Bundle.main
+            .infoDictionary?["CFBundleShortVersionString"] as? String {
+            sendVariable(to: client, name: INJECTION_APP_VERSION,
+                         value: version)
+        }
+        sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
+                     value: String(dlOpenMode.flags))
+        sendVariable(to: client, name: INJECTION_DETAIL,
+                     value: verboseLogging ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_PRESERVE_STATICS,
+                     value: preserveStatics ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_SWEEP_DETAIL,
+                     value: sweepDetail ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_SWEEP_EXCLUDE,
+                     value: sweepExclude != "" ? sweepExclude : nil)
+        sendVariable(to: client, name: INJECTION_BENCH,
+                     value: benchmarking ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_TRACE_FILTER,
+                     value: traceFilter != "" ? traceFilter : nil)
+        if traceLookup {
+            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
+                         value: "1")
+        }
         switch traceMode {
-        case .injected:
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE)
-            client.write("1")
         case .all:
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_ALL)
-            client.write("1")
+            sendVariable(to: client, name: INJECTION_TRACE_ALL, value: "1")
+            fallthrough
+        case .injected:
+            sendVariable(to: client, name: INJECTION_TRACE, value: "1")
         case .off:
             break
         }
         if traceFrameworks != "" {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_FRAMEWORKS)
-            client.write(traceFrameworks)
+            sendVariable(to: client, name: INJECTION_TRACE_FRAMEWORKS,
+                         value: traceFrameworks)
         }
         if traceUIKit != "" {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_UIKIT)
-            client.write(traceUIKit)
+            sendVariable(to: client, name: INJECTION_TRACE_UIKIT,
+                         value: traceUIKit)
         }
-        if traceLookup {
-            client.writeCommand(InjectionCommand.setenv.rawValue,
-                                with: INJECTION_TRACE_LOOKUP)
-            client.write("1")
-        }
+        client.write(InjectionCommand.endenv.rawValue)
     }
 
     // MARK: - Devices
@@ -418,6 +419,7 @@ final class ConfigStore: ObservableObject {
         didSet {
             ud.set(dlOpenMode.rawValue, forKey: "dlOpenMode")
             DLKit.dlOpenMode = dlOpenMode.flags
+            updateEnvVars()
         }
     }
     /// Opt-in MCP server (ControlServer + LogBuffer). Default off; enable with:
@@ -479,7 +481,7 @@ final class ConfigStore: ObservableObject {
         self.verboseLogging = ud.bool(forKey: "verboseLogging")
         self.benchmarking = ud.bool(forKey: "benchmarking")
         self.mcpServer = ud.bool(forKey: "mcpServer")
-        self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .lazyGlobal
+        self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .nowGlobal
         DLKit.dlOpenMode = self.dlOpenMode.flags
 
         // Auto-detect running Xcode on launch
@@ -591,7 +593,7 @@ final class ConfigStore: ObservableObject {
         verboseLogging = false
         benchmarking = false
         mcpServer = false
-        dlOpenMode = .lazyGlobal
+        dlOpenMode = .nowGlobal
     }
 }
 

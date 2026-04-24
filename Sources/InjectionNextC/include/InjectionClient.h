@@ -23,6 +23,9 @@ extern NSString *INJECTION_KEY;
 #define APP_NAME "InjectionNext"
 #define APP_PREFIX "🔥 "
 #define DYLIB_PREFIX "/eval_injection_" // Expected by DLKit.appImages
+
+#define INJECTION_APP_VERSION "INJECTION_APP_VERSION"
+#define INJECTION_DLOPEN_MODE "INJECTION_DLOPEN_MODE"
 #define UNSETENV_VALUE "__NULL__"
 
 @interface NSObject(HotReloading)
@@ -42,6 +45,7 @@ typedef NS_ENUM(int, InjectionCommand) {
     InjectionSendFile,
     InjectionMetrics,
     InjectionSetenv,
+    InjectionEndenv,
 
     InjectionInvalid = 1000,
 

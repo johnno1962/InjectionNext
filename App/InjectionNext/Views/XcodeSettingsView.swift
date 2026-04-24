@@ -72,12 +72,12 @@ struct XcodeSettingsView: View {
             }
 
             Section {
-                LabeledContent("Launched Xcode") {
+                LabeledContent("App Launched Xcode") {
                     HStack {
                         Circle()
                             .fill(config.haveLaunchedXcode ? .green : .gray)
                             .frame(width: 8, height: 8)
-                        Text(config.haveLaunchedXcode ? "Running" : "Not Running")
+                        Text(config.haveLaunchedXcode ? "Have Launched" : "Did not Launch")
                     }
                 }
                 .help("Was Xcode launched by this app")

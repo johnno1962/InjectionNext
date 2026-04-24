@@ -51,7 +51,10 @@ struct InjectionSettingsView: View {
             } header: {
                 Label("File Watchers", systemImage: "eye")
             }
+            .help("Directories being file watched for source file changes")
 
+            /* not sure app should have a select project UI */
+            #if true
             Section {
                 LabeledContent("Project Path") {
                     HStack {
@@ -101,24 +104,28 @@ struct InjectionSettingsView: View {
                     }
                 }
             } header: {
-                Label("Project", systemImage: "folder")
+                Label("Project (Optional)", systemImage: "folder")
             } footer: {
                 Text("Set a project directory. If it contains multiple .xcodeproj/.xcworkspace files, you can pick a default or be asked each time Xcode launches.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            #endif
 
             Section {
                 Toggle("Preserve Static Variables", isOn: $config.preserveStatics)
-                Toggle("Disable Standalone Mode", isOn: $config.disableStandalone)
+                    .help("Static variables retained over injections")
+//                Toggle("Disable Standalone Mode", isOn: $config.disableStandalone)
             } header: {
                 Label("Injection Behavior", systemImage: "bolt.circle")
             } footer: {
-                Text("\"Preserve Statics\" keeps static/top-level variable values across injections. \"Disable Standalone\" prevents fallback standalone injection when the app can't connect to InjectionNext.")
+                Text("\"Preserve Statics\" keeps static/top-level variable values across injections.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
+            /* These are realised before a connection exixts to the app */
+            #if false
             Section {
                 Picker("Generics Injection", selection: $config.genericsMode) {
                     ForEach(GenericsMode.allCases) { mode in
@@ -138,11 +145,14 @@ struct InjectionSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            #endif
 
             Section {
                 Toggle("Sweep Verbose Logging", isOn: $config.sweepDetail)
+                    .help("Log instances as they are swept to imlement @objc func injected()")
                 TextField("Sweep Exclude Regex", text: $config.sweepExclude)
                     .textFieldStyle(.roundedBorder)
+                    .help("Use this regexp to exclude types from the Sweep")
             } header: {
                 Label("Object Sweep", systemImage: "rectangle.and.text.magnifyingglass")
             } footer: {
