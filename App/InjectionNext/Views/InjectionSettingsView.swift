@@ -104,7 +104,7 @@ struct InjectionSettingsView: View {
                     }
                 }
             } header: {
-                Label("Project", systemImage: "folder")
+                Label("Project (Optional)", systemImage: "folder")
             } footer: {
                 Text("Set a project directory. If it contains multiple .xcodeproj/.xcworkspace files, you can pick a default or be asked each time Xcode launches.")
                     .font(.caption)
