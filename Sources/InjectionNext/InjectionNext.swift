@@ -151,11 +151,13 @@ open class InjectionNext: SimpleSocket {
         }
 
         switch name {
+        /// Custom type lookup on tracing.
         case INJECTION_TRACE_LOOKUP:
             if value.hasPrefix("|") {
                 SwiftTrace.defaultLookupExclusions += value
             }
             SwiftTrace.typeLookup = true
+        /// Entire App bundle tracing.
         case INJECTION_TRACE_ALL:
             if value.hasPrefix("|") {
                 SwiftTrace.defaultMethodExclusions += value
@@ -172,6 +174,7 @@ open class InjectionNext: SimpleSocket {
                 }
                 SwiftTrace.trace(bundlePath: imageName)
             }
+        /// Trace calls to framework e.g. SwiftUI,SwiftUICore
         case INJECTION_TRACE_FRAMEWORKS:
             var frmwks = value
             if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
@@ -185,6 +188,7 @@ open class InjectionNext: SimpleSocket {
                     error("Invalid trace framework \(frmwk)")
                 }
             }
+        /// Trace UIKit internals using swizzling
         case INJECTION_TRACE_UIKIT:
             var frmwks = value
             if frmwks == "" || frmwks == "1" { frmwks = "UIKitCore" }
@@ -195,6 +199,7 @@ open class InjectionNext: SimpleSocket {
                     error("Invalid swizzle framework \(frmwk)")
                 }
             }
+        /// Function and class method tracing on injection.
         case INJECTION_TRACE:
             Reloader.traceHook = { (injected, name) in
                 let name = SwiftMeta.demangle(symbol: name) ?? String(cString: name)
