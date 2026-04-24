@@ -327,6 +327,10 @@ final class ConfigStore: ObservableObject {
                      value: benchmarking ? "1" : nil)
         sendVariable(to: client, name: INJECTION_TRACE_FILTER,
                      value: traceFilter != "" ? traceFilter : nil)
+        if traceLookup {
+            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
+                         value: "1")
+        }
         switch traceMode {
         case .all:
             sendVariable(to: client, name: INJECTION_TRACE_ALL, value: "1")
@@ -343,10 +347,6 @@ final class ConfigStore: ObservableObject {
         if traceUIKit != "" {
             sendVariable(to: client, name: INJECTION_TRACE_UIKIT,
                          value: traceUIKit)
-        }
-        if traceLookup {
-            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
-                         value: "1")
         }
         client.write(InjectionCommand.endenv.rawValue)
     }
