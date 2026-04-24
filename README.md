@@ -90,7 +90,7 @@ The binary bundles also integrate [Nimble](https://github.com/Quick/Nimble)
 and a slightly modified version of the [Quick](https://github.com/Quick/Quick) 
 testing framework to inhibit spec caching under their respective Apache licences.
 
-An alternative to loading a bundle is to add the following additional "Other Linker Flag":
+An alternative to loading a bundle is to add the following additional `Debug` "Other Linker Flag":
 
 `/Applications/InjectionNext.app/Contents/Resources/lib$(PLATFORM_NAME)Injection.dylib`
 

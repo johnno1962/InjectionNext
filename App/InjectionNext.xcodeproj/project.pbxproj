@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2217BE812C0A65C20032A832 /* Fortify in Frameworks */ = {isa = PBXBuildFile; productRef = 2217BE802C0A65C20032A832 /* Fortify */; };
-		222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */ = {isa = PBXBuildFile; fileRef = 222BC9442C157C3200780A41 /* InjectionReady.tif */; };
 		224E57FB2C08978F00B71C79 /* SwiftRegex in Frameworks */ = {isa = PBXBuildFile; productRef = 224E57FA2C08978F00B71C79 /* SwiftRegex */; };
 		224E57FE2C08BBE300B71C79 /* InjectionServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FD2C08BBE300B71C79 /* InjectionServer.swift */; };
 		224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */; };
@@ -16,9 +15,24 @@
 		22B645A02C18DD9D00F99B61 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
 		22E3D98B2C19009900BB234E /* DLKit in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98A2C19009900BB234E /* DLKit */; };
 		22E3D98D2C19009900BB234E /* DLKitC in Frameworks */ = {isa = PBXBuildFile; productRef = 22E3D98C2C19009900BB234E /* DLKitC */; };
+		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
+		AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000A1 /* InjectionNextApp.swift */; };
+		AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* StatusMenuView.swift */; };
+		AAAA000000000000000000C2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C1 /* SettingsView.swift */; };
+		AAAA000000000000000000C4 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C3 /* GeneralSettingsView.swift */; };
+		AAAA000000000000000000C6 /* XcodeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C5 /* XcodeSettingsView.swift */; };
+		AAAA000000000000000000C8 /* BuildSystemSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */; };
+		AAAA000000000000000000CA /* CompilerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000C9 /* CompilerSettingsView.swift */; };
+		AAAA000000000000000000CC /* InjectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CB /* InjectionSettingsView.swift */; };
+		AAAA000000000000000000CE /* DevicesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CD /* DevicesSettingsView.swift */; };
+		AAAA000000000000000000D0 /* FileWatcherSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000CF /* FileWatcherSettingsView.swift */; };
+		AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D1 /* NetworkSettingsView.swift */; };
+		AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D3 /* TracingSettingsView.swift */; };
+		AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000D5 /* AdvancedSettingsView.swift */; };
+		AAAA000000000000000000E2 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E1 /* LogManager.swift */; };
+		AAAA000000000000000000E4 /* ConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E3 /* ConsoleView.swift */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
 		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
-		BB16653A25E9A5F2001407AE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BB16653925E9A5F0001407AE /* main.m */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -81,9 +95,8 @@
 		BB4788972EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s in Sources */ = {isa = PBXBuildFile; fileRef = BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */; };
 		BB4788982EB6B81A00464AB4 /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = BB4788862EB6B81A00464AB4 /* fishhook.c */; };
 		BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5155D92CDED44400704C7A /* InjectionHybrid.swift */; };
-		AA0000012F08000000000001 /* ControlServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002F08000000000001 /* ControlServer.swift */; };
 		BB52AD552F1501F500297CD9 /* Unhider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B6459F2C18DD9D00F99B61 /* Unhider.swift */; };
-		BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* Defaults.swift */; };
+		BB6A56F02C50E73600C92112 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6A56EF2C50E73600C92112 /* ConfigStore.swift */; };
 		BB6A56F12C50E79800C92112 /* copy_bundle.sh in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */; };
 		BB85A42B2D6B9C7B00FA29D0 /* feedcommands in Resources */ = {isa = PBXBuildFile; fileRef = BB85A4242D6B9C5300FA29D0 /* feedcommands */; };
 		BB85A42E2D6BA13B00FA29D0 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
@@ -96,19 +109,13 @@
 		BBB64FEC1FD585D50020BE47 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBB64FEB1FD585D50020BE47 /* WebKit.framework */; };
 		BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCA02011FB0F10300E45F0F /* AppDelegate.swift */; };
 		BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02031FB0F10300E45F0F /* Assets.xcassets */; };
-		BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02051FB0F10300E45F0F /* MainMenu.xib */; };
 		BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
-		BBCA02591FB112F500E45F0F /* App.icns in Resources */ = {isa = PBXBuildFile; fileRef = BBCA02581FB112F500E45F0F /* App.icns */; };
-		BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */; };
-		BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBCA025F1FB122C300E45F0F /* InjectionOK.tif */; };
 		BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBBEC42D1FC56522004188B3 /* XCTest.framework */; };
 		BBDD843F2C4FE8D5000F3124 /* macOSInjection.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BBDD84132C4FE749000F3124 /* macOSInjection.bundle */; };
 		BBDD84422C4FEA4E000F3124 /* InjectionNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */; };
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
-		BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490D91FB2C643003D41BB /* InjectionBusy.tif */; };
-		BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */ = {isa = PBXBuildFile; fileRef = BBE490DA1FB2C643003D41BB /* InjectionError.tif */; };
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
@@ -164,14 +171,28 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		222BC9442C157C3200780A41 /* InjectionReady.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionReady.tif; sourceTree = "<group>"; };
 		224E57FC2C08BAE200B71C79 /* InjectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InjectionClient.h; path = ../../Sources/InjectionNextC/include/InjectionClient.h; sourceTree = "<group>"; };
 		224E57FD2C08BBE300B71C79 /* InjectionServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionServer.swift; sourceTree = "<group>"; };
 		224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorXcode.swift; sourceTree = "<group>"; };
 		22B6459F2C18DD9D00F99B61 /* Unhider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Unhider.swift; path = ../../InjectionLite/Sources/InjectionImpl/Unhider.swift; sourceTree = "<group>"; };
+		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000A1 /* InjectionNextApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionNextApp.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B1 /* StatusMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMenuView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C3 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C5 /* XcodeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildSystemSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000C9 /* CompilerSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompilerSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CB /* InjectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CD /* DevicesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000CF /* FileWatcherSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcherSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D1 /* NetworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D3 /* TracingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracingSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000D5 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000E1 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000E3 /* ConsoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleView.swift; sourceTree = "<group>"; };
 		BB037DF31FAD808B004B267C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		BB037DF41FAD80D0004B267C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		BB16653925E9A5F0001407AE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BB2A66352E3E753B001EDD38 /* BAZEL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = BAZEL.md; path = ../BAZEL.md; sourceTree = SOURCE_ROOT; };
 		BB42F8D22EB626F100FDBBCC /* EasyPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyPointer.swift; sourceTree = "<group>"; };
 		BB42F8D32EB626F100FDBBCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -230,10 +251,9 @@
 		BB47888D2EB6B81A00464AB4 /* xt_forwarding_trampoline_x64.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x64.s; sourceTree = "<group>"; };
 		BB47888E2EB6B81A00464AB4 /* xt_forwarding_trampoline_x86.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = xt_forwarding_trampoline_x86.s; sourceTree = "<group>"; };
 		BB5155D92CDED44400704C7A /* InjectionHybrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectionHybrid.swift; sourceTree = "<group>"; };
-		AA0000002F08000000000001 /* ControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlServer.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
-		BB6A56EF2C50E73600C92112 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
+		BB6A56EF2C50E73600C92112 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
@@ -245,12 +265,8 @@
 		BBCA01FE1FB0F10300E45F0F /* InjectionNext.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InjectionNext.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBCA02011FB0F10300E45F0F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BBCA02031FB0F10300E45F0F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BBCA02061FB0F10300E45F0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BBCA02081FB0F10400E45F0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InjectionNext.entitlements; sourceTree = "<group>"; };
-		BBCA02581FB112F500E45F0F /* App.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = App.icns; sourceTree = "<group>"; };
-		BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionIdle.tif; sourceTree = "<group>"; };
-		BBCA025F1FB122C300E45F0F /* InjectionOK.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionOK.tif; sourceTree = "<group>"; };
 		BBCCC3B02C73A6AD00E71F81 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/WatchOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		BBDD84132C4FE749000F3124 /* macOSInjection.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSInjection.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InjectionNext.swift; path = ../../Sources/InjectionNext/InjectionNext.swift; sourceTree = "<group>"; };
@@ -260,8 +276,6 @@
 		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
 		BBDD84592C4FF645000F3124 /* ClientBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ClientBoot.mm; path = ../../Sources/InjectionNextC/ClientBoot.mm; sourceTree = "<group>"; };
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
-		BBE490D91FB2C643003D41BB /* InjectionBusy.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionBusy.tif; sourceTree = "<group>"; };
-		BBE490DA1FB2C643003D41BB /* InjectionError.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = InjectionError.tif; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
 		BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftRefs.swift; sourceTree = "<group>"; };
@@ -309,6 +323,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AAAA000000000000000000B0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AAAA000000000000000000B1 /* StatusMenuView.swift */,
+				AAAA000000000000000000C1 /* SettingsView.swift */,
+				AAAA000000000000000000C3 /* GeneralSettingsView.swift */,
+				AAAA000000000000000000C5 /* XcodeSettingsView.swift */,
+				AAAA000000000000000000C7 /* BuildSystemSettingsView.swift */,
+				AAAA000000000000000000C9 /* CompilerSettingsView.swift */,
+				AAAA000000000000000000CB /* InjectionSettingsView.swift */,
+				AAAA000000000000000000CD /* DevicesSettingsView.swift */,
+				AAAA000000000000000000CF /* FileWatcherSettingsView.swift */,
+				AAAA000000000000000000D1 /* NetworkSettingsView.swift */,
+				AAAA000000000000000000D3 /* TracingSettingsView.swift */,
+				AAAA000000000000000000D5 /* AdvancedSettingsView.swift */,
+				AAAA000000000000000000E3 /* ConsoleView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BB42F8E02EB626F100FDBBCC /* SwiftTrace */ = {
 			isa = PBXGroup;
 			children = (
@@ -498,29 +532,24 @@
 		BBCA01FF1FB0F10300E45F0F /* InjectionNext */ = {
 			isa = PBXGroup;
 			children = (
-				BB16653925E9A5F0001407AE /* main.m */,
+				AAAA000000000000000000A1 /* InjectionNextApp.swift */,
 				BBCA02011FB0F10300E45F0F /* AppDelegate.swift */,
+				AAAA000000000000000000B0 /* Views */,
 				BB4654802C257F110080EC40 /* NextCompiler.swift */,
 				224E57FF2C08BC0E00B71C79 /* MonitorXcode.swift */,
 				224E57FD2C08BBE300B71C79 /* InjectionServer.swift */,
 				BB5155D92CDED44400704C7A /* InjectionHybrid.swift */,
 				BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */,
 				CEC17029253ED117002E823F /* Experimental.swift */,
-				BB6A56EF2C50E73600C92112 /* Defaults.swift */,
+				BB6A56EF2C50E73600C92112 /* ConfigStore.swift */,
 				22B6459F2C18DD9D00F99B61 /* Unhider.swift */,
 				AA0000002F08000000000001 /* ControlServer.swift */,
+				AAAA000000000000000000E1 /* LogManager.swift */,
 				224E57FC2C08BAE200B71C79 /* InjectionClient.h */,
 				BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */,
 				BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */,
 				BBCA02031FB0F10300E45F0F /* Assets.xcassets */,
-				BBCA025E1FB122C300E45F0F /* InjectionIdle.tif */,
-				222BC9442C157C3200780A41 /* InjectionReady.tif */,
-				BBCA025F1FB122C300E45F0F /* InjectionOK.tif */,
-				BBE490D91FB2C643003D41BB /* InjectionBusy.tif */,
-				BBE490DA1FB2C643003D41BB /* InjectionError.tif */,
-				BBCA02051FB0F10300E45F0F /* MainMenu.xib */,
 				BBCA02081FB0F10400E45F0F /* Info.plist */,
-				BBCA02581FB112F500E45F0F /* App.icns */,
 				BBCA020B1FB0F10400E45F0F /* InjectionNext.entitlements */,
 				BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */,
 				BB42F9542EB63EFF00FDBBCC /* InjectionBazel */,
@@ -692,16 +721,9 @@
 				BBB64DC61FD450B40020BE47 /* LICENSE in Resources */,
 				BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */,
 				BBB64DC51FD450AF0020BE47 /* README.md in Resources */,
-				BBE490DC1FB2C643003D41BB /* InjectionError.tif in Resources */,
-				BBCA02591FB112F500E45F0F /* App.icns in Resources */,
-				BBCA02601FB122C300E45F0F /* InjectionIdle.tif in Resources */,
 				BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */,
 				BBF6572F2DAFF00200638170 /* QUICK.md in Resources */,
-				BBCA02611FB122C300E45F0F /* InjectionOK.tif in Resources */,
 				BBCA02041FB0F10300E45F0F /* Assets.xcassets in Resources */,
-				222BC9452C157C3200780A41 /* InjectionReady.tif in Resources */,
-				BBCA02071FB0F10300E45F0F /* MainMenu.xib in Resources */,
-				BBE490DB1FB2C643003D41BB /* InjectionBusy.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -783,7 +805,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB6A56F02C50E73600C92112 /* Defaults.swift in Sources */,
+				BB6A56F02C50E73600C92112 /* ConfigStore.swift in Sources */,
 				BB42F93F2EB63CD800FDBBCC /* Common.swift in Sources */,
 				BB42F94C2EB63E4F00FDBBCC /* LogParser.swift in Sources */,
 				224E58002C08BC0E00B71C79 /* MonitorXcode.swift in Sources */,
@@ -792,7 +814,21 @@
 				BBA082362D6BC33500FFFB2F /* FrontendServer.swift in Sources */,
 				BBCA022A1FB0F64800E45F0F /* SimpleSocket.mm in Sources */,
 				BB42F94E2EB63E7700FDBBCC /* InjectionBase.swift in Sources */,
-				BB16653A25E9A5F2001407AE /* main.m in Sources */,
+				AAAA000000000000000000A2 /* InjectionNextApp.swift in Sources */,
+				AAAA000000000000000000B2 /* StatusMenuView.swift in Sources */,
+				AAAA000000000000000000C2 /* SettingsView.swift in Sources */,
+				AAAA000000000000000000C4 /* GeneralSettingsView.swift in Sources */,
+				AAAA000000000000000000C6 /* XcodeSettingsView.swift in Sources */,
+				AAAA000000000000000000C8 /* BuildSystemSettingsView.swift in Sources */,
+				AAAA000000000000000000CA /* CompilerSettingsView.swift in Sources */,
+				AAAA000000000000000000CC /* InjectionSettingsView.swift in Sources */,
+				AAAA000000000000000000CE /* DevicesSettingsView.swift in Sources */,
+				AAAA000000000000000000D0 /* FileWatcherSettingsView.swift in Sources */,
+				AAAA000000000000000000D2 /* NetworkSettingsView.swift in Sources */,
+				AAAA000000000000000000D4 /* TracingSettingsView.swift in Sources */,
+				AAAA000000000000000000D6 /* AdvancedSettingsView.swift in Sources */,
+				AAAA000000000000000000E2 /* LogManager.swift in Sources */,
+				AAAA000000000000000000E4 /* ConsoleView.swift in Sources */,
 				BBCA02021FB0F10300E45F0F /* AppDelegate.swift in Sources */,
 				BB5155DA2CDED44F00704C7A /* InjectionHybrid.swift in Sources */,
 				BB42F94B2EB63E3F00FDBBCC /* FileWatcher.swift in Sources */,
@@ -886,17 +922,6 @@
 			targetProxy = BBDD843D2C4FE8C5000F3124 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		BBCA02051FB0F10300E45F0F /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BBCA02061FB0F10300E45F0F /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BB439B821FABA64300B4F50B /* Debug */ = {
@@ -1094,8 +1119,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.6.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1118,8 +1143,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = InjectionNext/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.6.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnholdsworth.InjectionNext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

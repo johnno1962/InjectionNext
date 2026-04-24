@@ -9,7 +9,7 @@
 import Foundation
 
 struct Defaults {
-    /// App deauflts for persistent state
+    /// App defaults for persistent state
     static let userDefaults = UserDefaults.standard
     static let xcodePathDefault = "XcodePath"
     static let librariesDefault = "libraries"

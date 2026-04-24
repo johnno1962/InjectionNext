@@ -205,6 +205,9 @@ static int lastServerSocket;
     }
     return self;
 }
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode {
+    return fdopen(clientSocket, mode);
+}
 
 - (void)run {
     [self performSelectorInBackground:@selector(runInBackground) withObject:nil];

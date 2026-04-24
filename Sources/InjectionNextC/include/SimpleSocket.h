@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <arpa/inet.h>
+#import <stdio.h>
 
 @interface SimpleSocket : NSObject {
 @protected
@@ -32,6 +33,7 @@
                                   message:(const char *_Nonnull)format;
 
 - (instancetype _Nonnull)initSocket:(int)socket;
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode;
 
 - (void)run;
 - (void)runInBackground;

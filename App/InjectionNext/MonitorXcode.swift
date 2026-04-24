@@ -12,7 +12,8 @@
 //  Captures this information and passes it onto a Recompiler
 //  instance to process and inject when edited file is saved.
 //
-import Foundation
+
+import AppKit
 import SwiftRegex
 import Fortify
 import Popen
@@ -20,17 +21,31 @@ import Popen
 class MonitorXcode {
 
     // Currently running Xcode process
-    static weak var runningXcode: MonitorXcode?
+    static weak var runningXcode: MonitorXcode? {
+        didSet {
+            DispatchQueue.main.async {
+                ConfigStore.shared.haveLaunchedXcode = runningXcode != nil
+            }
+        }
+    }
     // The service to recompile and inject a source file.
     static var recompiler = FrontendServer.frontendRecompiler(for: "Xcode")
 
-    func debug(_ what: Any..., separator: String = " ") {
-        #if DEBUG
-        print(what, separator: separator)
-        #endif
+    /// Any Xcode already running on this machine (not necessarily spawned
+    /// by InjectionNext). Used to avoid launching a second `Xcode`
+    /// process that would show the "already open in another Xcode
+    /// process" dialog when the project is already open elsewhere.
+    static var externalXcode: NSRunningApplication? {
+        NSRunningApplication
+            .runningApplications(withBundleIdentifier: "com.apple.dt.Xcode")
+            .first(where: { $0.processIdentifier > 0 })
     }
 
-    init(args: String = "") {
+    init?(args: String = "") {
+        if Self.externalXcode != nil {
+            InjectionServer.error("Xcode already running, cannot start another")
+            return nil
+        }
         var args = args
         #if DEBUG
         args += " | tee \(Reloader.tmpbase).log"
@@ -173,7 +188,7 @@ class MonitorXcode {
                     return
                 }
 
-                print("Updating \(parser.args.count) args with \(parser.swiftFileCount) swift files "+source+" "+line)
+                debug("Updating \(parser.args.count) args with \(parser.swiftFileCount) swift files "+source+" "+line)
                 let update = NextCompiler.Compilation(arguments: parser.args,
                     swiftFiles: parser.swiftFiles, workingDir: parser.workingDir)
 
@@ -181,9 +196,12 @@ class MonitorXcode {
                     Self.recompiler.store(compilation: update, for: source)
                 }
             } else if line ==
-                "  key.request: source.request.indexer.editor-did-save-file,",
+                "  key.request: source.request.indexer.editor-will-save-file,",
                 let _ = xcodeStdout.readLine(), let source = readQuotedString() {
-                print("Injecting saved file "+source)
+                debug("Injecting saved file "+source)
+                DispatchQueue.main.async {
+                    InjectionHybrid.lastInjected[source] = Date.timeIntervalSinceReferenceDate
+                }
                 NextCompiler.compileQueue.async {
                     _ = Self.recompiler.inject(source: source)
                 }
