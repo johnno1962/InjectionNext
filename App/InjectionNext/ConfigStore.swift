@@ -311,7 +311,8 @@ final class ConfigStore: ObservableObject {
     func envVarsForSwiftPackage() -> String {
         var exports = ""
         func addEnv(named: String, value: String? = nil) {
-            exports += "export \(named)='\(value ?? "1")'\n"
+            let safe = value?[#"['"\n]"#, "_"]
+            exports += "export \(named)='\(safe ?? "1")'\n"
         }
         if injectionHost != "" {
             addEnv(named: INJECTION_HOST, value: injectionHost)
@@ -437,10 +438,14 @@ final class ConfigStore: ObservableObject {
     }
 
     // MARK: - Network (mostly read-only display)
+    private var hostTextWarned = false
 
     @Published var injectionHost: String {
         didSet { ud.set(injectionHost, forKey: "injectionHost")
-                 warnRelaunchXcode(for: #function) }
+                 if !hostTextWarned {
+                     hostTextWarned = true
+                     warnRelaunchXcode(for: #function)
+                 } }
     }
     let injectionPort: String = HOTRELOADING_PORT
     let controlPort: UInt16 = 8919
