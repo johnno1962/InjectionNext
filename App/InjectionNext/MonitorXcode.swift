@@ -49,6 +49,9 @@ class MonitorXcode {
             return nil
         }
         var args = args
+        if project != "" {
+            args += " '\(project)'"
+        }
         #if DEBUG
         args += " | tee \(Reloader.tmpbase).log"
         #endif
@@ -66,7 +69,7 @@ class MonitorXcode {
             '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)
             """) {
             Self.runningXcode = self
-            AppDelegate.ui.launchXcodeItem.state = .on
+//            AppDelegate.ui.launchXcodeItem.state = .on
             DispatchQueue.global().async {
                 while true {
                     do {
@@ -76,7 +79,7 @@ class MonitorXcode {
                             AppDelegate.ui.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        AppDelegate.ui.launchXcodeItem.state = .off
+//                        AppDelegate.ui.launchXcodeItem.state = .off
                         if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }

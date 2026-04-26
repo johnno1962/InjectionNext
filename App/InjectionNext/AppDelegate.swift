@@ -31,14 +31,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Compatibility shims (route to ConfigStore)
 
-    /// Mimics `launchXcodeItem.state` for MonitorXcode.
-    var launchXcodeItem: CompatMenuItem {
-        CompatMenuItem(
-            get: { ConfigStore.shared.haveLaunchedXcode ? .on : .off },
-            set: { ConfigStore.shared.haveLaunchedXcode = ($0 == .on) }
-        )
-    }
-
     /// Mimics `watchDirectoryItem.state` for ControlServer / InjectionHybrid.
     var watchDirectoryItem: CompatMenuItem {
         CompatMenuItem(
@@ -53,11 +45,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             get: { ConfigStore.shared.devicesEnabled ? .on : .off },
             set: { ConfigStore.shared.devicesEnabled = ($0 == .on) }
         )
-    }
-
-    /// Mimics `selectXcodeItem.toolTip` for ControlServer.
-    var selectXcodeItem: CompatMenuItem {
-        CompatMenuItem(get: { .off }, set: nil)
     }
 
     /// Mimics `patchCompilerItem` — a real orphan NSMenuItem so
@@ -125,9 +112,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if Defaults.xcodeDefault == nil {
                 Defaults.xcodeDefault = xcodePath
             }
-            if updatePatchUnpatch() == .unpatched &&
-                getenv(INJECTION_HIDE_XCODE_ALERT) == nil &&
-                !ConfigStore.shared.hideXcodeAlert {
+            if !ConfigStore.shared.hideXcodeAlert &&
+                updatePatchUnpatch() == .unpatched &&
+                getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
                 InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
@@ -137,8 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if ConfigStore.shared.autoLaunchXcode {
-            let project = ConfigStore.shared.projectPath
-            _ = MonitorXcode(args: project != "" ? " '\(project)'" : "")
+            _ = MonitorXcode()
         }
 
         if Defaults.mcpServer {
