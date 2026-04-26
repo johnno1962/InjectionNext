@@ -37,6 +37,14 @@ static dispatch_once_t onlyOneClient;
 
 /// Attempt to connect to InjectionNext.app
 + (void)connectToInjection:(Class)clientClass {
+    #ifdef INJECTION_HOST_SETTING
+    if (!getenv(INJECTION_HOST))
+        setenv(INJECTION_HOST, INJECTION_HOST_SETTING, 1);
+    #endif
+    #ifdef INJECTION_NOSTANDALONE_SETTING
+    if (!getenv(INJECTION_NOSTANDALONE))
+        setenv(INJECTION_NOSTANDALONE, INJECTION_NOSTANDALONE_SETTING, 1);
+    #endif
     const char *hostip = getenv(INJECTION_HOST) ?: "127.0.0.1";
 
     // Do we need to use broadcasts to find devlepers Mac on the network

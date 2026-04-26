@@ -42,6 +42,8 @@ class MonitorXcode {
     }
 
     init?(args: String = "") {
+        let exports = ConfigStore.shared.envVarsForSwiftPackage(),
+            project = ConfigStore.shared.projectPath
         if Self.externalXcode != nil {
             InjectionServer.error("Xcode already running, cannot start another")
             return nil
@@ -58,7 +60,7 @@ class MonitorXcode {
                 to select a valid path.
                 """)
         }
-        else if let xcodeStdout = Popen(cmd: """
+        else if let xcodeStdout = Popen(cmd: exports+"""
             export SOURCEKIT_LOGGING=1
             export RUNNING_VIA_INJECTION_NEXT=1
             '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)

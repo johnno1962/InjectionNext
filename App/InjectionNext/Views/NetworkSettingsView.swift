@@ -13,7 +13,7 @@ struct NetworkSettingsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Injection Host") {
+                LabeledContent("Injection Host﹡") {
                     TextField("127.0.0.1", text: $config.injectionHost)
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: 200)

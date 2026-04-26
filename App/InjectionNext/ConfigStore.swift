@@ -278,13 +278,16 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(preserveStatics, forKey: "preserveStatics"); updateEnvVars() }
     }
     @Published var disableStandalone: Bool { // difficult to implement without connection.
-        didSet { ud.set(disableStandalone, forKey: "disableStandalone") }
+        didSet { ud.set(disableStandalone, forKey: "disableStandalone")
+                 warnRelaunchXcode(for: #function)}
     }
     @Published var genericsMode: GenericsMode { // difficult to implement early.
-        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode") }
+        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var keyPathsMode: KeyPathsMode { // difficult to implement early.
-        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
+        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var sweepExclude: String {
         didSet { ud.set(sweepExclude, forKey: "sweepExclude"); updateEnvVars() }
@@ -302,6 +305,36 @@ final class ConfigStore: ObservableObject {
         }
     }
     
+    func envVarsForSwiftPackage() -> String {
+        var exports = ""
+        func addEnv(named: String, value: String? = nil) {
+            exports += "export \(named)='\(value ?? "1")'\n"
+        }
+        if injectionHost != "" {
+            addEnv(named: INJECTION_HOST, value: injectionHost)
+        }
+        if disableStandalone {
+            addEnv(named: INJECTION_NOSTANDALONE)
+        }
+        switch genericsMode {
+        case .auto:
+            break
+        case .legacy:
+            addEnv(named: INJECTION_OF_GENERICS)
+        case .disabled:
+            addEnv(named: INJECTION_NOGENERICS)
+        }
+        switch keyPathsMode {
+        case .auto:
+            break
+        case .enabled:
+            addEnv(named: INJECTION_KEYPATHS)
+        case .disabled:
+            addEnv(named: INJECTION_NOKEYPATHS)
+        }
+        return exports
+    }
+    
     func sendVariable(to client: InjectionServer, name: String, value: String?) {
         client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
         client.write(value ?? UNSETENV_VALUE)
@@ -310,7 +343,7 @@ final class ConfigStore: ObservableObject {
     func sendEnvVars(to client: InjectionServer) {
         if let version = Bundle.main
             .infoDictionary?["CFBundleShortVersionString"] as? String {
-            sendVariable(to: client, name: INJECTION_APP_VERSION,
+            sendVariable(to: client, name: INJECTION_NEXT_VERSION,
                          value: version)
         }
         sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
@@ -402,10 +435,17 @@ final class ConfigStore: ObservableObject {
     // MARK: - Network (mostly read-only display)
 
     @Published var injectionHost: String {
-        didSet { ud.set(injectionHost, forKey: "injectionHost") }
+        didSet { ud.set(injectionHost, forKey: "injectionHost")
+                 warnRelaunchXcode(for: #function) }
     }
     let injectionPort: String = HOTRELOADING_PORT
     let controlPort: UInt16 = 8919
+    
+    func warnRelaunchXcode(for setting: String) {
+        InjectionServer.error("""
+            Changing \(setting) requires you re-launch xcode and build clean.
+            """)
+    }
 
     // MARK: - Advanced
 
