@@ -426,7 +426,8 @@ final class ConfigStore: ObservableObject {
     // MARK: - File Watcher
 
     @Published var fileWatcherLatency: Double {
-        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency") }
+        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency")
+                 FileWatcher.latency = fileWatcherLatency }
     }
     @Published var injectablePattern: String {
         didSet { ud.set(injectablePattern, forKey: "injectablePattern") }
@@ -523,6 +524,7 @@ final class ConfigStore: ObservableObject {
         self.mcpServer = ud.bool(forKey: "mcpServer")
         self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .nowGlobal
         DLKit.dlOpenMode = self.dlOpenMode.flags
+        FileWatcher.latency = self.fileWatcherLatency
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
