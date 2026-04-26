@@ -207,7 +207,7 @@ open class InjectionNext: SimpleSocket {
             if let dylib = DLKit.imageMap[frmwk] {
                 Self.target = dylib
                 for image in images {
-                    print(image)
+                    detail("Tracing image \(image)")
                     rebind_symbols_trace(autoBitCast(image.imageHeader),
                                          image.imageSlide, Self.tracer)
                 }
