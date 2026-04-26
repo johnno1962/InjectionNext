@@ -308,37 +308,6 @@ final class ConfigStore: ObservableObject {
         }
     }
     
-    func envVarsForSwiftPackage() -> String {
-        var exports = ""
-        func addEnv(named: String, value: String? = nil) {
-            let safe = value?[#"['"\n]"#, "_"]
-            exports += "export \(named)='\(safe ?? "1")'\n"
-        }
-        if injectionHost != "" {
-            addEnv(named: INJECTION_HOST, value: injectionHost)
-        }
-        if disableStandalone {
-            addEnv(named: INJECTION_NOSTANDALONE)
-        }
-        switch genericsMode {
-        case .auto:
-            break
-        case .legacy:
-            addEnv(named: INJECTION_OF_GENERICS)
-        case .disabled:
-            addEnv(named: INJECTION_NOGENERICS)
-        }
-        switch keyPathsMode {
-        case .auto:
-            break
-        case .enabled:
-            addEnv(named: INJECTION_KEYPATHS)
-        case .disabled:
-            addEnv(named: INJECTION_NOKEYPATHS)
-        }
-        return exports
-    }
-    
     func sendVariable(to client: InjectionServer, name: String, value: String?) {
         client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
         client.write(value ?? UNSETENV_VALUE)
@@ -386,6 +355,64 @@ final class ConfigStore: ObservableObject {
                          value: traceUIKit)
         }
         client.write(InjectionCommand.endenv.rawValue)
+    }
+
+    ///
+    /// There are two ways "early" settings (those actioned before connecting
+    /// to the app) are connunicated to the User's client app:
+    ///
+    /// 1) Through environment variables on running Xcode which make their
+    /// way through to the Swift Package manifest to set compilation options.
+    ///
+    /// 2) Writing a short script source'd  by copy_bundle.sh that copies them
+    /// into the Info.plist of the injection bundle.
+    ///
+    func envVarsForSwiftPackage() -> String {
+        var exports = "", sets = "", count = 0
+        func addEnv(named: String, value: String? = nil) {
+            let safe = value?[#"['"\n]"#, "_"] ?? "1"
+            exports += "export \(named)='\(safe)'\n"
+            sets += """
+                /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "$PLIST" &&
+
+                """
+            count += 1
+        }
+        if injectionHost != "127.0.0.1" {
+            addEnv(named: INJECTION_HOST, value: injectionHost)
+        }
+        if disableStandalone {
+            addEnv(named: INJECTION_NOSTANDALONE)
+        }
+        switch genericsMode {
+        case .auto:
+            break
+        case .legacy:
+            addEnv(named: INJECTION_OF_GENERICS)
+        case .disabled:
+            addEnv(named: INJECTION_NOGENERICS)
+        }
+        switch keyPathsMode {
+        case .auto:
+            break
+        case .enabled:
+            addEnv(named: INJECTION_KEYPATHS)
+        case .disabled:
+            addEnv(named: INJECTION_NOKEYPATHS)
+        }
+        try? (sets+"echo Sourced \(count) settings\n")
+            .write(toFile: "/tmp/\(APP_NAME)_sets.sh",
+                   atomically: false, encoding: .utf8)
+        return exports
+    }
+    
+    func warnRelaunchXcode(for setting: String, alert: Bool = true) {
+        if alert && MonitorXcode.runningXcode != nil {
+            InjectionServer.error("""
+            Changing \(setting) requires you re-launch xcode and build clean.
+            """)
+        }
+        _ = envVarsForSwiftPackage()
     }
 
     // MARK: - Devices
@@ -438,23 +465,15 @@ final class ConfigStore: ObservableObject {
     }
 
     // MARK: - Network (mostly read-only display)
-    private var hostTextWarned = false
+    private var hostChangeWarned = false
 
     @Published var injectionHost: String {
         didSet { ud.set(injectionHost, forKey: "injectionHost")
-                 if !hostTextWarned {
-                     hostTextWarned = true
-                     warnRelaunchXcode(for: #function)
-                 } }
+                 warnRelaunchXcode(for: #function, alert: !hostChangeWarned)
+                 hostChangeWarned = true }
     }
     let injectionPort: String = HOTRELOADING_PORT
     let controlPort: UInt16 = 8919
-    
-    func warnRelaunchXcode(for setting: String) {
-        InjectionServer.error("""
-            Changing \(setting) requires you re-launch xcode and build clean.
-            """)
-    }
 
     // MARK: - Advanced
 

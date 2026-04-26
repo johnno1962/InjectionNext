@@ -13,6 +13,10 @@
 #import "InjectionClient.h"
 #import "SimpleSocket.h"
 
+extern "C" {
+const char *_insetting(NSString *name);
+}
+
 @interface InjectionNext : SimpleSocket
 @end
 
@@ -47,6 +51,12 @@ static dispatch_once_t onlyOneClient;
     #endif
     const char *hostip = getenv(INJECTION_HOST) ?: "127.0.0.1";
 
+    if (const char *settingsValue = _insetting(@INJECTION_HOST)) {
+        NSLog(@APP_PREFIX"Connecting to %s setting %s",
+              INJECTION_HOST, settingsValue);
+        hostip = settingsValue;
+    }
+    else
     // Do we need to use broadcasts to find devlepers Mac on the network
     #if !TARGET_IPHONE_SIMULATOR && !TARGET_OS_OSX
     if (@available(iOS 14.0, *)) if (![NSProcessInfo processInfo].isiOSAppOnMac) {
@@ -54,6 +64,8 @@ static dispatch_once_t onlyOneClient;
         hostip = [SimpleSocket getMulticastService:HOTRELOADING_MULTICAST port:HOTRELOADING_PORT
                                            message:APP_PREFIX"Connecting to %s (%s)...\n"].UTF8String;
     }
+    #else
+    ;
     #endif
 
     // Have the address to connect to, connect and start local thread.
@@ -72,7 +84,7 @@ static dispatch_once_t onlyOneClient;
 
     #if TARGET_IPHONE_SIMULATOR || TARGET_OS_MAC
     // If InjectionLite class present, start it up.
-    if (getenv(INJECTION_NOSTANDALONE)) return;
+    if (_insetting(@INJECTION_NOSTANDALONE)) return;
     if (Class InjectionLite = objc_getClass("InjectionLite")) {
         printf(APP_PREFIX"Unable to connect to app, running standalone... "
                "Set env var " INJECTION_NOSTANDALONE " to avoid this.\n");

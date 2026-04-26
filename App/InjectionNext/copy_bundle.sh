@@ -91,6 +91,7 @@ CAN_FAIL
     # copy prebuilt bundle into app package and codesign
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     # See +[SimpleSocket initialize] for pre-built bundles/dylibs
+    source "/tmp/InjectionNext_sets.sh"
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
     (/usr/libexec/PlistBuddy -c "Delete :InjectionUserHome" "$CODESIGNING_FOLDER_PATH/Info.plist" || echo -n) &&
     /usr/libexec/PlistBuddy -c "Add :InjectionUserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&
