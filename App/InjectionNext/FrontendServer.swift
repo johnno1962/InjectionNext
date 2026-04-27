@@ -247,8 +247,17 @@ extension AppDelegate {
     @IBAction func patchCompiler(_ sender: NSMenuItem) {
         let fm = FileManager.default
         do {
-            let linksToMove = ["swift", "swiftc", "swift-symbolgraph-extract",
-                               "swift-api-digester", "swift-cache-tool"]
+            // Tools that are not compile entry points: route directly to the
+            // original binary, the wrapper has nothing to do for them.
+            let linksToOriginal = ["swift", "swift-symbolgraph-extract",
+                                   "swift-api-digester", "swift-cache-tool"]
+            // Tools that ARE compile entry points and must hit the wrapper.
+            // Pre-Xcode 26, Xcode invoked swift-frontend directly; from
+            // Xcode 26 onward, builtin-SwiftDriver invokes swiftc instead.
+            // Routing only swiftc through the wrapper (rather than every
+            // multi-mode link) keeps overhead minimal.
+            let linksToWrapper = ["swiftc"]
+            let allLinks = linksToOriginal + linksToWrapper
             if updatePatchUnpatch() == .unpatched {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main
@@ -272,22 +281,46 @@ extension AppDelegate {
                                     to: FrontendServer.patchedURL)
                     try fm.copyItem(at: feeder,
                                     to: FrontendServer.unpatchedURL)
-                    for binary in linksToMove {
+                    for binary in linksToOriginal {
                         let link = FrontendServer.binURL
                             .appendingPathComponent(binary)
                         try fm.removeItem(at: link)
                         symlink("swift-frontend.save", link.path)
+                    }
+                    for binary in linksToWrapper {
+                        let link = FrontendServer.binURL
+                            .appendingPathComponent(binary)
+                        try fm.removeItem(at: link)
+                        symlink("swift-frontend", link.path)
+                        // Wrapper resolves "$0.save"; create the matching
+                        // symlink so e.g. swiftc.save -> swift-frontend.save.
+                        let saveLink = FrontendServer.binURL
+                            .appendingPathComponent(binary + ".save")
+                        if fm.fileExists(atPath: saveLink.path) ||
+                            (try? fm.destinationOfSymbolicLink(
+                                atPath: saveLink.path)) != nil {
+                            try? fm.removeItem(at: saveLink)
+                        }
+                        symlink("swift-frontend.save", saveLink.path)
                     }
                 }
             } else if fm.fileExists(atPath: FrontendServer.patched) {
                 try? fm.removeItem(at: FrontendServer.unpatchedURL)
                 try fm.moveItem(at: FrontendServer.patchedURL,
                                 to: FrontendServer.unpatchedURL)
-                for binary in linksToMove {
+                for binary in allLinks {
                     let link = FrontendServer.binURL
                         .appendingPathComponent(binary)
                     try fm.removeItem(at: link)
                     symlink("swift-frontend", link.path)
+                }
+                for binary in linksToWrapper {
+                    let saveLink = FrontendServer.binURL
+                        .appendingPathComponent(binary + ".save")
+                    if (try? fm.destinationOfSymbolicLink(
+                            atPath: saveLink.path)) != nil {
+                        try? fm.removeItem(at: saveLink)
+                    }
                 }
                 FrontendServer.loggedFrontend = nil
             }
