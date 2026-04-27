@@ -401,7 +401,7 @@ final class ConfigStore: ObservableObject {
             addEnv(named: INJECTION_NOKEYPATHS)
         }
         try? (sets+"echo Sourced \(count) settings\n")
-            .write(toFile: "/tmp/\(APP_NAME)_sets.sh",
+            .write(toFile: NSHomeDirectory()+"/.\(APP_NAME)_settings.sh",
                    atomically: false, encoding: .utf8)
         return exports
     }
