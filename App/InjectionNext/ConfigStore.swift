@@ -359,7 +359,7 @@ final class ConfigStore: ObservableObject {
 
     ///
     /// There are two ways "early" settings (those actioned before connecting
-    /// to the app) are connunicated to the User's client app:
+    /// to the app) are communicated to the User's client app:
     ///
     /// 1) Through environment variables on running Xcode which make their
     /// way through to the Swift Package manifest to set compilation options.
