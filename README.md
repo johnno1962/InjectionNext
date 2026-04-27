@@ -31,7 +31,7 @@ class methods.
 ![Icon](App/interposable.png)
 
 Verson 2.0.0+ of the app contains a completely renovated settings interface
-written in SwiftUI allows you control even the most obscure feature of the app. 
+written in SwiftUI and allows you to control even the most obscure feature of the app. 
 If an option is marked with an asterisk﹡ you need to use the bundles available
 inside the app package along with the copy_bundle.sh script for them to work
 as you might expect. Otherwise, if you are launching Xcode from within the app 
