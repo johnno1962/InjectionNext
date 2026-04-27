@@ -32,10 +32,12 @@ struct StatusMenuView: View {
                 AppDelegate.ui?.runXcode(self)
             } label: {
                 HStack {
-                    Text("Launch Xcode")
                     if config.haveLaunchedXcode {
+                        Text("Launched Xcode")
                         Spacer()
                         Image(systemName: "checkmark")
+                    } else {
+                        Text("Launch Xcode")
                     }
                 }
             }
@@ -80,14 +82,33 @@ struct StatusMenuView: View {
 
             Divider()
 
-            Button(config.compilerState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
-                AppDelegate.ui.patchCompiler(NSMenuItem())
+            /* Don't always display, not something you want to do by accident */
+            if config.compilerState == .patched {
+                Button {
+                    AppDelegate.ui.patchCompiler(NSMenuItem())
+                    config.updateCompilerState()
+                } label: {
+                    Text(config.compilerState.rawValue)
+                }
             }
 
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
             }
             .help("Make public generators for injecting default arguments")
+
+            Menu("Prepare SwiftUI") {
+                Button("Last Injected") {
+                    AppDelegate.ui.prepareSource(NSMenuItem())
+                }
+                .disabled(NextCompiler.lastSource == nil)
+                .help("Prepare the last injected file for SwiftUI previews")
+
+                Button("Prepare Project") {
+                    AppDelegate.ui.prepareProject(NSMenuItem())
+                }
+                .help("Prepare all project files for SwiftUI previews")
+            }
 
             Divider()
 

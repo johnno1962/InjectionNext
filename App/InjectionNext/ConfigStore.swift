@@ -257,8 +257,11 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(emitFrontendCommandLines, forKey: "emitFrontendCommandLines") }
     }
 
-    var compilerState: FrontendServer.State {
-        FileManager.default.fileExists(atPath: FrontendServer.patched) ? .patched : .unpatched
+    @Published var compilerState: FrontendServer.State = .unpatched
+    @discardableResult
+    func updateCompilerState() -> FrontendServer.State {
+        compilerState = AppDelegate.ui.updatePatchUnpatch()
+        return compilerState
     }
 
     // MARK: - Injection
@@ -278,13 +281,16 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(preserveStatics, forKey: "preserveStatics"); updateEnvVars() }
     }
     @Published var disableStandalone: Bool { // difficult to implement without connection.
-        didSet { ud.set(disableStandalone, forKey: "disableStandalone") }
+        didSet { ud.set(disableStandalone, forKey: "disableStandalone")
+                 warnRelaunchXcode(for: #function)}
     }
     @Published var genericsMode: GenericsMode { // difficult to implement early.
-        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode") }
+        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var keyPathsMode: KeyPathsMode { // difficult to implement early.
-        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
+        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var sweepExclude: String {
         didSet { ud.set(sweepExclude, forKey: "sweepExclude"); updateEnvVars() }
@@ -310,7 +316,7 @@ final class ConfigStore: ObservableObject {
     func sendEnvVars(to client: InjectionServer) {
         if let version = Bundle.main
             .infoDictionary?["CFBundleShortVersionString"] as? String {
-            sendVariable(to: client, name: INJECTION_APP_VERSION,
+            sendVariable(to: client, name: INJECTION_NEXT_VERSION,
                          value: version)
         }
         sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
@@ -349,6 +355,64 @@ final class ConfigStore: ObservableObject {
                          value: traceUIKit)
         }
         client.write(InjectionCommand.endenv.rawValue)
+    }
+
+    ///
+    /// There are two ways "early" settings (those actioned before connecting
+    /// to the app) are communicated to the User's client app:
+    ///
+    /// 1) Through environment variables on running Xcode which make their
+    /// way through to the Swift Package manifest to set compilation options.
+    ///
+    /// 2) Writing a short script source'd  by copy_bundle.sh that copies them
+    /// into the Info.plist of the injection bundle.
+    ///
+    func envVarsForSwiftPackage() -> String {
+        var exports = "", sets = "", count = 0
+        func addEnv(named: String, value: String? = nil) {
+            let safe = value?[#"['"\n]"#, "_"] ?? "1"
+            exports += "export \(named)='\(safe)'\n"
+            sets += """
+                /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "$PLIST" &&
+
+                """
+            count += 1
+        }
+        if injectionHost != "127.0.0.1" {
+            addEnv(named: INJECTION_HOST, value: injectionHost)
+        }
+        if disableStandalone {
+            addEnv(named: INJECTION_NOSTANDALONE)
+        }
+        switch genericsMode {
+        case .auto:
+            break
+        case .legacy:
+            addEnv(named: INJECTION_OF_GENERICS)
+        case .disabled:
+            addEnv(named: INJECTION_NOGENERICS)
+        }
+        switch keyPathsMode {
+        case .auto:
+            break
+        case .enabled:
+            addEnv(named: INJECTION_KEYPATHS)
+        case .disabled:
+            addEnv(named: INJECTION_NOKEYPATHS)
+        }
+        try? (sets+"echo Sourced \(count) settings\n")
+            .write(toFile: NSHomeDirectory()+"/.\(APP_NAME)_settings.sh",
+                   atomically: false, encoding: .utf8)
+        return exports
+    }
+    
+    func warnRelaunchXcode(for setting: String, alert: Bool = true) {
+        if alert && MonitorXcode.runningXcode != nil {
+            InjectionServer.error("""
+            Changing \(setting) requires you re-launch xcode and build clean.
+            """)
+        }
+        _ = envVarsForSwiftPackage()
     }
 
     // MARK: - Devices
@@ -393,16 +457,20 @@ final class ConfigStore: ObservableObject {
     // MARK: - File Watcher
 
     @Published var fileWatcherLatency: Double {
-        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency") }
+        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency")
+                 FileWatcher.latency = fileWatcherLatency }
     }
     @Published var injectablePattern: String {
         didSet { ud.set(injectablePattern, forKey: "injectablePattern") }
     }
 
     // MARK: - Network (mostly read-only display)
+    private var hostChangeWarned = false
 
     @Published var injectionHost: String {
-        didSet { ud.set(injectionHost, forKey: "injectionHost") }
+        didSet { ud.set(injectionHost, forKey: "injectionHost")
+                 warnRelaunchXcode(for: #function, alert: !hostChangeWarned)
+                 hostChangeWarned = true }
     }
     let injectionPort: String = HOTRELOADING_PORT
     let controlPort: UInt16 = 8919
@@ -483,6 +551,7 @@ final class ConfigStore: ObservableObject {
         self.mcpServer = ud.bool(forKey: "mcpServer")
         self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .nowGlobal
         DLKit.dlOpenMode = self.dlOpenMode.flags
+        FileWatcher.latency = self.fileWatcherLatency
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
