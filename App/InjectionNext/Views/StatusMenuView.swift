@@ -82,9 +82,12 @@ struct StatusMenuView: View {
 
             Divider()
 
-            Button(config.compilerState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
+            // Does not synchronise without observation.
+            // Trying obseration prevents server start.
+            Button(config.compilerState.rawValue) {
                 AppDelegate.ui.patchCompiler(NSMenuItem())
             }
+            .hidden()
 
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
