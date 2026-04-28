@@ -257,8 +257,11 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(emitFrontendCommandLines, forKey: "emitFrontendCommandLines") }
     }
 
-    var compilerState: FrontendServer.State {
-        FileManager.default.fileExists(atPath: FrontendServer.patched) ? .patched : .unpatched
+    @Published var compilerState: FrontendServer.State = .unpatched
+    @discardableResult
+    func updateCompilerState() -> FrontendServer.State {
+        compilerState = AppDelegate.ui.updatePatchUnpatch()
+        return compilerState
     }
 
     // MARK: - Injection
