@@ -369,10 +369,20 @@ final class ConfigStore: ObservableObject {
     ///
     func envVarsForSwiftPackage() -> String {
         var exports = "", sets = "", count = 0
+        let appPlist = "$CODESIGNING_FOLDER_PATH/" + (InjectionServer
+            .currentClient?.platform == "MacOSX" ? "Contents/" : "") + "Info.plist"
+        for name in [INJECTION_HOST, INJECTION_NOSTANDALONE, INJECTION_NOKEYPATHS,
+                 INJECTION_KEYPATHS, INJECTION_NOGENERICS, INJECTION_OF_GENERICS] {
+            sets += """
+                /usr/libexec/PlistBuddy -c "Delete :\(name)" "\(appPlist)";
+                
+                """
+        }
         func addEnv(named: String, value: String? = nil) {
             let safe = value?[#"['"\n]"#, "_"] ?? "1"
             exports += "export \(named)='\(safe)'\n"
             sets += """
+                /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "\(appPlist)" &&
                 /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "$PLIST" &&
 
                 """

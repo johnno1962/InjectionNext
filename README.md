@@ -31,12 +31,12 @@ class methods.
 ![Icon](App/interposable.png)
 
 Version 2.0.0+ of the app contains a completely renovated settings interface
-written in SwiftUI and allows you to control even the most obscure feature of the app. 
-If an option is marked with an asterisk﹡ you need to use the bundles available
-inside the app package along with the copy_bundle.sh script for them to work
-as you might expect. Otherwise, if you are launching Xcode from within the app 
-along with the InjectionNext Swift Package you need to re-launch Xcode when
-you change these settings and perform a clean build.
+written in SwiftUI allowing control of the most obscure features of the app. 
+If an option is marked with an asterisk﹡ you need to be using copy_bundle.sh 
+script for them to work as you might expect. Otherwise, if you are launching 
+Xcode from within the app along with the InjectionNext Swift Package you need 
+to re-launch Xcode when you change these settings and perform a clean build.
+Versions 1.6.0+ contain an MCP server. Consult the file mcp-server/README.md.
 
 If your app contains local Swift packages, add the following to their targets
 in Package.swift to be able to inject functions inside the package.
