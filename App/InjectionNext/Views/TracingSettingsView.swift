@@ -28,7 +28,7 @@ struct TracingSettingsView: View {
             }
             .help("Enable function/method invocation tracing.")
 
-            if config.traceMode != .off {
+            if true || config.traceMode != .off {
                 Section {
                     TextField("Include Filter (regex)",
                               text: $config.traceFilter)
