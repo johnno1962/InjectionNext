@@ -60,10 +60,6 @@ typedef union {
     return -1;
 }
 
-+ (void)startServer:(NSString *)address {
-    [self performSelectorInBackground:@selector(runServer:) withObject:address];
-}
-
 + (void)forEachInterface:(void (^)(ifaddrs *ifa, in_addr_t addr, in_addr_t mask))handler {
     ifaddrs *addrs;
     if (getifaddrs(&addrs) < 0) {
@@ -79,7 +75,7 @@ typedef union {
 
 static int lastServerSocket;
 
-+ (void)runServer:(NSString *)address {
++ (void)startServer:(NSString *)address {
     sockaddr_union serverAddr;
     [self parseV4Address:address into:&serverAddr.any];
 
@@ -93,6 +89,12 @@ static int lastServerSocket;
     else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
+        [self performSelectorInBackground:@selector(runServer:)
+                               withObject:@(serverSocket)];
+}
+
++ (void)runServer:(NSNumber  *)socket {
+        int serverSocket = socket.intValue;
         while (serverSocket) {
             sockaddr_union clientAddr;
             socklen_t addrLen = sizeof clientAddr;
