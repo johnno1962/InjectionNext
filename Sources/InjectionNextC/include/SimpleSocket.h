@@ -22,6 +22,7 @@
 + (void)startServer:(NSString *_Nonnull)address;
 + (void)runServer:(NSString *_Nonnull)address;
 + (int)error:(NSString *_Nonnull)message;
++ (void)setLastServerSocket:(int)socket;
 + (void)stopLastServer;
 
 + (instancetype _Nullable)connectTo:(NSString *_Nonnull)address;

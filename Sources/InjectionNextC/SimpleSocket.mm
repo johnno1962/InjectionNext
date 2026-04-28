@@ -75,6 +75,10 @@ typedef union {
 
 static int lastServerSocket;
 
++ (void)setLastServerSocket:(int)socket {
+    lastServerSocket = socket;
+}
+
 + (void)startServer:(NSString *)address {
     sockaddr_union serverAddr;
     [self parseV4Address:address into:&serverAddr.any];
@@ -83,7 +87,7 @@ static int lastServerSocket;
     if (serverSocket < 0)
         return;
 
-    lastServerSocket = serverSocket;
+    [self setLastServerSocket:serverSocket];
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
     else if (listen(serverSocket, 50) < 0)
