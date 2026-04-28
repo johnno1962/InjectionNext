@@ -102,10 +102,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Populate the list of valid codesigning identities.
         ConfigStore.shared.discoverCodesigningIdentities()
 
-        if ConfigStore.shared.updateCompilerState() == .patched {
+        // Start injection server(s) for on-device/sim connections.
+        if updatePatchUnpatch() == .patched {
             _ = FrontendServer.startOnce
         }
-        // Start injection server(s) for on-device/sim connections.
         deviceEnable(nil)
 
         if let xcodePath = MonitorXcode.externalXcode?.bundleURL?.path {

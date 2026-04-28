@@ -82,14 +82,8 @@ struct StatusMenuView: View {
 
             Divider()
 
-            /* Don't always display, not something you want to do by accident */
-            if config.compilerState == .patched {
-                Button {
-                    AppDelegate.ui.patchCompiler(NSMenuItem())
-                    config.updateCompilerState()
-                } label: {
-                    Text(config.compilerState.rawValue)
-                }
+            Button(config.compilerState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
+                AppDelegate.ui.patchCompiler(NSMenuItem())
             }
 
             Button("Unhide Symbols") {
