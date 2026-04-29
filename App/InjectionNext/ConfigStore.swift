@@ -331,11 +331,12 @@ final class ConfigStore: ObservableObject {
                      value: sweepExclude != "" ? sweepExclude : nil)
         sendVariable(to: client, name: INJECTION_BENCH,
                      value: benchmarking ? "1" : nil)
+        sendVariable(to: client, name: INJECTION_TRACE_REPAIR,
+                     value: traceRepair ? "1" : nil)
         sendVariable(to: client, name: INJECTION_TRACE_FILTER,
                      value: traceFilter != "" ? traceFilter : nil)
         if traceLookup {
-            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
-                         value: "1")
+            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP, value: "1")
         }
         switch traceMode {
         case .all:
@@ -463,6 +464,7 @@ final class ConfigStore: ObservableObject {
     @Published var traceUIKit: String {
         didSet { ud.set(traceUIKit, forKey: "traceUIKit"); updateEnvVars() }
     }
+    @Published var traceRepair = false
 
     // MARK: - File Watcher
 

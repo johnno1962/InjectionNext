@@ -48,6 +48,10 @@ struct TracingSettingsView: View {
                     Toggle("Expand Custom Types in Trace",
                            isOn: $config.traceLookup)
                         .help("Expand App types used as arguments")
+
+                    Toggle("Repair Tracing if Crashing",
+                           isOn: $config.traceRepair)
+                        .help("Detect trace crashes and suppress them")
                 } header: {
                     Label("Trace Filters", systemImage: "line.3.horizontal.decrease.circle")
                 } footer: {
