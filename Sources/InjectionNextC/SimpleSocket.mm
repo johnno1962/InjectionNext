@@ -73,10 +73,18 @@ typedef union {
     freeifaddrs(addrs);
 }
 
-static int lastServerSocket;
+static NSMutableDictionary<NSString *,NSNumber *> *lastSockets;
 
-+ (void)setLastServerSocket:(int)socket {
-    lastServerSocket = socket;
++ (NSNumber *)setLastServerSocket:(int)socket {
+    if (!lastSockets)
+        lastSockets = [NSMutableDictionary new];
+    NSNumber *socketNumber = @(socket);
+    lastSockets[NSStringFromClass(self)] = socketNumber;
+    return socketNumber;
+}
+
++ (NSNumber *)lastNumber {
+    return lastSockets[NSStringFromClass(self)];
 }
 
 + (void)startServer:(NSString *)address {
@@ -87,17 +95,17 @@ static int lastServerSocket;
     if (serverSocket < 0)
         return;
 
-    [self setLastServerSocket:serverSocket];
+    NSNumber *socketNumber = [self setLastServerSocket:serverSocket];
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
     else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
         [self performSelectorInBackground:@selector(runServer:)
-                               withObject:@(serverSocket)];
+                               withObject:socketNumber];
 }
 
-+ (void)runServer:(NSNumber  *)socket {
++ (void)runServer:(NSNumber *)socket {
         int serverSocket = socket.intValue;
         while (serverSocket) {
             sockaddr_union clientAddr;
@@ -122,7 +130,7 @@ static int lastServerSocket;
                     [client run];
                 }
             }
-            else if (lastServerSocket)
+            else if (self.lastNumber == socket)
                 [NSThread sleepForTimeInterval:.5];
             else
                 break;
@@ -132,9 +140,10 @@ static int lastServerSocket;
 }
 
 + (void)stopLastServer {
-    if (lastServerSocket)
+    NSString *className = NSStringFromClass(self);
+    if (int lastServerSocket = lastSockets[className].intValue)
         close(lastServerSocket);
-    lastServerSocket = 0;
+    [lastSockets removeObjectForKey:className];
     [NSThread sleepForTimeInterval:.5];
 }
 

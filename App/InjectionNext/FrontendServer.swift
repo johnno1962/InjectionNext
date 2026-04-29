@@ -98,8 +98,6 @@ class FrontendServer: SimpleSocket {
         }
     }
     
-    override class func setLastServer(_ socket: Int32) {}
-
     func validateConnection() -> Bool {
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
