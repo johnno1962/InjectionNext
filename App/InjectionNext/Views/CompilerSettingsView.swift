@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CompilerSettingsView: View {
     @ObservedObject var config: ConfigStore
+    @State private var currentState: FrontendServer.State = .unpatched
 
     var body: some View {
-        let currentState = config.compilerState
         Form {
             Section {
                 LabeledContent("Compiler State") {
@@ -23,9 +23,9 @@ struct CompilerSettingsView: View {
                     }
                 }
 
-                Button(currentState.rawValue) {
+                Button(currentState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
                     AppDelegate.ui.patchCompiler(NSMenuItem())
-                    config.updateCompilerState()
+                    refreshState()
                 }
 
                 LabeledContent("Frontend Binary") {
@@ -68,6 +68,12 @@ struct CompilerSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onAppear { refreshState() }
         .help("Information about whether xcode-frontend logs compilations")
+    }
+
+    private func refreshState() {
+        currentState = FileManager.default.fileExists(atPath: FrontendServer.patched)
+            ? .patched : .unpatched
     }
 }

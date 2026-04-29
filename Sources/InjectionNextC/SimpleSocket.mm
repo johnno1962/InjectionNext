@@ -78,13 +78,7 @@ static NSMutableDictionary<NSString *,NSNumber *> *lastSockets;
 + (NSNumber *)setLastServerSocket:(int)socket {
     if (!lastSockets)
         lastSockets = [NSMutableDictionary new];
-    NSNumber *socketNumber = @(socket);
-    lastSockets[NSStringFromClass(self)] = socketNumber;
-    return socketNumber;
-}
-
-+ (NSNumber *)lastNumber {
-    return lastSockets[NSStringFromClass(self)];
+    return lastSockets[NSStringFromClass(self)] = @(socket);
 }
 
 + (void)startServer:(NSString *)address {
@@ -95,14 +89,13 @@ static NSMutableDictionary<NSString *,NSNumber *> *lastSockets;
     if (serverSocket < 0)
         return;
 
-    NSNumber *socketNumber = [self setLastServerSocket:serverSocket];
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
     else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
         [self performSelectorInBackground:@selector(runServer:)
-                               withObject:socketNumber];
+                               withObject:[self setLastServerSocket:serverSocket]];
 }
 
 + (void)runServer:(NSNumber *)socket {
@@ -130,8 +123,10 @@ static NSMutableDictionary<NSString *,NSNumber *> *lastSockets;
                     [client run];
                 }
             }
-            else if (self.lastNumber == socket)
+            else if (lastSockets[NSStringFromClass(self)] == socket) {
+                NSLog(@"Bad accept %s", strerror(errno));
                 [NSThread sleepForTimeInterval:.5];
+            }
             else
                 break;
         }
