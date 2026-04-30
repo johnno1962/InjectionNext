@@ -27,8 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     static var ui: AppDelegate!
 
-    @objc let defaults = Defaults.userDefaults
-
     // MARK: - Compatibility shims (route to ConfigStore)
 
     /// Mimics `watchDirectoryItem.state` for ControlServer / InjectionHybrid.

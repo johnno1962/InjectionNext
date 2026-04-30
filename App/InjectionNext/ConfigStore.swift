@@ -936,51 +936,18 @@ private final class ProjectPickerWindow: NSObject {
 
 // MARK: - Backward Compatibility
 
-struct Defaults {
-    static let userDefaults = UserDefaults.standard
-    static let xcodePathDefault = "XcodePath"
-    static let librariesDefault = "libraries"
-    static let codesigningDefault = "codesigningIdentity"
-    static let projectPathDefault = "projectPath"
+let Defaults = ConfigStore.shared
 
-    static var xcodePath: String {
-        ConfigStore.shared.xcodePath
-    }
-    static var xcodeDefault: String? {
-        get { ConfigStore.shared.ud.string(forKey: xcodePathDefault) }
+extension ConfigStore {
+
+    var ignoreGitignore: Bool { ud.bool(forKey: #function) }
+    
+    var xcodeDefault: String? {
+        get { ud.string(forKey: "XcodePath") }
         set {
             if let val = newValue {
-                ConfigStore.shared.xcodePath = val
+                xcodePath = val
             }
         }
-    }
-    static var ignoreGitignore: Bool {
-        return userDefaults.bool(forKey: #function)
-    }
-    static var deviceTesting: Bool {
-        get { ConfigStore.shared.deviceTesting }
-        set { ConfigStore.shared.deviceTesting = newValue }
-    }
-    static var deviceLibraries: String {
-        get { ConfigStore.shared.deviceLibraries }
-        set { ConfigStore.shared.deviceLibraries = newValue }
-    }
-    static var codesigningIdentity: String? {
-        get { ConfigStore.shared.codesigningIdentity }
-        set { ConfigStore.shared.codesigningIdentity = newValue }
-    }
-    static var xcodeRestart: Bool {
-        get { ConfigStore.shared.xcodeRestart }
-        set { ConfigStore.shared.xcodeRestart = newValue }
-    }
-    static var projectPath: String? {
-        get {
-            let val = ConfigStore.shared.projectPath
-            return val.isEmpty ? nil : val
-        }
-    }
-    static var mcpServer: Bool {
-        get { ConfigStore.shared.mcpServer }
-        set { ConfigStore.shared.mcpServer = newValue }
     }
 }
