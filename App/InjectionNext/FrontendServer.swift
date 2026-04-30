@@ -97,13 +97,14 @@ class FrontendServer: SimpleSocket {
             InjectionServer.error("Unable to write commands cache: \(error)")
         }
     }
-    
+
     func validateConnection() -> Bool {
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
 
     override func run() {
         Self.frontendQueue.async {
+            autoreleasepool {
             do {
                 try Fortify.protect { () -> () in
                     guard self.validateConnection(),
@@ -115,6 +116,7 @@ class FrontendServer: SimpleSocket {
                 }
             } catch {
                 Self.error("Feed error: \(error)")
+            }
             }
         }
     }
@@ -155,7 +157,7 @@ class FrontendServer: SimpleSocket {
                 open.canChooseDirectories = true
                 open.canChooseFiles = false
                 if open.runModal() == .OK, let url = open.url {
-                    AppDelegate.ui.watch(path: url.path)
+                    AppDelegate.ui.watch(path: url.path, patchProjects: false)
                 }
             }
         }
@@ -242,6 +244,8 @@ class FrontendServer: SimpleSocket {
     }
 }
 
+/// This file is included in the InjectionIII project so some shared code can go here.
+
 extension AppDelegate {
 
     @IBAction func patchCompiler(_ sender: NSMenuItem) {
@@ -253,19 +257,13 @@ extension AppDelegate {
                 if !fm.fileExists(atPath: FrontendServer.patched),
                    let feeder = Bundle.main
                     .url(forResource: "swift-frontend", withExtension: "sh") {
-                    let alert: NSAlert = NSAlert()
-                    alert.alertStyle = .warning
-                    alert.messageText = APP_NAME
-                    alert.informativeText = """
+                    if !InjectionServer.alert("""
                         The Swift compiler of your current toolchain \
                         \(FrontendServer.unpatchedURL.path) will be \
                         replaced by a script that calls the compiler \
                         and captures all compilation commands. Use compiler \
                         setting "Unpatch Compiler" to revert this change.
-                        """
-                    alert.addButton(withTitle: "OK")
-                    alert.addButton(withTitle: "Cancel")
-                    if alert.runModal() != .alertFirstButtonReturn {
+                        """, cancel: "Cancel") {
                         return
                     }
                     try fm.moveItem(at: FrontendServer.unpatchedURL,
@@ -313,7 +311,7 @@ extension AppDelegate {
         return state
     }
 
-    /// Shared regular expresssions to patch .enableInjection() and @ObserveInject into a source
+    /// Shared regular expresssions to patch .enableInjection() and @ObserveInjection into a source
     func prepareSwiftUI(source: String, changes: UnsafeMutablePointer<Int>? = nil) {
         let fileURL = URL(fileURLWithPath: source)
         guard let original = try? String(contentsOf: fileURL) else {
@@ -428,6 +426,55 @@ extension AppDelegate {
                                   atomically: true, encoding: .utf8)
             } catch {
                 InjectionServer.error("Could not save \(source): \(error)")
+            }
+        }
+    }
+    
+    /// Patch project files to include Debug -Xlinker -interposable
+    func ensureInterposable(project: String) {
+        var projectEncoding: String.Encoding = .utf8
+        let projectURL = URL(fileURLWithPath: project)
+        let pbxprojURL = projectURL.appendingPathComponent("project.pbxproj")
+        if let projectSource = try? String(contentsOf: pbxprojURL,
+                                           usedEncoding: &projectEncoding),
+            strstr(projectSource, "-interposable") == nil {
+            var newProjectSource = projectSource
+            // For each PBXSourcesBuildPhase in project file...
+            // Make sure "Other linker Flags" includes -interposable
+            newProjectSource[#"""
+                /\* Debug.*? \*/ = \{
+                \s+isa = XCBuildConfiguration;
+                (?:.*\n)*?(\s+)buildSettings = \{
+                ((?:.*\n)*?\1\};)
+                """#, group: 2] = """
+                                    OTHER_LDFLAGS = (
+                                        "-Xlinker",
+                                        "-interposable",
+                                    );
+                                    ENABLE_BITCODE = NO;
+                    $2
+                    """
+
+            if newProjectSource != projectSource {
+                do {
+                    let backup = pbxprojURL.path+".prepatch"
+                    if !FileManager.default.fileExists(atPath: backup) {
+                        try projectSource.write(toFile: backup, atomically: true,
+                                                encoding: projectEncoding)
+                    }
+                    
+                    if InjectionServer.alert("""
+                        \(APP_NAME) can patch \(projectURL.lastPathComponent) \
+                        slightly to add the required -Xlinker -interposable \
+                        "Other Linker Flags". Restart the app to have these \
+                        changes take effect. A backup has been saved at: \(backup)
+                        """, cancel: "No Thanks") {
+                        try newProjectSource.write(to: pbxprojURL, atomically: true,
+                                                   encoding: projectEncoding)
+                    }
+                } catch {
+                    InjectionServer.error("Could not patch project file \(projectURL): \(error)")
+                }
             }
         }
     }

@@ -111,7 +111,8 @@ class MonitorXcode {
                         // using %s which uses the macOS system encoding.
                         // https://en.wikipedia.org/wiki/Mac_OS_Roman
                         // For now we need to do the following dance
-                        // to revert scrambled non-ASCII file paths.
+                        // to revert scrambled non-ASCII file paths. Now fixed
+                        // https://github.com/swiftlang/indexstore-db/pull/215
                         if out.hasPrefix("/") &&
                             !FileManager.default.fileExists(atPath: out),
                            let data = out.data(using: .macOSRoman),

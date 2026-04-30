@@ -39,7 +39,8 @@ class InjectionServer: SimpleSocket {
     var arch = "arm64"
     var tmpPath = "/unset"
 
-    class func alert(_ msg: String) {
+    @discardableResult
+    class func alert(_ msg: String, cancel: String? = nil) -> Bool {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
         LogBuffer.shared.append("\(APP_NAME) \(msg)", level: "alert")
         lastAlert = NSAlert()
@@ -47,7 +48,10 @@ class InjectionServer: SimpleSocket {
         lastAlert?.informativeText = msg
         lastAlert?.alertStyle = .warning
         lastAlert?.addButton(withTitle: "OK")
-        _ = lastAlert?.runModal()
+        if let alt = cancel {
+            lastAlert?.addButton(withTitle: alt)
+        }
+        return lastAlert?.runModal() == .alertFirstButtonReturn
     }
 
     /// Pops up an alert panel for networking

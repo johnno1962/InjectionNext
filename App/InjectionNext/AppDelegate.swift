@@ -113,11 +113,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if !ConfigStore.shared.hideXcodeAlert &&
                 updatePatchUnpatch() == .unpatched &&
                 getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
-                InjectionServer.alert("""
+                if !InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
-                    """)
+                    """, cancel: "Got it") {
+                    ConfigStore.shared.hideXcodeAlert = true
+                }
             }
         }
 

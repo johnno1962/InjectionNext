@@ -32,8 +32,12 @@ extension AppDelegate {
         }
     }
 
-    func watch(path: String) {
+    func watch(path: String, patchProjects: Bool = true) {
         guard Self.alreadyWatching(path) == nil else { return }
+        for project in ProjectDiscovery.discoverProjects(in: path)
+            where project.path.hasSuffix(".xcodeproj") && patchProjects {
+            AppDelegate.ui.ensureInterposable(project: project.path)
+        }
         GitIgnoreParser.monitor(directory: path)
         Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
