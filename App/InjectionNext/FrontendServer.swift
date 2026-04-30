@@ -260,8 +260,8 @@ extension AppDelegate {
                         The Swift compiler of your current toolchain \
                         \(FrontendServer.unpatchedURL.path) will be \
                         replaced by a script that calls the compiler \
-                        and captures all compilation commands. Use menu \
-                        item "Unpatch Compiler" to revert this change.
+                        and captures all compilation commands. Use compiler \
+                        setting "Unpatch Compiler" to revert this change.
                         """
                     alert.addButton(withTitle: "OK")
                     alert.addButton(withTitle: "Cancel")

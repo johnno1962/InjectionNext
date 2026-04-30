@@ -23,7 +23,7 @@ struct CompilerSettingsView: View {
                     }
                 }
 
-                Button(currentState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
+                Button(currentState.rawValue) {
                     AppDelegate.ui.patchCompiler(NSMenuItem())
                     refreshState()
                 }
