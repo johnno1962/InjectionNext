@@ -92,7 +92,7 @@ CAN_FAIL
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     # See +[SimpleSocket initialize] for pre-built bundles/dylibs
     APP_SETTINGS="$HOME/.InjectionNext_settings.sh" &&
-    if [ -f $APP_SETTINGS ]; then source $APP_SETTINGS; fi &&
+    if [ -f "$APP_SETTINGS" ]; then . "$APP_SETTINGS" || echo "*** copy_bundle.sh warning: unable to source $APP_SETTINGS ***" >&2; fi &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
     (/usr/libexec/PlistBuddy -c "Delete :InjectionUserHome" "$CODESIGNING_FOLDER_PATH/Info.plist" || echo -n) &&
     /usr/libexec/PlistBuddy -c "Add :InjectionUserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&
