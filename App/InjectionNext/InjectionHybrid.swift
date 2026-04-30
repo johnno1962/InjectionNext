@@ -153,7 +153,8 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        if let why = GitIgnoreParser.shouldExclude(file: source) {
+        if !Defaults.ignoreGitignore,
+           let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source

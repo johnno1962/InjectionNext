@@ -954,6 +954,9 @@ struct Defaults {
             }
         }
     }
+    static var ignoreGitignore: Bool {
+        return userDefaults.bool(forKey: #function)
+    }
     static var deviceTesting: Bool {
         get { ConfigStore.shared.deviceTesting }
         set { ConfigStore.shared.deviceTesting = newValue }
