@@ -83,7 +83,8 @@ struct StatusMenuView: View {
             Divider()
 
             // Does not synchronise without observation.
-            // Trying obseration prevents server start.
+            // Trying observation prevents server start.
+            // Removing button can prevent server start.
             Button(config.compilerState.rawValue) {
                 AppDelegate.ui.patchCompiler(NSMenuItem())
             }

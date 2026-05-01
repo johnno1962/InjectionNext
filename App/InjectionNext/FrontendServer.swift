@@ -120,6 +120,8 @@ class FrontendServer: SimpleSocket {
             }
         }
     }
+    
+    static var alreadySuggested = Set<String>()
 
     class func processFrontendCommandFrom(feed: SimpleSocket) throws {
         guard var projectRoot = feed.readString(),
@@ -145,10 +147,11 @@ class FrontendServer: SimpleSocket {
         let update = NextCompiler.Compilation(arguments: parser.args,
             swiftFiles: parser.swiftFiles, workingDir: projectRoot, env: env)
 
-        DispatchQueue.main.async {
-            if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
+        if !projectRoot.hasSuffix(".xcodeproj") && projectRoot != "/" &&
 //                MonitorXcode.runningXcode == nil &&
-                AppDelegate.alreadyWatching(projectRoot) == nil {
+            alreadySuggested.insert(projectRoot).inserted &&
+            AppDelegate.alreadyWatching(projectRoot) == nil {
+            DispatchQueue.main.async {
                 let open = NSOpenPanel()
 //                open.titleVisibility = .visible
 //                open.title = "InjectionNext: add directory"
