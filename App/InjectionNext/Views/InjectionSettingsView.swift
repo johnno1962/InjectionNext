@@ -104,7 +104,7 @@ struct InjectionSettingsView: View {
                     }
                 }
             } header: {
-                Label("Project (Optional)", systemImage: "folder")
+                Label("Launch Project (Optional)", systemImage: "folder")
             } footer: {
                 Text("Set a project directory. If it contains multiple .xcodeproj/.xcworkspace files, you can pick a default or be asked each time Xcode launches.")
                     .font(.caption)
@@ -113,39 +113,18 @@ struct InjectionSettingsView: View {
             #endif
 
             Section {
-                Toggle("Preserve Static Variables", isOn: $config.preserveStatics)
-                    .help("Static variables retained over injections")
-//                Toggle("Disable Standalone Mode", isOn: $config.disableStandalone)
+                Toggle("Verbose Logging", isOn: $config.verboseLogging)
+                    .help("Provide detailed logging of swizzling operations")
+                Toggle("Benchmarking", isOn: $config.benchmarking)
+                    .help("Print timings of various swizzling operations")
             } header: {
-                Label("Injection Behavior", systemImage: "bolt.circle")
+                Label("Debug", systemImage: "ladybug")
             } footer: {
-                Text("\"Preserve Statics\" keeps static/top-level variable values across injections.")
+                Text("Verbose logging shows detailed binding steps. Benchmarking logs timing information for various operations.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
-            /* These are realised before a connection exixts to the app */
-            #if false
-            Section {
-                Picker("Generics Injection", selection: $config.genericsMode) {
-                    ForEach(GenericsMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
-
-                Picker("Key Paths", selection: $config.keyPathsMode) {
-                    ForEach(KeyPathsMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
-            } header: {
-                Label("Generic & Key Path Support", systemImage: "chevron.left.forwardslash.chevron.right")
-            } footer: {
-                Text("Auto mode detects TCA usage and adjusts key path hooking automatically. Legacy generics uses object sweep; new mode doesn't require it.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            #endif
+            .help("Log detail about the process of injecting the dynamic library")
 
             Section {
                 Toggle("Sweep Verbose Logging", isOn: $config.sweepDetail)

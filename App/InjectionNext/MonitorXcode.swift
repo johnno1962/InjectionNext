@@ -42,11 +42,16 @@ class MonitorXcode {
     }
 
     init?(args: String = "") {
+        let exports = ConfigStore.shared.envVarsForSwiftPackage(),
+            project = ConfigStore.shared.projectPath
         if Self.externalXcode != nil {
             InjectionServer.error("Xcode already running, cannot start another")
             return nil
         }
         var args = args
+        if project != "" {
+            args += " '\(project)'"
+        }
         #if DEBUG
         args += " | tee \(Reloader.tmpbase).log"
         #endif
@@ -58,13 +63,13 @@ class MonitorXcode {
                 to select a valid path.
                 """)
         }
-        else if let xcodeStdout = Popen(cmd: """
+        else if let xcodeStdout = Popen(cmd: exports+"""
             export SOURCEKIT_LOGGING=1
             export RUNNING_VIA_INJECTION_NEXT=1
             '\(Defaults.xcodePath)/Contents/MacOS/Xcode' 2>&1 \(args)
             """) {
             Self.runningXcode = self
-            AppDelegate.ui.launchXcodeItem.state = .on
+//            AppDelegate.ui.launchXcodeItem.state = .on
             DispatchQueue.global().async {
                 while true {
                     do {
@@ -74,7 +79,7 @@ class MonitorXcode {
                             AppDelegate.ui.setMenuIcon(.idle)
                         }
                         Self.runningXcode = nil
-                        AppDelegate.ui.launchXcodeItem.state = .off
+//                        AppDelegate.ui.launchXcodeItem.state = .off
                         if !xcodeStdout.terminatedOK() && Defaults.xcodeRestart == true {
                             AppDelegate.ui.runXcode(self)
                         }
@@ -106,7 +111,8 @@ class MonitorXcode {
                         // using %s which uses the macOS system encoding.
                         // https://en.wikipedia.org/wiki/Mac_OS_Roman
                         // For now we need to do the following dance
-                        // to revert scrambled non-ASCII file paths.
+                        // to revert scrambled non-ASCII file paths. Now fixed
+                        // https://github.com/swiftlang/indexstore-db/pull/215
                         if out.hasPrefix("/") &&
                             !FileManager.default.fileExists(atPath: out),
                            let data = out.data(using: .macOSRoman),

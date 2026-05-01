@@ -32,10 +32,12 @@ struct StatusMenuView: View {
                 AppDelegate.ui?.runXcode(self)
             } label: {
                 HStack {
-                    Text("Launch Xcode")
                     if config.haveLaunchedXcode {
+                        Text("Launched Xcode")
                         Spacer()
                         Image(systemName: "checkmark")
+                    } else {
+                        Text("Launch Xcode")
                     }
                 }
             }
@@ -80,14 +82,31 @@ struct StatusMenuView: View {
 
             Divider()
 
-            Button(config.compilerState == .patched ? "Unpatch Compiler" : "Intercept Compiler") {
+            // Does not synchronise without observation.
+            // Trying observation prevents server start.
+            // Removing button can prevent server start.
+            Button(config.compilerState.rawValue) {
                 AppDelegate.ui.patchCompiler(NSMenuItem())
             }
+            .hidden()
 
             Button("Unhide Symbols") {
                 Unhider.startUnhide()
             }
             .help("Make public generators for injecting default arguments")
+
+            Menu("Prepare SwiftUI") {
+                Button("Last Injected") {
+                    AppDelegate.ui.prepareSource(NSMenuItem())
+                }
+                .disabled(NextCompiler.lastSource == nil)
+                .help("Prepare the last injected file for SwiftUI previews")
+
+                Button("Prepare Project") {
+                    AppDelegate.ui.prepareProject(NSMenuItem())
+                }
+                .help("Prepare all project files for SwiftUI previews")
+            }
 
             Divider()
 
@@ -128,6 +147,13 @@ struct StatusMenuView: View {
             }
 
             Divider()
+
+            Button {
+                UpdateChecker.checkForUpdates()
+            } label: {
+                Label("Check for Updates…", systemImage: "arrow.down.circle")
+            }
+            .help("Check GitHub for a newer release of InjectionNext")
 
             Button("Quit InjectionNext") {
                 NSApp.terminate(nil)

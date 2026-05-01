@@ -27,17 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     static var ui: AppDelegate!
 
-    @objc let defaults = Defaults.userDefaults
-
     // MARK: - Compatibility shims (route to ConfigStore)
-
-    /// Mimics `launchXcodeItem.state` for MonitorXcode.
-    var launchXcodeItem: CompatMenuItem {
-        CompatMenuItem(
-            get: { ConfigStore.shared.haveLaunchedXcode ? .on : .off },
-            set: { ConfigStore.shared.haveLaunchedXcode = ($0 == .on) }
-        )
-    }
 
     /// Mimics `watchDirectoryItem.state` for ControlServer / InjectionHybrid.
     var watchDirectoryItem: CompatMenuItem {
@@ -53,11 +43,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             get: { ConfigStore.shared.devicesEnabled ? .on : .off },
             set: { ConfigStore.shared.devicesEnabled = ($0 == .on) }
         )
-    }
-
-    /// Mimics `selectXcodeItem.toolTip` for ControlServer.
-    var selectXcodeItem: CompatMenuItem {
-        CompatMenuItem(get: { .off }, set: nil)
     }
 
     /// Mimics `patchCompilerItem` — a real orphan NSMenuItem so
@@ -125,20 +110,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if Defaults.xcodeDefault == nil {
                 Defaults.xcodeDefault = xcodePath
             }
-            if updatePatchUnpatch() == .unpatched &&
-                getenv(INJECTION_HIDE_XCODE_ALERT) == nil &&
-                !ConfigStore.shared.hideXcodeAlert {
-                InjectionServer.alert("""
+            if !ConfigStore.shared.hideXcodeAlert &&
+                updatePatchUnpatch() == .unpatched &&
+                getenv(INJECTION_HIDE_XCODE_ALERT) == nil {
+                if !InjectionServer.alert("""
                     Please quit Xcode and
                     use this app to launch it
                     (unless you are using a file watcher).
-                    """)
+                    """, cancel: "Got it") {
+                    ConfigStore.shared.hideXcodeAlert = true
+                }
             }
         }
 
         if ConfigStore.shared.autoLaunchXcode {
-            let project = ConfigStore.shared.projectPath
-            _ = MonitorXcode(args: project != "" ? " '\(project)'" : "")
+            _ = MonitorXcode()
         }
 
         if Defaults.mcpServer {

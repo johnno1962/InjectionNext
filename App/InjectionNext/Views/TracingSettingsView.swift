@@ -28,7 +28,7 @@ struct TracingSettingsView: View {
             }
             .help("Enable function/method invocation tracing.")
 
-            if config.traceMode != .off {
+            if true || config.traceMode != .off {
                 Section {
                     TextField("Include Filter (regex)",
                               text: $config.traceFilter)
@@ -48,6 +48,10 @@ struct TracingSettingsView: View {
                     Toggle("Expand Custom Types in Trace",
                            isOn: $config.traceLookup)
                         .help("Expand App types used as arguments")
+
+                    Toggle("Repair Tracing if Crashing",
+                           isOn: $config.traceRepair)
+                        .help("Detect trace crashes and suppress them")
                 } header: {
                     Label("Trace Filters", systemImage: "line.3.horizontal.decrease.circle")
                 } footer: {

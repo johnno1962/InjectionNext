@@ -60,10 +60,6 @@ typedef union {
     return -1;
 }
 
-+ (void)startServer:(NSString *)address {
-    [self performSelectorInBackground:@selector(runServer:) withObject:address];
-}
-
 + (void)forEachInterface:(void (^)(ifaddrs *ifa, in_addr_t addr, in_addr_t mask))handler {
     ifaddrs *addrs;
     if (getifaddrs(&addrs) < 0) {
@@ -77,9 +73,15 @@ typedef union {
     freeifaddrs(addrs);
 }
 
-static int lastServerSocket;
+static NSMutableDictionary<NSString *,NSNumber *> *lastSockets;
 
-+ (void)runServer:(NSString *)address {
++ (NSNumber *)setLastServerSocket:(int)socket {
+    if (!lastSockets)
+        lastSockets = [NSMutableDictionary new];
+    return lastSockets[NSStringFromClass(self)] = @(socket);
+}
+
++ (void)startServer:(NSString *)address {
     sockaddr_union serverAddr;
     [self parseV4Address:address into:&serverAddr.any];
 
@@ -87,12 +89,17 @@ static int lastServerSocket;
     if (serverSocket < 0)
         return;
 
-    lastServerSocket = serverSocket;
     if (bind(serverSocket, &serverAddr.addr, serverAddr.sa_len) < 0)
         [self error:@"Could not bind service socket: %s"];
     else if (listen(serverSocket, 50) < 0)
         [self error:@"Service socket would not listen: %s"];
     else
+        [self performSelectorInBackground:@selector(runServer:)
+                               withObject:[self setLastServerSocket:serverSocket]];
+}
+
++ (void)runServer:(NSNumber *)socket {
+        int serverSocket = socket.intValue;
         while (serverSocket) {
             sockaddr_union clientAddr;
             socklen_t addrLen = sizeof clientAddr;
@@ -116,8 +123,10 @@ static int lastServerSocket;
                     [client run];
                 }
             }
-            else if (lastServerSocket)
+            else if (lastSockets[NSStringFromClass(self)] == socket) {
+                NSLog(@"Bad accept %s", strerror(errno));
                 [NSThread sleepForTimeInterval:.5];
+            }
             else
                 break;
         }
@@ -126,9 +135,10 @@ static int lastServerSocket;
 }
 
 + (void)stopLastServer {
-    if (lastServerSocket)
+    NSString *className = NSStringFromClass(self);
+    if (int lastServerSocket = lastSockets[className].intValue)
         close(lastServerSocket);
-    lastServerSocket = 0;
+    [lastSockets removeObjectForKey:className];
     [NSThread sleepForTimeInterval:.5];
 }
 
@@ -205,6 +215,7 @@ static int lastServerSocket;
     }
     return self;
 }
+
 - (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode {
     return fdopen(clientSocket, mode);
 }

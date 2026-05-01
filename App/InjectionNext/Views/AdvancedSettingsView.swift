@@ -15,20 +15,6 @@ struct AdvancedSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Toggle("Verbose Logging", isOn: $config.verboseLogging)
-                    .help("Provide detailed logging of swizzling operations")
-                Toggle("Benchmarking", isOn: $config.benchmarking)
-                    .help("Print timings of various swizzling operations")
-            } header: {
-                Label("Debug", systemImage: "ladybug")
-            } footer: {
-                Text("Verbose logging shows detailed binding steps. Benchmarking logs timing information for various operations.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .help("Log detail about the process of injecting the dynamic library")
-
-            Section {
                 Picker("dlopen Mode", selection: $config.dlOpenMode) {
                     ForEach(DLOpenMode.allCases) { mode in
                         VStack(alignment: .leading, spacing: 2) {
@@ -50,6 +36,39 @@ struct AdvancedSettingsView: View {
                 Label("Dynamic Loader", systemImage: "square.stack.3d.up")
             } footer: {
                 Text("Flags passed to dlopen() when DLKit loads each injected dylib. Change this only if injections are failing to resolve symbols or you want eager error reporting. Maps to DLKit.dlOpenMode.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            /* Realised using environment variables picked up by SPM */
+            Section {
+                Toggle("Preserve Static Variables", isOn: $config.preserveStatics)
+                    .help("Static variables retained over injections")
+                Toggle("Disable Standalone Mode﹡", isOn: $config.disableStandalone)
+                    .help("Prevent injection from starting connectionless")
+            } header: {
+                Label("Injection Behavior", systemImage: "bolt.circle")
+            } footer: {
+                Text("\"Preserve Statics\" keeps static/top-level variable values across injections.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Picker("Generics Injection﹡", selection: $config.genericsMode) {
+                    ForEach(GenericsMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+
+                Picker("Key Paths﹡", selection: $config.keyPathsMode) {
+                    ForEach(KeyPathsMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+            } header: {
+                Label("Generic & Key Path Support", systemImage: "chevron.left.forwardslash.chevron.right")
+            } footer: {                Text("Auto mode detects TCA usage and adjusts key path hooking automatically. Legacy generics uses object sweep; new mode doesn't require it.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

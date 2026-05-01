@@ -33,14 +33,14 @@ struct FileWatcherSettingsView: View {
             Section {
                 VStack(alignment: .leading) {
                     HStack {
-                        Text("Latency")
+                        Text("Latency (Restart app to apply)")
                         Spacer()
                         Text(String(format: "%.2fs", config.fileWatcherLatency))
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
                     }
                     Slider(value: $config.fileWatcherLatency, in: 0.05...1.0, step: 0.05)
-                        .help("Not implemented in FileWatcher (yet)?")
+                        .help("Delay before injecting source changes")
                 }
 
                 Button("Reset to Default (0.10s)") {

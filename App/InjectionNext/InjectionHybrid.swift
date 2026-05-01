@@ -32,8 +32,12 @@ extension AppDelegate {
         }
     }
 
-    func watch(path: String) {
+    func watch(path: String, patchProjects: Bool = true) {
         guard Self.alreadyWatching(path) == nil else { return }
+        for project in ProjectDiscovery.discoverProjects(in: path)
+            where project.path.hasSuffix(".xcodeproj") && patchProjects {
+            AppDelegate.ui.ensureInterposable(project: project.path)
+        }
         GitIgnoreParser.monitor(directory: path)
         Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
@@ -153,7 +157,8 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        if let why = GitIgnoreParser.shouldExclude(file: source) {
+        if !Defaults.ignoreGitignore,
+           let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source

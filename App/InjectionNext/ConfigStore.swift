@@ -278,13 +278,16 @@ final class ConfigStore: ObservableObject {
         didSet { ud.set(preserveStatics, forKey: "preserveStatics"); updateEnvVars() }
     }
     @Published var disableStandalone: Bool { // difficult to implement without connection.
-        didSet { ud.set(disableStandalone, forKey: "disableStandalone") }
+        didSet { ud.set(disableStandalone, forKey: "disableStandalone")
+                 warnRelaunchXcode(for: #function)}
     }
     @Published var genericsMode: GenericsMode { // difficult to implement early.
-        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode") }
+        didSet { ud.set(genericsMode.rawValue, forKey: "genericsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var keyPathsMode: KeyPathsMode { // difficult to implement early.
-        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode") }
+        didSet { ud.set(keyPathsMode.rawValue, forKey: "keyPathsMode")
+                 warnRelaunchXcode(for: #function) }
     }
     @Published var sweepExclude: String {
         didSet { ud.set(sweepExclude, forKey: "sweepExclude"); updateEnvVars() }
@@ -301,54 +304,116 @@ final class ConfigStore: ObservableObject {
             }
         }
     }
-    
-    func sendVariable(to client: InjectionServer, name: String, value: String?) {
-        client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
-        client.write(value ?? UNSETENV_VALUE)
-    }
-    
+        
     func sendEnvVars(to client: InjectionServer) {
+        func send(_ name: String, value: String?) {
+            client.writeCommand(InjectionCommand.setenv.rawValue, with: name)
+            client.write(value ?? UNSETENV_VALUE)
+        }
+        func send(_ name: String, value: Bool) {
+            send(name, value: value ? "1" : nil)
+        }
         if let version = Bundle.main
             .infoDictionary?["CFBundleShortVersionString"] as? String {
-            sendVariable(to: client, name: INJECTION_APP_VERSION,
-                         value: version)
+            send(INJECTION_NEXT_VERSION, value: version)
         }
-        sendVariable(to: client, name: INJECTION_DLOPEN_MODE,
-                     value: String(dlOpenMode.flags))
-        sendVariable(to: client, name: INJECTION_DETAIL,
-                     value: verboseLogging ? "1" : nil)
-        sendVariable(to: client, name: INJECTION_PRESERVE_STATICS,
-                     value: preserveStatics ? "1" : nil)
-        sendVariable(to: client, name: INJECTION_SWEEP_DETAIL,
-                     value: sweepDetail ? "1" : nil)
-        sendVariable(to: client, name: INJECTION_SWEEP_EXCLUDE,
-                     value: sweepExclude != "" ? sweepExclude : nil)
-        sendVariable(to: client, name: INJECTION_BENCH,
-                     value: benchmarking ? "1" : nil)
-        sendVariable(to: client, name: INJECTION_TRACE_FILTER,
-                     value: traceFilter != "" ? traceFilter : nil)
+        send(INJECTION_DLOPEN_MODE, value: String(dlOpenMode.flags))
+        send(INJECTION_DETAIL, value: verboseLogging)
+        send(INJECTION_PRESERVE_STATICS, value: preserveStatics)
+        send(INJECTION_SWEEP_DETAIL, value: sweepDetail)
+        send(INJECTION_SWEEP_EXCLUDE,
+             value: sweepExclude != "" ? sweepExclude : nil)
+        send(INJECTION_BENCH, value: benchmarking)
+        send(INJECTION_TRACE_REPAIR, value: traceRepair)
+        send(INJECTION_TRACE_FILTER,
+             value: traceFilter != "" ? traceFilter : nil)
         if traceLookup {
-            sendVariable(to: client, name: INJECTION_TRACE_LOOKUP,
-                         value: "1")
+            send(INJECTION_TRACE_LOOKUP, value: "1")
         }
         switch traceMode {
         case .all:
-            sendVariable(to: client, name: INJECTION_TRACE_ALL, value: "1")
+            send(INJECTION_TRACE_ALL, value: "1")
             fallthrough
         case .injected:
-            sendVariable(to: client, name: INJECTION_TRACE, value: "1")
+            send(INJECTION_TRACE, value: "1")
         case .off:
             break
         }
         if traceFrameworks != "" {
-            sendVariable(to: client, name: INJECTION_TRACE_FRAMEWORKS,
-                         value: traceFrameworks)
+            send(INJECTION_TRACE_FRAMEWORKS, value: traceFrameworks)
         }
         if traceUIKit != "" {
-            sendVariable(to: client, name: INJECTION_TRACE_UIKIT,
-                         value: traceUIKit)
+            send(INJECTION_TRACE_UIKIT, value: traceUIKit)
         }
         client.write(InjectionCommand.endenv.rawValue)
+    }
+
+    ///
+    /// There are two ways "early" settings (those actioned before connecting
+    /// to the app) are communicated to the User's client app:
+    ///
+    /// 1) Through environment variables on running Xcode which make their
+    /// way through to the Swift Package manifest to set compilation options.
+    ///
+    /// 2) Writing a short script source'd  by copy_bundle.sh that copies them
+    /// into the Info.plist of the injection bundle.
+    ///
+    func envVarsForSwiftPackage() -> String {
+        var exports = "", sets = "", count = 0
+        let appPlist = "$CODESIGNING_FOLDER_PATH/" + (InjectionServer
+            .currentClient?.platform == "MacOSX" ? "Contents/" : "") + "Info.plist"
+        for name in [INJECTION_HOST, INJECTION_NOSTANDALONE, INJECTION_NOKEYPATHS,
+                 INJECTION_KEYPATHS, INJECTION_NOGENERICS, INJECTION_OF_GENERICS] {
+            sets += """
+                /usr/libexec/PlistBuddy -c "Delete :\(name)" "\(appPlist)";
+                
+                """
+        }
+        func addEnv(named: String, value: String? = nil) {
+            let safe = value?[#"['"\n]"#, "_"] ?? "1"
+            exports += "export \(named)='\(safe)'\n"
+            sets += """
+                /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "\(appPlist)" &&
+                /usr/libexec/PlistBuddy -c "Add :\(named) string \(safe)" "$PLIST" &&
+
+                """
+            count += 1
+        }
+        if injectionHost != "127.0.0.1" {
+            addEnv(named: INJECTION_HOST, value: injectionHost)
+        }
+        if disableStandalone {
+            addEnv(named: INJECTION_NOSTANDALONE)
+        }
+        switch genericsMode {
+        case .auto:
+            break
+        case .legacy:
+            addEnv(named: INJECTION_OF_GENERICS)
+        case .disabled:
+            addEnv(named: INJECTION_NOGENERICS)
+        }
+        switch keyPathsMode {
+        case .auto:
+            break
+        case .enabled:
+            addEnv(named: INJECTION_KEYPATHS)
+        case .disabled:
+            addEnv(named: INJECTION_NOKEYPATHS)
+        }
+        try? (sets+"echo Sourced \(count) settings\n")
+            .write(toFile: NSHomeDirectory()+"/.\(APP_NAME)_settings.sh",
+                   atomically: false, encoding: .utf8)
+        return exports
+    }
+    
+    func warnRelaunchXcode(for setting: String, alert: Bool = true) {
+        if alert && MonitorXcode.runningXcode != nil {
+            InjectionServer.error("""
+            Changing \(setting) requires you re-launch xcode and build clean.
+            """)
+        }
+        _ = envVarsForSwiftPackage()
     }
 
     // MARK: - Devices
@@ -389,20 +454,25 @@ final class ConfigStore: ObservableObject {
     @Published var traceUIKit: String {
         didSet { ud.set(traceUIKit, forKey: "traceUIKit"); updateEnvVars() }
     }
+    @Published var traceRepair = false
 
     // MARK: - File Watcher
 
     @Published var fileWatcherLatency: Double {
-        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency") }
+        didSet { ud.set(fileWatcherLatency, forKey: "fileWatcherLatency")
+                 FileWatcher.latency = fileWatcherLatency }
     }
     @Published var injectablePattern: String {
         didSet { ud.set(injectablePattern, forKey: "injectablePattern") }
     }
 
     // MARK: - Network (mostly read-only display)
+    private var hostChangeWarned = false
 
     @Published var injectionHost: String {
-        didSet { ud.set(injectionHost, forKey: "injectionHost") }
+        didSet { ud.set(injectionHost, forKey: "injectionHost")
+                 warnRelaunchXcode(for: #function, alert: !hostChangeWarned)
+                 hostChangeWarned = true }
     }
     let injectionPort: String = HOTRELOADING_PORT
     let controlPort: UInt16 = 8919
@@ -483,6 +553,7 @@ final class ConfigStore: ObservableObject {
         self.mcpServer = ud.bool(forKey: "mcpServer")
         self.dlOpenMode = DLOpenMode(rawValue: ud.string(forKey: "dlOpenMode") ?? "") ?? .nowGlobal
         DLKit.dlOpenMode = self.dlOpenMode.flags
+        FileWatcher.latency = self.fileWatcherLatency
 
         // Auto-detect running Xcode on launch
         if ud.string(forKey: "XcodePath") == nil,
@@ -858,48 +929,18 @@ private final class ProjectPickerWindow: NSObject {
 
 // MARK: - Backward Compatibility
 
-struct Defaults {
-    static let userDefaults = UserDefaults.standard
-    static let xcodePathDefault = "XcodePath"
-    static let librariesDefault = "libraries"
-    static let codesigningDefault = "codesigningIdentity"
-    static let projectPathDefault = "projectPath"
+let Defaults = ConfigStore.shared
 
-    static var xcodePath: String {
-        ConfigStore.shared.xcodePath
-    }
-    static var xcodeDefault: String? {
-        get { ConfigStore.shared.ud.string(forKey: xcodePathDefault) }
+extension ConfigStore {
+
+    var ignoreGitignore: Bool { ud.bool(forKey: #function) }
+    
+    var xcodeDefault: String? {
+        get { ud.string(forKey: "XcodePath") }
         set {
             if let val = newValue {
-                ConfigStore.shared.xcodePath = val
+                xcodePath = val
             }
         }
-    }
-    static var deviceTesting: Bool {
-        get { ConfigStore.shared.deviceTesting }
-        set { ConfigStore.shared.deviceTesting = newValue }
-    }
-    static var deviceLibraries: String {
-        get { ConfigStore.shared.deviceLibraries }
-        set { ConfigStore.shared.deviceLibraries = newValue }
-    }
-    static var codesigningIdentity: String? {
-        get { ConfigStore.shared.codesigningIdentity }
-        set { ConfigStore.shared.codesigningIdentity = newValue }
-    }
-    static var xcodeRestart: Bool {
-        get { ConfigStore.shared.xcodeRestart }
-        set { ConfigStore.shared.xcodeRestart = newValue }
-    }
-    static var projectPath: String? {
-        get {
-            let val = ConfigStore.shared.projectPath
-            return val.isEmpty ? nil : val
-        }
-    }
-    static var mcpServer: Bool {
-        get { ConfigStore.shared.mcpServer }
-        set { ConfigStore.shared.mcpServer = newValue }
     }
 }

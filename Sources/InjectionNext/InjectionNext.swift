@@ -176,18 +176,7 @@ open class InjectionNext: SimpleSocket {
             }
         /// Trace calls to framework e.g. SwiftUI,SwiftUICore
         case INJECTION_TRACE_FRAMEWORKS:
-            var frmwks = value
-            if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
-            for frmwk in frmwks.components(separatedBy: ",") {
-                if let dylib = DLKit.imageMap[frmwk] {
-                    Self.target = dylib
-                    appBundleImages { path, header, slide in
-                        rebind_symbols_trace(autoBitCast(header), slide, Self.tracer)
-                    }
-                } else {
-                    error("Invalid trace framework \(frmwk)")
-                }
-            }
+            traceCalls(toFrameworks: value, images: DLKit.appImages.imageList)
         /// Trace UIKit internals using swizzling
         case INJECTION_TRACE_UIKIT:
             var frmwks = value
@@ -208,6 +197,23 @@ open class InjectionNext: SimpleSocket {
             }
         default:
             break
+        }
+    }
+    
+    func traceCalls(toFrameworks: String, images: [ImageSymbols]) {
+        var frmwks = toFrameworks
+        if frmwks == "" || frmwks == "1" { frmwks = "SwiftUI,SwiftUICore" }
+        for frmwk in frmwks.components(separatedBy: ",") {
+            if let dylib = DLKit.imageMap[frmwk] {
+                Self.target = dylib
+                for image in images {
+                    detail("Tracing image \(image)")
+                    rebind_symbols_trace(autoBitCast(image.imageHeader),
+                                         image.imageSlide, Self.tracer)
+                }
+            } else {
+                error("Invalid trace framework \(frmwk)")
+            }
         }
     }
 
@@ -232,6 +238,10 @@ open class InjectionNext: SimpleSocket {
             var succeeded = false
             if let (image, classes) = Reloader.injectionQueue
                 .sync(execute: { loader.loadAndPatch(in: dylib) }) {
+                if let tracing = getenv(INJECTION_TRACE_FRAMEWORKS) {
+                    traceCalls(toFrameworks: String(cString: tracing),
+                               images: [image])
+                }
                 loader.sweeper.sweepAndRunTests(image: image, classes: classes)
                 succeeded = true
 

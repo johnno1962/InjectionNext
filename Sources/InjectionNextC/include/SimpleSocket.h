@@ -20,7 +20,7 @@
 @property BOOL isLocalClient;
 
 + (void)startServer:(NSString *_Nonnull)address;
-+ (void)runServer:(NSString *_Nonnull)address;
++ (void)runServer:(NSNumber *_Nonnull)socket;
 + (int)error:(NSString *_Nonnull)message;
 + (void)stopLastServer;
 
