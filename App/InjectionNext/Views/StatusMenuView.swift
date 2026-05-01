@@ -148,6 +148,13 @@ struct StatusMenuView: View {
 
             Divider()
 
+            Button {
+                UpdateChecker.checkForUpdates()
+            } label: {
+                Label("Check for Updates…", systemImage: "arrow.down.circle")
+            }
+            .help("Check GitHub for a newer release of InjectionNext")
+
             Button("Quit InjectionNext") {
                 NSApp.terminate(nil)
             }
