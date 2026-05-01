@@ -99,6 +99,9 @@ class FrontendServer: SimpleSocket {
     }
 
     func validateConnection() -> Bool {
+        #if SWIFT_PACKAGE
+        let COMMANDS_VERSION = -1
+        #endif
         return readInt() == COMMANDS_VERSION && readString() == NSHomeDirectory()
     }
 
