@@ -24,7 +24,7 @@
 }
 - (BOOL)writeBytes:(const void *)buffer length:(size_t)length cmd:(SEL)cmd {
     if (!out)
-        out = fdopen(clientSocket, "w");
+        out = [self fdopenForMode:"w"];
     return fwrite(buffer, 1, length, out) == length;
 }
 - (void)dealloc {

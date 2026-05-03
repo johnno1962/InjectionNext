@@ -9,58 +9,6 @@
 
 import Cocoa
 
-// MARK: - Log Buffer
-
-class LogBuffer {
-
-    static var shared: LogBuffer?
-
-    struct Entry {
-        let timestamp: TimeInterval
-        let message: String
-        let level: String
-    }
-
-    private let lock = NSLock()
-    private var entries = [Entry]()
-    private let maxEntries = 2000
-
-    func append(_ message: String, level: String = "info") {
-        lock.lock()
-        defer { lock.unlock() }
-        entries.append(Entry(
-            timestamp: Date().timeIntervalSince1970,
-            message: message,
-            level: level
-        ))
-        if entries.count > maxEntries {
-            entries.removeFirst(entries.count - maxEntries)
-        }
-    }
-
-    func get(since: TimeInterval = 0, limit: Int = 200) -> [[String: Any]] {
-        lock.lock()
-        defer { lock.unlock() }
-        let filtered = entries.filter { $0.timestamp > since }
-        let sliced = filtered.suffix(limit)
-        return sliced.map {
-            ["timestamp": $0.timestamp, "message": $0.message, "level": $0.level]
-        }
-    }
-
-    func clear() {
-        lock.lock()
-        defer { lock.unlock() }
-        entries.removeAll()
-    }
-
-    var count: Int {
-        lock.lock()
-        defer { lock.unlock() }
-        return entries.count
-    }
-}
-
 // MARK: - Control Server
 
 class ControlServer {
@@ -246,7 +194,7 @@ class ControlServer {
     private func getStatus() -> ActionResult {
         var result = [String: Any]()
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             result["xcode_running"] = MonitorXcode.runningXcode != nil
             result["xcode_path"] = Defaults.xcodePath
             result["compiler_intercepted"] = delegate.updatePatchUnpatch() == .patched
@@ -291,7 +239,7 @@ class ControlServer {
     private func interceptCompiler() -> ActionResult {
         var state = ""
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             let currentState = delegate.updatePatchUnpatch()
             state = currentState == .patched ? "patched" : "unpatched"
         }
@@ -301,10 +249,10 @@ class ControlServer {
 
     private func enableDevices(enable: Bool) -> ActionResult {
         DispatchQueue.main.sync {
-            let delegate = AppDelegate.ui!
+            guard let delegate = AppDelegate.ui else { return }
             let currentlyEnabled = delegate.enableDevicesItem.state == .on
             if enable != currentlyEnabled {
-                delegate.deviceEnable(delegate.enableDevicesItem)
+                delegate.deviceEnable(NSMenuItem())
             }
         }
         return .ok(["devices_enabled": enable])
@@ -343,19 +291,18 @@ class ControlServer {
         }
         DispatchQueue.main.sync {
             Defaults.xcodeDefault = path
-            AppDelegate.ui.selectXcodeItem.toolTip = path
             AppDelegate.ui.updatePatchUnpatch()
         }
         return .ok(["xcode_path": path])
     }
 
     private func getLogs(since: TimeInterval, limit: Int) -> ActionResult {
-        let logs = LogBuffer.shared?.get(since: since, limit: limit)
-        return .ok(["logs": logs ?? [], "count": LogBuffer.shared?.count ?? 0])
+        let logs = LogBuffer.shared.get(since: since, limit: limit)
+        return .ok(["logs": logs, "count": LogBuffer.shared.count])
     }
 
     private func clearLogs() -> ActionResult {
-        LogBuffer.shared?.clear()
+        LogBuffer.shared.clear()
         return .ok()
     }
 }
