@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <arpa/inet.h>
+#import <stdio.h>
 
 @interface SimpleSocket : NSObject {
 @protected
@@ -19,7 +20,7 @@
 @property BOOL isLocalClient;
 
 + (void)startServer:(NSString *_Nonnull)address;
-+ (void)runServer:(NSString *_Nonnull)address;
++ (void)runServer:(NSNumber *_Nonnull)socket;
 + (int)error:(NSString *_Nonnull)message;
 + (void)stopLastServer;
 
@@ -32,6 +33,7 @@
                                   message:(const char *_Nonnull)format;
 
 - (instancetype _Nonnull)initSocket:(int)socket;
+- (FILE *_Nullable)fdopenForMode:(const char * _Nonnull)mode;
 
 - (void)run;
 - (void)runInBackground;
