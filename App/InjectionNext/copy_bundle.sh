@@ -19,7 +19,7 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     # determine which prebuilt bundle to copy
     RESOURCES=${RESOURCES:-"$(dirname "$0")"}
     # If there are frameworks used only by tests
-    TESTING_FRAMEWORKS="$2"
+    TESTING_FRAMEWORKS=${2:-$PLATFORM_DEVELOPER_LIBRARY_DIR/Frameworks/_Testing_*.framework}
     COPY="$CODESIGNING_FOLDER_PATH/iOSInjection.bundle"
     PLIST="$COPY/Info.plist"
     if [ "$PLATFORM_NAME" == "macosx" ]; then
