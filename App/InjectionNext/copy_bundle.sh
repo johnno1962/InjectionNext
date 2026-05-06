@@ -58,10 +58,10 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     rm -f /tmp/InjectionNext.Products
     ln -s "$PRODUCTS_DIR" /tmp/InjectionNext.Products
     (cd "$PRODUCTS_DIR" && for fwork in $TESTING_FRAMEWORKS; do
-        if [ -f "$fwork/Info.plist" -a \
-            ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
+        TESTING_COPIED="$CODESIGNING_FOLDER_PATH/Frameworks/$(basename "$fwork")"
+        if [ -f "$fwork/Info.plist" -a ! -d "$TESTING_COPIED" ]; then
             rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
-            codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork"
+            codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$TESTING_COPIED"
         fi
     done)
 
