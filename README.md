@@ -191,5 +191,3 @@ Set a user default with the same name if you want to always open
 this project inside the selected Xcode on launching the app.
 
 After 100 injections you'll be reminded you can sponsor this project on GitHub.
-
-The fabulous app icon is thanks to Katya of [pixel-mixer.com](http://pixel-mixer.com/).
