@@ -32,8 +32,12 @@ extension AppDelegate {
         }
     }
 
-    func watch(path: String) {
+    func watch(path: String, patchProjects: Bool = true) {
         guard Self.alreadyWatching(path) == nil else { return }
+        for project in ProjectDiscovery.discoverProjects(in: path)
+            where project.path.hasSuffix(".xcodeproj") && patchProjects {
+            AppDelegate.ui.ensureInterposable(project: project.path)
+        }
         GitIgnoreParser.monitor(directory: path)
         Self.watchers[path] = InjectionHybrid(watching: path)
         Self.lastWatched = path
@@ -70,14 +74,17 @@ class InjectionHybrid: InjectionBase {
         setenv(INJECTION_DIRECTORIES, watchPaths, 1)
         Reloader.injectionQueue = .main
         super.init()
-        // Extend FileWatcher pattern to detect git lock files
-        FileWatcher.INJECTABLE_PATTERN = try! NSRegularExpression(
-            pattern: #"[^~]\.(mm?|cpp|cc|swift|lock|o)$"#)
+        do {
+            // Extend FileWatcher pattern to detect git lock files
+            FileWatcher.INJECTABLE_PATTERN = try NSRegularExpression(
+                pattern: ConfigStore.shared.injectablePattern)
+        } catch {
+            InjectionServer.error("Invalid file pattern: \(error)")
+        }
     }
 
     /// Called from file watcher when file is edited.
     override func inject(source: String) {
-        guard MonitorXcode.runningXcode == nil else { return }
         // Detect git lock files - record path for later checking
         if source.hasSuffix(".lock") &&
            source.contains("/.git/") {
@@ -150,7 +157,8 @@ class InjectionHybrid: InjectionBase {
             }
         }
 
-        if let why = GitIgnoreParser.shouldExclude(file: source) {
+        if !Defaults.ignoreGitignore,
+           let why = GitIgnoreParser.shouldExclude(file: source) {
             log("Excluded \(source) as \(why)")
         } else if !recompiler.inject(source: source) {
             recompiler.pendingSource = source
@@ -164,11 +172,14 @@ class HybridCompiler: NextCompiler {
     static var liteRecompiler = Recompiler()
 
     override func recompile(source: String, platform: String) ->  String? {
-        let oldCache = Reloader.cacheFile
-        Reloader.sdk = platform // Select commands cache file.
-        if oldCache != Reloader.cacheFile { Self.liteRecompiler = Recompiler() }
+        let connected = InjectionServer.currentClient  != nil,
+            oldCache = Reloader.cacheFile
+        Reloader.sdk = platform // Switch commands cache file.
+        if oldCache != Reloader.cacheFile && connected {
+            Self.liteRecompiler = Recompiler()
+        }
         return Self.liteRecompiler.recompile(source: source, platformFilter:
-                                            "SDKs/"+platform, dylink: false)
+                            connected ? "SDKs/"+platform : "", dylink: false)
     }
 
     override func link(object: String, dylib: String, arch: String) -> (String, Double)? {

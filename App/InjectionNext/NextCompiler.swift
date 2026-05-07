@@ -23,11 +23,24 @@ public func log(_ what: Any..., prefix: String = APP_PREFIX, separator: String =
     msg = "⏳ "+msg
     #else
     msg = prefix+msg
-    LogBuffer.shared?.append(msg, level: "info")
+    LogBuffer.shared.append(msg, level: "info")
     #endif
     print(msg)
     for client in InjectionServer.currentClients {
         client?.sendCommand(.log, with: msg)
+    }
+    return true
+}
+
+@discardableResult
+public func debug(_ what: Any..., prefix: String = "🐞 ", separator: String = " ") -> Bool {
+    #if DEBUG
+    let show = true
+    #else
+    let show = isatty(STDIN_FILENO) != 0
+    #endif
+    if show {
+        print(prefix+what.map {"\($0)"}.joined(separator: separator))
     }
     return true
 }
@@ -86,13 +99,13 @@ class NextCompiler {
         Self.lastSource = source
         if lastCompilation != compilation {
             lastCompilation = compilation
-        } //else { print("reusing") }
+        } //else { debug("reusing") }
         if compilations[source] != lastCompilation {
             compilations[source] = lastCompilation
             modified = true
         }
         if source == pendingSource {
-            print("Delayed injection of "+source)
+            debug("Delayed injection of "+source)
             if inject(source: source) {
                 pendingSource = nil
             }
@@ -178,13 +191,13 @@ class NextCompiler {
                 !symbol.hasSuffix("MD") && !symbol.hasSuffix("Oh") &&
                 !symbol.hasSuffix("Wl") && !symbol.hasSuffix("WL") })
             .map({ String(cString: $0.name) }).sorted() {
-//            print(symbols)
+//            debug(symbols)
             if let previous = client.exports[source],
                previous.count != symbols.count {
                 log("ℹ️ Symbols altered, this may not be supported." +
                       " \(symbols.count) c.f. \(previous.count)")
                 if #available(macOS 15.0, *) {
-                    print(symbols.difference(from: previous))
+                    debug(symbols.difference(from: previous))
                 }
             }
             client.exports[source] = symbols
@@ -245,7 +258,7 @@ class NextCompiler {
 
         strikes[source] = 0
         prepared[sourceName] = dylib
-        print("Prepared dylib: "+dylib)
+        debug("Prepared dylib: "+dylib)
         return (dylib, dylibName, platform, useFilesystem)
     }
 
@@ -442,7 +455,7 @@ class NextCompiler {
                 metrics.bazelTarget = queryHandler.getAppTarget()
             } catch {
                 // Bazel discovery failed, metrics will have nil bazelTarget
-                print("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
+                debug("⚠️ Could not discover Bazel target for \(sourcePath): \(error)")
             }
         }
     }

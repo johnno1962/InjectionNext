@@ -19,7 +19,7 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     # determine which prebuilt bundle to copy
     RESOURCES=${RESOURCES:-"$(dirname "$0")"}
     # If there are frameworks used only by tests
-    TESTING_FRAMEWORKS="$2"
+    TESTING_FRAMEWORKS=${2:-$PLATFORM_DEVELOPER_LIBRARY_DIR/Frameworks/_Testing_*.framework}
     COPY="$CODESIGNING_FOLDER_PATH/iOSInjection.bundle"
     PLIST="$COPY/Info.plist"
     if [ "$PLATFORM_NAME" == "macosx" ]; then
@@ -58,10 +58,10 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     rm -f /tmp/InjectionNext.Products
     ln -s "$PRODUCTS_DIR" /tmp/InjectionNext.Products
     (cd "$PRODUCTS_DIR" && for fwork in $TESTING_FRAMEWORKS; do
-        if [ -f "$fwork/Info.plist" -a \
-            ! -d "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork" ]; then
+        TESTING_COPIED="$CODESIGNING_FOLDER_PATH/Frameworks/$(basename "$fwork")"
+        if [ -f "$fwork/Info.plist" -a ! -d "$TESTING_COPIED" ]; then
             rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
-            codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$CODESIGNING_FOLDER_PATH/Frameworks/$fwork"
+            codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$TESTING_COPIED"
         fi
     done)
 
@@ -91,6 +91,9 @@ CAN_FAIL
     # copy prebuilt bundle into app package and codesign
     rsync -a "$RESOURCES/$BUNDLE.bundle"/* "$COPY/" &&
     # See +[SimpleSocket initialize] for pre-built bundles/dylibs
+    APP_SETTINGS="$HOME/.InjectionNext_settings.sh" &&
+    if [ -f "$APP_SETTINGS" ]; then . "$APP_SETTINGS" ||
+        echo "*** copy_bundle.sh warning: unable to source $APP_SETTINGS ***" >&2; fi &&
     /usr/libexec/PlistBuddy -c "Add :UserHome string $HOME" "$PLIST" &&
     (/usr/libexec/PlistBuddy -c "Delete :InjectionUserHome" "$CODESIGNING_FOLDER_PATH/Info.plist" || echo -n) &&
     /usr/libexec/PlistBuddy -c "Add :InjectionUserHome string $HOME" "$CODESIGNING_FOLDER_PATH/Info.plist" &&

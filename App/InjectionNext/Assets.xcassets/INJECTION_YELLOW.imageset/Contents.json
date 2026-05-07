@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "INJECTION_YELLOW.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

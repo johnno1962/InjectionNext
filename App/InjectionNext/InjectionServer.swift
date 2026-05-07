@@ -39,22 +39,26 @@ class InjectionServer: SimpleSocket {
     var arch = "arm64"
     var tmpPath = "/unset"
 
-    class func alert(_ msg: String) {
+    @discardableResult
+    class func alert(_ msg: String, cancel: String? = nil) -> Bool {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
-        LogBuffer.shared?.append("\(APP_NAME) \(msg)", level: "alert")
+        LogBuffer.shared.append("\(APP_NAME) \(msg)", level: "alert")
         lastAlert = NSAlert()
         lastAlert?.messageText = "\(self)"
         lastAlert?.informativeText = msg
         lastAlert?.alertStyle = .warning
         lastAlert?.addButton(withTitle: "OK")
-        _ = lastAlert?.runModal()
+        if let alt = cancel {
+            lastAlert?.addButton(withTitle: alt)
+        }
+        return lastAlert?.runModal() == .alertFirstButtonReturn
     }
 
     /// Pops up an alert panel for networking
     @discardableResult
     override public class func error(_ message: String) -> Int32 {
         let msg = String(format:message, strerror(errno))
-        LogBuffer.shared?.append(msg, level: "error")
+        LogBuffer.shared.append(msg, level: "error")
         DispatchQueue.main.async { alert(msg) }
         return -1
     }
@@ -69,7 +73,7 @@ class InjectionServer: SimpleSocket {
     // Write message into Xcode console of client app.
     open func log(_ msg: String) {
         NSLog("\(APP_PREFIX)\(APP_NAME) \(msg)")
-        LogBuffer.shared?.append(msg, level: "info")
+        LogBuffer.shared.append(msg, level: "info")
         sendCommand(.log, with: APP_PREFIX+msg)
     }
     open func error(_ msg: String) {
@@ -131,16 +135,15 @@ class InjectionServer: SimpleSocket {
                         self.log("Repository lock cleared - injection resumed")
                     }
                 }
-                AppDelegate.ui.setMenuIcon(.ok)
                 processResponses()
-                AppDelegate.ui.setMenuIcon(MonitorXcode
-                    .runningXcode != nil ? .ready : .idle)
             }
         } catch {
             self.error("\(self) error \(error)")
         }
         Self.clientQueue.sync {
             Self.connected.removeAll { $0 === self }
+            AppDelegate.ui.setMenuIcon(MonitorXcode
+                .runningXcode != nil ? .ready : .idle)
         } // flush messages and de-register
     }
 
@@ -167,7 +170,7 @@ class InjectionServer: SimpleSocket {
                 }
             case .tmpPath:
                 if let tmpPath = readString() {
-                    print("Tmp path: "+tmpPath)
+                    debug("Tmp path: "+tmpPath)
                     if tmpPath.contains("/Xcode/UserData/Previews/") {
                         return
                     }
@@ -175,6 +178,8 @@ class InjectionServer: SimpleSocket {
                     self.tmpPath[#"/$"#] = "" // strip trailing slash
                     Self.clientQueue.async {
                         Self.connected.append(self)
+                        AppDelegate.ui.setMenuIcon(.ok)
+                        ConfigStore.shared.sendEnvVars(to: self)
                     }
                 } else {
                     error("**** Bad tmp ****")

@@ -2,6 +2,20 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+import Foundation
+
+/**
+ If any of these options have been selected inside the InjectionNext.app they will be set
+ in the environment when Xcode is launched from inside the app and available here to
+ feed through to C initialisers using a #define for the compiler where they take effect,
+ */
+var cSettings = [CSetting]()
+for name in ["INJECTION_HOST", "INJECTION_NOSTANDALONE", "INJECTION_NOKEYPATHS",
+         "INJECTION_KEYPATHS", "INJECTION_NOGENERICS", "INJECTION_OF_GENERICS"] {
+    if let value = ProcessInfo.processInfo.environment[name] {
+        cSettings.append(.define(name+"_SETTING", to: "\"\(value)\""))
+    }
+}
 
 let package = Package(
     name: "InjectionNext",
@@ -25,7 +39,7 @@ let package = Package(
             path: "Sources/InjectionNext", swiftSettings: [.define("DEBUG_ONLY")]),
         .target(
             name: "InjectionNextC",
-            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]),
+            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]+cSettings),
         .testTarget(
             name: "InjectionNextTests",
             dependencies: ["InjectionBundle"]),
