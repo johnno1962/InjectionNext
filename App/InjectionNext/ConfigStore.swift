@@ -365,7 +365,7 @@ final class ConfigStore: ObservableObject {
         for name in [INJECTION_HOST, INJECTION_NOSTANDALONE, INJECTION_NOKEYPATHS,
                  INJECTION_KEYPATHS, INJECTION_NOGENERICS, INJECTION_OF_GENERICS] {
             sets += """
-                /usr/libexec/PlistBuddy -c "Delete :\(name)" "\(appPlist)";
+                /usr/libexec/PlistBuddy -c "Delete :\(name)" "\(appPlist)" 2>/dev/null;
                 
                 """
         }
