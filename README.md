@@ -191,3 +191,6 @@ Set a user default with the same name if you want to always open
 this project inside the selected Xcode on launching the app.
 
 After 100 injections you'll be reminded you can sponsor this project on GitHub.
+
+The spendid new Settings panels and Icons where contributed by 
+[@MaatheusGois](https://github.com/MaatheusGois)
