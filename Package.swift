@@ -43,5 +43,6 @@ let package = Package(
         .testTarget(
             name: "InjectionNextTests",
             dependencies: ["InjectionBundle"]),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )

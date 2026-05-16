@@ -217,7 +217,9 @@ open class InjectionNext: SimpleSocket {
         }
     }
 
+    nonisolated(unsafe)
     static var target: ImageSymbols?
+    nonisolated(unsafe)
     static var tracer: STTracer = { existing, symname in
         var traced = existing
         if SwiftTrace.injectableSymbol(symname),
@@ -308,7 +310,7 @@ open class InjectionNext: SimpleSocket {
                     return error("Unable to read metrics JSON")
                 }
                 if let data = metricsJSON.data(using: .utf8),
-                   let metricsDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let metricsDict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
                    let notificationName = metricsDict["notification_name"] as? String {
                     NotificationCenter.default.post(
                         name: NSNotification.Name(notificationName),
