@@ -8,6 +8,11 @@
 //
 #if DEBUG || !SWIFT_PACKAGE
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 #if canImport(InjectionImpl)
 import InjectionImpl
 #endif
@@ -32,6 +37,39 @@ open class InjectionNext: SimpleSocket {
     }
     func error(_ msg: String) {
         log("⚠️ "+msg)
+    }
+
+    private func screenshotData() -> Data? {
+        var data: Data?
+        let capture = {
+            #if canImport(UIKit) && !os(watchOS)
+            guard let window = UIApplication.shared.windows.first(where: {
+                $0.isKeyWindow
+            }) ?? UIApplication.shared.windows.first(where: {
+                !$0.isHidden && $0.alpha > 0
+            }) else { return }
+            let renderer = UIGraphicsImageRenderer(bounds: window.bounds)
+            data = renderer.image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }.pngData()
+            #elseif canImport(AppKit)
+            guard let window = NSApplication.shared.keyWindow ??
+                    NSApplication.shared.mainWindow ??
+                    NSApplication.shared.windows.first(where: {
+                        $0.isVisible
+                    }) else { return }
+            window.displayIfNeeded()
+            let bounds = window.contentView?.bounds ?? window.frame
+            guard let view = window.contentView,
+                  let rep = view.bitmapImageRepForCachingDisplay(in: bounds) else {
+                return
+            }
+            view.cacheDisplay(in: bounds, to: rep)
+            data = rep.representation(using: .png, properties: [:])
+            #endif
+        }
+        Thread.isMainThread ? capture() : DispatchQueue.main.sync(execute: capture)
+        return data
     }
 
     /// Connection from client app opened in ClientBoot.mm arrives here
@@ -317,6 +355,16 @@ open class InjectionNext: SimpleSocket {
                         object: nil,
                         userInfo: metricsDict
                     )
+                }
+            case .screenshot:
+                if let data = screenshotData() {
+                    writeCommand(InjectionResponse.screenshotData.rawValue,
+                                 with: "image/png")
+                    write(data)
+                } else {
+                    writeCommand(InjectionResponse.screenshotData.rawValue,
+                                 with: "")
+                    write(Data())
                 }
             case .setenv:
                 while let name = readString(), let value = readString() {

@@ -257,6 +257,12 @@
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
+		BB7AC1522FBCEDEF009269AF /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		BB7AC1532FBCEDEF009269AF /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
+		BB7AC1542FBCEDEF009269AF /* package.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		BB7AC1552FBCEDEF009269AF /* package-lock.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "package-lock.json"; sourceTree = "<group>"; };
+		BB7AC1562FBCEDEF009269AF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		BB7AC1572FBCEDEF009269AF /* take-screenshot.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "take-screenshot.js"; sourceTree = "<group>"; };
 		BB85A4242D6B9C5300FA29D0 /* feedcommands */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = feedcommands; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBA082352D6BC32D00FFFB2F /* FrontendServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontendServer.swift; sourceTree = "<group>"; };
 		BBA082372D6BD6CB00FFFB2F /* swift-frontend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "swift-frontend.sh"; sourceTree = "<group>"; };
@@ -456,6 +462,7 @@
 				BBCA01FF1FB0F10300E45F0F /* InjectionNext */,
 				BBDD84172C4FE79E000F3124 /* InjectionBundle */,
 				BB85A4252D6B9C5300FA29D0 /* feedcommands */,
+				BB7AC1582FBCEDEF009269AF /* mcp-server */,
 				BB439B661FABA64300B4F50B /* Products */,
 				BBB040621FB1798A007DDD0A /* Frameworks */,
 			);
@@ -517,6 +524,20 @@
 			);
 			name = SwiftTraceGuts;
 			path = ../SwiftTrace/SwiftTraceGuts;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB7AC1582FBCEDEF009269AF /* mcp-server */ = {
+			isa = PBXGroup;
+			children = (
+				BB7AC1522FBCEDEF009269AF /* .gitignore */,
+				BB7AC1532FBCEDEF009269AF /* index.js */,
+				BB7AC1542FBCEDEF009269AF /* package.json */,
+				BB7AC1552FBCEDEF009269AF /* package-lock.json */,
+				BB7AC1562FBCEDEF009269AF /* README.md */,
+				BB7AC1572FBCEDEF009269AF /* take-screenshot.js */,
+			);
+			name = "mcp-server";
+			path = "../mcp-server";
 			sourceTree = SOURCE_ROOT;
 		};
 		BBB040621FB1798A007DDD0A /* Frameworks */ = {

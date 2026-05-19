@@ -103,6 +103,17 @@ echo '{"action":"get_logs"}' | nc -w 3 localhost 8919
 echo '{"action":"stop_watching"}' | nc -w 3 localhost 8919
 ```
 
+### Screenshot test from terminal
+
+This starts the MCP server over stdio, calls its `take_screenshot` tool, and writes the returned PNG:
+
+```bash
+cd mcp-server
+npm run screenshot -- /tmp/injection-screenshot.png
+```
+
+`take_screenshot` captures the connected client app, not the InjectionNext menu-bar app. Launch a target app that has the InjectionNext package/bundle loaded before running this command.
+
 ### Test from Cursor
 
 After configuring the MCP server, open Cursor and ask the AI:
@@ -129,6 +140,7 @@ or:
 | `enable_devices` | Toggle device/simulator injection support |
 | `unhide_symbols` | Fix default-argument symbol visibility issues |
 | `get_last_error` | Get last compilation error |
+| `take_screenshot` | Capture a PNG screenshot from the connected client app |
 | `prepare_swiftui_source` | Add injection annotations to current SwiftUI file |
 | `prepare_swiftui_project` | Prepare all SwiftUI files in target |
 | `set_xcode_path` | Point to a different Xcode.app |

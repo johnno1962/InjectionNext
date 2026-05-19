@@ -8,13 +8,13 @@ import net from "node:net";
 const CONTROL_PORT = 8919;
 const CONTROL_HOST = "127.0.0.1";
 
-function sendCommand(action, params = {}) {
+function sendCommand(action, params = {}, timeoutMs = 5000) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     const timeout = setTimeout(() => {
       client.destroy();
       reject(new Error("Connection timed out. Is InjectionNext running with ControlServer?"));
-    }, 5000);
+    }, timeoutMs);
 
     client.connect(CONTROL_PORT, CONTROL_HOST, () => {
       const payload = JSON.stringify({ action, ...params }) + "\n";
@@ -141,6 +141,29 @@ server.tool(
   async () => {
     const result = await sendCommand("get_last_error");
     return formatResponse(result);
+  }
+);
+
+server.tool(
+  "take_screenshot",
+  "Capture a screenshot from the currently connected client app and return it as PNG image data",
+  {},
+  async () => {
+    const result = await sendCommand("take_screenshot", {}, 15000);
+    if (!result.success) {
+      return { content: [{ type: "text", text: `Error: ${result.error}` }], isError: true };
+    }
+    const data = result.data?.data;
+    const mimeType = result.data?.mimeType ?? "image/png";
+    if (!data) {
+      return { content: [{ type: "text", text: "Error: Screenshot response did not include image data" }], isError: true };
+    }
+    return {
+      content: [
+        { type: "image", data, mimeType },
+        { type: "text", text: `Captured ${result.data?.bytes ?? 0} bytes` },
+      ],
+    };
   }
 );
 

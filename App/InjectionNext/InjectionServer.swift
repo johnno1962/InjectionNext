@@ -38,6 +38,12 @@ class InjectionServer: SimpleSocket {
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
+    private final class PendingScreenshot {
+        let semaphore = DispatchSemaphore(value: 0)
+        var mimeType: String?
+        var data: Data?
+    }
+    private var pendingScreenshot: PendingScreenshot?
 
     @discardableResult
     class func alert(_ msg: String, cancel: String? = nil) -> Bool {
@@ -68,6 +74,31 @@ class InjectionServer: SimpleSocket {
         Self.clientQueue.async {
             _ = self.writeCommand(command.rawValue, with: string)
         }
+    }
+
+    func requestScreenshot(timeout: DispatchTimeInterval = .seconds(10))
+        -> (mimeType: String, data: Data)? {
+        let pending = PendingScreenshot()
+        Self.clientQueue.sync {
+            pendingScreenshot = pending
+            _ = writeCommand(InjectionCommand.screenshot.rawValue, with: nil)
+        }
+        guard pending.semaphore.wait(timeout: .now() + timeout) == .success,
+              let mimeType = pending.mimeType, !mimeType.isEmpty,
+              let data = pending.data, !data.isEmpty else {
+            Self.clientQueue.sync {
+                if pendingScreenshot === pending {
+                    pendingScreenshot = nil
+                }
+            }
+            return nil
+        }
+        Self.clientQueue.sync {
+            if pendingScreenshot === pending {
+                pendingScreenshot = nil
+            }
+        }
+        return (mimeType, data)
     }
 
     // Write message into Xcode console of client app.
@@ -213,6 +244,16 @@ class InjectionServer: SimpleSocket {
                 if let executable = readString() {
                     Reloader.appName = URL(fileURLWithPath:
                                             executable).lastPathComponent
+                }
+            case .screenshotData:
+                guard let mimeType = readString(), let data = readData() else {
+                    error("**** Bad screenshot ****")
+                    return
+                }
+                Self.clientQueue.sync {
+                    pendingScreenshot?.mimeType = mimeType
+                    pendingScreenshot?.data = data
+                    pendingScreenshot?.semaphore.signal()
                 }
             case .detail:
                 if let detail = readString() {

@@ -51,4 +51,7 @@ if [[ "$ACTION" = "install" ]]; then
     build_bundle tvOSDev AppleTVOS appletvos &&
     build_bundle xrOSDev XROS xros
 fi &&
+
+rsync -au ../mcp-server "$CODESIGNING_FOLDER_PATH/Contents/Resources" &&
+
 exit 0

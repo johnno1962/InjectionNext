@@ -164,6 +164,9 @@ class ControlServer {
         case "get_last_error":
             return getLastError()
 
+        case "take_screenshot":
+            return takeScreenshot()
+
         case "prepare_swiftui_source":
             return prepareSwiftUISource()
 
@@ -266,6 +269,20 @@ class ControlServer {
     private func getLastError() -> ActionResult {
         let error = NextCompiler.lastError ?? "No error."
         return .ok(["error": error])
+    }
+
+    private func takeScreenshot() -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        guard let screenshot = client.requestScreenshot() else {
+            return .fail("Unable to capture screenshot from client app")
+        }
+        return .ok([
+            "mimeType": screenshot.mimeType,
+            "data": screenshot.data.base64EncodedString(),
+            "bytes": screenshot.data.count
+        ])
     }
 
     private func prepareSwiftUISource() -> ActionResult {
