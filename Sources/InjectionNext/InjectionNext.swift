@@ -22,7 +22,20 @@ import InjectionImpl
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {
-    
+    private let responseQueue = DispatchQueue(label: "InjectionNextResponses")
+    private func sendResponse(_ response: InjectionResponse,
+                              with string: String? = nil,
+                              data: Data? = nil,
+                              extra: (() -> Void)? = nil) {
+        responseQueue.async {
+            _ = self.writeCommand(response.rawValue, with: string)
+            if let data = data {
+                self.write(data)
+            }
+            extra?()
+        }
+    }
+
     override class open func error(_ message: String) -> Int32 {
         let msg = String(format: message, strerror(errno))
         print(APP_PREFIX+APP_NAME+": "+msg)
@@ -116,25 +129,22 @@ open class InjectionNext: SimpleSocket {
         #endif
 
         // Let server side know the platform and architecture
-        writeCommand(InjectionResponse.platform.rawValue, with: platform)
-        super.write(arch)
+        sendResponse(.platform, with: platform) {
+            self.write(arch)
+        }
         if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
                            getenv(BUILD_WORKSPACE_DIRECTORY) {
-            writeCommand(InjectionResponse.projectRoot.rawValue,
-                         with: String(cString: projectRoot))
+            sendResponse(.projectRoot, with: String(cString: projectRoot))
         }
-        writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
+        sendResponse(.tmpPath, with: NSTemporaryDirectory())
         if let detail = getenv(INJECTION_DETAIL) {
-            writeCommand(InjectionResponse.detail.rawValue,
-                         with: String(cString: detail))
+            sendResponse(.detail, with: String(cString: detail))
         }
         if let bazelTarget = getenv(INJECTION_BAZEL_TARGET) {
-            writeCommand(InjectionResponse.bazelTarget.rawValue,
-                         with: String(cString: bazelTarget))
+            sendResponse(.bazelTarget, with: String(cString: bazelTarget))
         }
         if let executable = Bundle.main.executablePath {
-            writeCommand(InjectionResponse.executable.rawValue,
-                         with: executable)
+            sendResponse(.executable, with: executable)
         }
 
         Reloader.injectionQueue.sync {
@@ -298,10 +308,9 @@ open class InjectionNext: SimpleSocket {
                         """)
                 }
             } else {
-                writeCommand(InjectionResponse.unhide.rawValue, with: nil)
+                sendResponse(.unhide)
             }
-            writeCommand(succeeded ? InjectionResponse.injected.rawValue :
-                            InjectionResponse.failed.rawValue, with: nil)
+            sendResponse(succeeded ? .injected : .failed)
         }
 
         while true {
@@ -356,15 +365,27 @@ open class InjectionNext: SimpleSocket {
                         userInfo: metricsDict
                     )
                 }
+            case .replayEvents:
+                guard let eventsJSON = readString() else {
+                    return error("Unable to read touch events JSON")
+                }
+                #if canImport(UIKit) && !os(watchOS)
+                eventsJSON.withCString {
+                    InjectionReplayTouchEventsJSON($0)
+                }
+                #endif
+                sendResponse(.replayComplete, with: eventsJSON)
+            case .captureEvents:
+                #if canImport(UIKit) && !os(watchOS)
+                InjectionInstallTouchEventCapture { [weak self] json in
+                    self?.sendResponse(.touchEvent, with: String(cString: json))
+                }
+                #endif
             case .screenshot:
                 if let data = screenshotData() {
-                    writeCommand(InjectionResponse.screenshotData.rawValue,
-                                 with: "image/png")
-                    write(data)
+                    sendResponse(.screenshotData, with: "image/png", data: data)
                 } else {
-                    writeCommand(InjectionResponse.screenshotData.rawValue,
-                                 with: "")
-                    write(Data())
+                    sendResponse(.screenshotData, with: "", data: Data())
                 }
             case .setenv:
                 while let name = readString(), let value = readString() {

@@ -11,6 +11,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "InjectionTouchEvents.h"
 
 #define HOTRELOADING_PORT ":8887"
 #define HOTRELOADING_MULTICAST "239.255.255.239"
@@ -44,6 +45,8 @@ typedef NS_ENUM(int, InjectionCommand) {
     InjectionSetenv,
     InjectionEndenv,
     InjectionScreenshot,
+    InjectionReplayEvents,
+    InjectionCaptureEvents,
 
     InjectionInvalid = 1000,
 
@@ -62,6 +65,8 @@ typedef NS_ENUM(int, InjectionResponse) {
     InjectionBazelTarget,
     InjectionExecutable,
     InjectionScreenshotData,
+    InjectionTouchEvent,
+    InjectionReplayComplete,
 
     InjectionExit = ~0
 };

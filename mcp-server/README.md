@@ -114,6 +114,31 @@ npm run screenshot -- /tmp/injection-screenshot.png
 
 `take_screenshot` captures the connected client app, not the InjectionNext menu-bar app. Launch a target app that has the InjectionNext package/bundle loaded before running this command.
 
+### Touch event test from terminal
+
+Touch capture is enabled only when the ControlServer/MCP option is enabled and the client app connects. After changing the `mcpServer` default or rebuilding InjectionNext, restart InjectionNext and relaunch the target app so the client receives the capture command during connection.
+
+Fetch accumulated touch events, print them, save them, and clear the app buffer:
+
+```bash
+cd mcp-server
+npm run touch-events -- get /tmp/injection-events.json
+```
+
+Replay saved events into the connected client app:
+
+```bash
+npm run touch-events -- replay /tmp/injection-events.json
+```
+
+Or fetch and immediately replay the same events:
+
+```bash
+npm run touch-events -- roundtrip /tmp/injection-events.json
+```
+
+Events are JSON and preserve the recorded timing interval between touch events. Replayed touches show a temporary translucent circle in the client app.
+
 ### Test from Cursor
 
 After configuring the MCP server, open Cursor and ask the AI:
@@ -141,6 +166,8 @@ or:
 | `unhide_symbols` | Fix default-argument symbol visibility issues |
 | `get_last_error` | Get last compilation error |
 | `take_screenshot` | Capture a PNG screenshot from the connected client app |
+| `get_touch_events` | Fetch and clear accumulated touch event JSON from the connected client app |
+| `replay_touch_events` | Replay captured touch event JSON in the connected client app |
 | `prepare_swiftui_source` | Add injection annotations to current SwiftUI file |
 | `prepare_swiftui_project` | Prepare all SwiftUI files in target |
 | `set_xcode_path` | Point to a different Xcode.app |
@@ -183,3 +210,8 @@ or:
 **Logs are empty**
 - Logs only capture events that happen while the app is running
 - Try `watch_project` to generate some activity, then `get_logs`
+
+**Touch events are empty**
+- Make sure `mcpServer` was enabled before launching InjectionNext
+- Restart InjectionNext and relaunch the target app so it reconnects
+- Touch capture starts only after the client receives the MCP capture command during connection

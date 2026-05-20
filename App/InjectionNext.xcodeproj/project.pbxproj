@@ -117,6 +117,7 @@
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
+		BBF00D012FBCE00100F0D001 /* InjectionTouchEvents.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */; };
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
@@ -255,6 +256,8 @@
 		BB5C8E8E2FA503D500646A0C /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
+		BBF00CFF2FBCE00100F0D001 /* InjectionTouchEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InjectionTouchEvents.h; path = ../../Sources/InjectionNextC/include/InjectionTouchEvents.h; sourceTree = "<group>"; };
+		BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionTouchEvents.mm; path = ../../Sources/InjectionNextC/InjectionTouchEvents.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB7AC1522FBCEDEF009269AF /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -588,6 +591,8 @@
 			isa = PBXGroup;
 			children = (
 				BB42F9302EB63AAF00FDBBCC /* InjectionImplC.h */,
+				BBF00CFF2FBCE00100F0D001 /* InjectionTouchEvents.h */,
+				BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */,
 				BBDD84592C4FF645000F3124 /* ClientBoot.mm */,
 				BBDD843A2C4FE892000F3124 /* InjectionBoot.mm */,
 				BBDD84182C4FE7E6000F3124 /* InjectionNext.swift */,
@@ -914,6 +919,7 @@
 				BB42F8EC2EB626F100FDBBCC /* SwiftMeta.swift in Sources */,
 				BB4788802EB6B6E700464AB4 /* InjectionBoot.mm in Sources */,
 				BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */,
+				BBF00D012FBCE00100F0D001 /* InjectionTouchEvents.mm in Sources */,
 				BB42F92D2EB639E500FDBBCC /* DLKitC.c in Sources */,
 				BB42F92E2EB639E500FDBBCC /* trie_dladdr.mm in Sources */,
 				BB42F92F2EB639E500FDBBCC /* trie_dlops.mm in Sources */,

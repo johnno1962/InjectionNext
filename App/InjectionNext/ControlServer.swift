@@ -167,6 +167,12 @@ class ControlServer {
         case "take_screenshot":
             return takeScreenshot()
 
+        case "get_touch_events":
+            return getTouchEvents()
+
+        case "replay_touch_events":
+            return replayTouchEvents(params: params)
+
         case "prepare_swiftui_source":
             return prepareSwiftUISource()
 
@@ -283,6 +289,37 @@ class ControlServer {
             "data": screenshot.data.base64EncodedString(),
             "bytes": screenshot.data.count
         ])
+    }
+
+    private func getTouchEvents() -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        let events = client.drainTouchEvents().compactMap { json -> Any? in
+            guard let data = json.data(using: .utf8) else { return nil }
+            return try? JSONSerialization.jsonObject(with: data)
+        }
+        return .ok(["events": events])
+    }
+
+    private func replayTouchEvents(params: [String: Any]) -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        let payload: Any
+        if let events = params["events"] as? [Any] {
+            payload = ["events": events]
+        } else {
+            payload = params
+        }
+        guard JSONSerialization.isValidJSONObject(payload),
+              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let json = String(data: data, encoding: .utf8) else {
+            return .fail("Invalid touch event JSON payload")
+        }
+        client.replayTouchEvents(json)
+        let count = (payload as? [String: Any])?["events"] as? [Any]
+        return .ok(["events": count?.count ?? 0])
     }
 
     private func prepareSwiftUISource() -> ActionResult {

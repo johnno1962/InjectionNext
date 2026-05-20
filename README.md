@@ -36,7 +36,9 @@ If an option is marked with an asterisk﹡ you need to be using copy_bundle.sh
 script for them to work as you might expect. Otherwise, if you are launching 
 Xcode from within the app along with the InjectionNext Swift Package you need 
 to re-launch Xcode when you change these settings and perform a clean build.
-Versions 1.6.0+ contain an MCP server. Consult the file mcp-server/README.md.
+The Resources directory of the app package of versions 2.0.1+ contain an MCP 
+server which is able to take snapshots of the client app's screen as well as
+record and replay touch events. Consult the file mcp-server/README.md.
 
 If your app contains local Swift packages, add the following to their targets
 in Package.swift to be able to inject functions inside the package.

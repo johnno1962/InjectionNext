@@ -44,6 +44,18 @@ class InjectionServer: SimpleSocket {
         var data: Data?
     }
     private var pendingScreenshot: PendingScreenshot?
+    private var touchEvents = [String]()
+
+    func drainTouchEvents() -> [String] {
+        Self.clientQueue.sync {
+            defer { touchEvents.removeAll() }
+            return touchEvents
+        }
+    }
+
+    func replayTouchEvents(_ json: String) {
+        sendCommand(.replayEvents, with: json)
+    }
 
     @discardableResult
     class func alert(_ msg: String, cancel: String? = nil) -> Bool {
@@ -211,6 +223,9 @@ class InjectionServer: SimpleSocket {
                         Self.connected.append(self)
                         AppDelegate.ui.setMenuIcon(.ok)
                         ConfigStore.shared.sendEnvVars(to: self)
+                        if Defaults.mcpServer {
+                            self.sendCommand(.captureEvents, with: nil)
+                        }
                     }
                 } else {
                     error("**** Bad tmp ****")
@@ -254,6 +269,18 @@ class InjectionServer: SimpleSocket {
                     pendingScreenshot?.mimeType = mimeType
                     pendingScreenshot?.data = data
                     pendingScreenshot?.semaphore.signal()
+                }
+            case .touchEvent:
+                if let json = readString() {
+                    Self.clientQueue.sync {
+                        touchEvents.append(json)
+                    }
+                } else {
+                    error("**** Bad touch event ****")
+                }
+            case .replayComplete:
+                if readString() == nil {
+                    error("**** Bad replay completion ****")
                 }
             case .detail:
                 if let detail = readString() {

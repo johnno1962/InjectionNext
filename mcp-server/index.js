@@ -168,6 +168,28 @@ server.tool(
 );
 
 server.tool(
+  "get_touch_events",
+  "Fetch accumulated touch events from the connected client app. The InjectionNext app clears the event buffer after returning it.",
+  {},
+  async () => {
+    const result = await sendCommand("get_touch_events");
+    return formatResponse(result);
+  }
+);
+
+server.tool(
+  "replay_touch_events",
+  "Replay previously captured touch events in the connected client app",
+  {
+    events: z.array(z.any()).describe("Touch event JSON array returned by get_touch_events"),
+  },
+  async ({ events }) => {
+    const result = await sendCommand("replay_touch_events", { events }, 15000);
+    return formatResponse(result);
+  }
+);
+
+server.tool(
   "prepare_swiftui_source",
   "Automatically add .enableInjection() and @ObserveInjection to the currently edited SwiftUI source file",
   {},
