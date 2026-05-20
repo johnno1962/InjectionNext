@@ -196,10 +196,10 @@ static void InjectionReplayEvent(NSDictionary *event) {
     if (!injectionTargets)
         injectionTargets = [NSMutableDictionary new];
     if (!injectionReplayEvent) {
-        id event = [NSClassFromString(@"UITouchesEvent") alloc];
+        id touchesEvent = [NSClassFromString(@"UITouchesEvent") alloc];
         SEL initSelector = NSSelectorFromString(@"_init");
         injectionReplayEvent =
-            ((id (*)(id, SEL))objc_msgSend)(event, initSelector);
+            ((id (*)(id, SEL))objc_msgSend)(touchesEvent, initSelector);
     }
 
     ((void (*)(id, SEL))objc_msgSend)(injectionReplayEvent,
@@ -264,7 +264,12 @@ void InjectionReplayTouchEventsJSON(const char *json) {
         return;
     NSData *data = [[NSData alloc] initWithBytes:json length:strlen(json)];
     id payload = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    NSArray *events = [payload isKindOfClass:NSArray.class] ? payload : [payload objectForKey:@"events"];
+    NSArray *events = nil;
+    if ([payload isKindOfClass:NSArray.class]) {
+        events = payload;
+    } else if ([payload isKindOfClass:NSDictionary.class]) {
+        events = [(NSDictionary *)payload objectForKey:@"events"];
+    }
     if (![events isKindOfClass:NSArray.class])
         return;
 

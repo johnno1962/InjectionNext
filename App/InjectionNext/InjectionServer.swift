@@ -91,9 +91,18 @@ class InjectionServer: SimpleSocket {
     func requestScreenshot(timeout: DispatchTimeInterval = .seconds(10))
         -> (mimeType: String, data: Data)? {
         let pending = PendingScreenshot()
+        var requestStarted = false
         Self.clientQueue.sync {
-            pendingScreenshot = pending
-            _ = writeCommand(InjectionCommand.screenshot.rawValue, with: nil)
+            if pendingScreenshot == nil {
+                pendingScreenshot = pending
+                requestStarted = writeCommand(InjectionCommand.screenshot.rawValue, with: nil)
+                if !requestStarted {
+                    pendingScreenshot = nil
+                }
+            }
+        }
+        guard requestStarted else {
+            return nil
         }
         guard pending.semaphore.wait(timeout: .now() + timeout) == .success,
               let mimeType = pending.mimeType, !mimeType.isEmpty,

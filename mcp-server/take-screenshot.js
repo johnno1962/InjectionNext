@@ -38,6 +38,21 @@ function textContent(result) {
     .join("\n");
 }
 
+function parseToolJSON(result, toolName) {
+  const text = textContent(result);
+  if (result.isError) {
+    throw new Error(text || `${toolName} MCP tool returned an error`);
+  }
+  if (!text) {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`${toolName} returned non-JSON text:\n${text}`);
+  }
+}
+
 async function main() {
   await client.connect(transport);
 
@@ -45,8 +60,7 @@ async function main() {
     name: "get_status",
     arguments: {},
   });
-  const statusText = textContent(status);
-  const statusData = statusText ? JSON.parse(statusText) : {};
+  const statusData = parseToolJSON(status, "get_status");
   if (!statusData.has_connected_client) {
     throw new Error(
       "No connected client app. Launch an app that has the InjectionNext " +
