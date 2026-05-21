@@ -22,7 +22,12 @@ struct NetworkSettingsView: View {
                 }
 
                 LabeledContent("Injection Port", value: config.injectionPort)
-                LabeledContent("Control Server Port", value: "\(config.controlPort)")
+                LabeledContent("Control Socket") {
+                    Text(ControlServer.socketPath)
+                        .font(.caption.monospaced())
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
             } header: {
                 Label("Connection", systemImage: "network")
             } footer: {
@@ -48,7 +53,7 @@ struct NetworkSettingsView: View {
                         Text(controlServerText)
                     }
                 }
-                .help("Local MCP control server on localhost:\(config.controlPort)")
+                .help("Local MCP control server socket")
             } header: {
                 Label("Status", systemImage: "antenna.radiowaves.left.and.right")
             }

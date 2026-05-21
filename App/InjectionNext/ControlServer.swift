@@ -2,8 +2,8 @@
 //  ControlServer.swift
 //  InjectionNext
 //
-//  Local TCP control server for MCP integration.
-//  Listens on localhost:8919 for JSON commands and
+//  Local Unix domain socket control server for MCP integration.
+//  Listens for JSON commands from the bundled MCP server and
 //  maps them to existing AppDelegate actions.
 //
 
@@ -13,15 +13,17 @@ import Cocoa
 
 class ControlServer {
 
-    static let port: UInt16 = 8919
-    static var shared: ControlServer?
+    static let compatibilityPort: UInt16 = 8919
+    static let socketPath = "/tmp/InjectionNext-control.sock"
     static var servicedRequest = false
+    static var shared: ControlServer?
 
     private var serverSocket: Int32 = -1
     private let queue = DispatchQueue(label: "ControlServer", attributes: .concurrent)
 
     static func start() {
         guard shared == nil else { return }
+        CompatibilityControlServer.startServer(":\(compatibilityPort)")
         shared = ControlServer()
         shared?.listen()
     }
@@ -30,32 +32,46 @@ class ControlServer {
         queue.async { [weak self] in
             guard let self = self else { return }
 
-            self.serverSocket = socket(AF_INET, SOCK_STREAM, 0)
+            self.serverSocket = socket(AF_UNIX, SOCK_STREAM, 0)
             guard self.serverSocket >= 0 else {
                 NSLog("\(APP_PREFIX)ControlServer: socket() failed")
                 return
             }
 
-            var reuse: Int32 = 1
-            setsockopt(self.serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+            let socketPath = Self.socketPath
+            guard socketPath.utf8.count < MemoryLayout.size(ofValue: sockaddr_un().sun_path) else {
+                NSLog("\(APP_PREFIX)ControlServer: socket path too long: \(socketPath)")
+                close(self.serverSocket)
+                return
+            }
 
-            var addr = sockaddr_in()
-            addr.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-            addr.sin_family = sa_family_t(AF_INET)
-            addr.sin_port = Self.port.bigEndian
-            addr.sin_addr.s_addr = inet_addr("127.0.0.1")
+            unlink(socketPath)
+
+            var addr = sockaddr_un()
+            addr.sun_len = UInt8(MemoryLayout<sockaddr_un>.size)
+            addr.sun_family = sa_family_t(AF_UNIX)
+            let sunPathSize = MemoryLayout.size(ofValue: sockaddr_un().sun_path)
+            withUnsafeMutableBytes(of: &addr.sun_path) { buffer in
+                socketPath.withCString { source in
+                    if let baseAddress = buffer.baseAddress {
+                        strncpy(baseAddress.assumingMemoryBound(to: CChar.self),
+                                source, sunPathSize - 1)
+                    }
+                }
+            }
 
             let bindResult = withUnsafePointer(to: &addr) {
                 $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                    bind(self.serverSocket, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+                    bind(self.serverSocket, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
                 }
             }
 
             guard bindResult == 0 else {
-                NSLog("\(APP_PREFIX)ControlServer: bind() failed on port \(Self.port): \(String(cString: strerror(errno)))")
+                NSLog("\(APP_PREFIX)ControlServer: bind() failed at \(socketPath): \(String(cString: strerror(errno)))")
                 close(self.serverSocket)
                 return
             }
+            chmod(socketPath, S_IRUSR | S_IWUSR)
 
             guard Darwin.listen(self.serverSocket, 5) == 0 else {
                 NSLog("\(APP_PREFIX)ControlServer: listen() failed")
@@ -63,16 +79,10 @@ class ControlServer {
                 return
             }
 
-            NSLog("\(APP_PREFIX)ControlServer: listening on localhost:\(Self.port)")
+            NSLog("\(APP_PREFIX)ControlServer: listening at \(socketPath)")
 
             while true {
-                var clientAddr = sockaddr_in()
-                var clientLen = socklen_t(MemoryLayout<sockaddr_in>.size)
-                let clientSocket = withUnsafeMutablePointer(to: &clientAddr) {
-                    $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                        accept(self.serverSocket, $0, &clientLen)
-                    }
-                }
+                let clientSocket = accept(self.serverSocket, nil, nil)
                 guard clientSocket >= 0 else { continue }
                 self.queue.async {
                     self.handleClient(clientSocket)
@@ -360,5 +370,24 @@ class ControlServer {
     private func clearLogs() -> ActionResult {
         LogBuffer.shared.clear()
         return .ok()
+    }
+
+    private final class CompatibilityControlServer: SimpleSocket {
+        override func run() {
+            let response: [String: Any] = [
+                "success": false,
+                "error": "InjectionNext now uses a Unix domain socket for MCP control. " +
+                "Upgrade your mcp-server or use the version bundled inside InjectionNext.app."
+            ]
+            guard let data = try? JSONSerialization.data(withJSONObject: response),
+                  let json = String(data: data, encoding: .utf8),
+                  let stream = fdopen(forMode: "w") else {
+                return
+            }
+            defer { fclose(stream) }
+            (json + "\n").withCString {
+                _ = fputs($0, stream)
+            }
+        }
     }
 }

@@ -91,16 +91,16 @@ You should see the InjectionNext icon in the menu bar.
 
 ```bash
 # Check status
-echo '{"action":"status"}' | nc -w 3 localhost 8919
+echo '{"action":"status"}' | nc -U /tmp/InjectionNext-control.sock
 
 # Start watching a project
-echo '{"action":"watch_project","path":"/path/to/your/project"}' | nc -w 3 localhost 8919
+echo '{"action":"watch_project","path":"/path/to/your/project"}' | nc -U /tmp/InjectionNext-control.sock
 
 # Read debug logs
-echo '{"action":"get_logs"}' | nc -w 3 localhost 8919
+echo '{"action":"get_logs"}' | nc -U /tmp/InjectionNext-control.sock
 
 # Stop watching
-echo '{"action":"stop_watching"}' | nc -w 3 localhost 8919
+echo '{"action":"stop_watching"}' | nc -U /tmp/InjectionNext-control.sock
 ```
 
 ### Screenshot test from terminal
@@ -177,11 +177,11 @@ or:
 ## Architecture
 
 ```
-┌─────────────┐       TCP :8919         ┌──────────────────────┐
+┌─────────────┐   Unix domain socket    ┌──────────────────────┐
 │  MCP Server │◄───────────────────────►│  InjectionNext.app   │
 │  (Node.js)  │   JSON commands/resp    │  ┌─────────────────┐ │
 │             │                         │  │  ControlServer  │ │
-│  stdio ↕    │                         │  │  (TCP listener) │ │
+│  stdio ↕    │                         │  │  (UDS listener) │ │
 │             │                         │  └────────┬────────┘ │
 │  Cursor /   │                         │           │          │
 │  AI Agent   │                         │  ┌────────▼────────┐ │
@@ -198,12 +198,12 @@ or:
 
 ## Troubleshooting
 
-**"Cannot connect to InjectionNext on port 8919"**
+**"Cannot connect to InjectionNext control socket"**
 - Make sure InjectionNext.app is running (check menu bar icon)
 - Make sure you built the version with ControlServer support (from this repo)
-- Check: `lsof -i :8919` should show InjectionNext listening
+- Check: `ls -l /tmp/InjectionNext-control.sock` should show the socket
 
-**Port already in use**
+**Stale socket file**
 - Kill any stale InjectionNext processes: `pkill -f InjectionNext`
 - Re-launch the app
 

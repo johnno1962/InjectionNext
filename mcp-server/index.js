@@ -5,8 +5,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import net from "node:net";
 
-const CONTROL_PORT = 8919;
-const CONTROL_HOST = "127.0.0.1";
+const CONTROL_SOCKET = process.env.INJECTION_CONTROL_SOCKET ||
+  "/tmp/InjectionNext-control.sock";
 
 function sendCommand(action, params = {}, timeoutMs = 5000) {
   return new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ function sendCommand(action, params = {}, timeoutMs = 5000) {
       reject(new Error("Connection timed out. Is InjectionNext running with ControlServer?"));
     }, timeoutMs);
 
-    client.connect(CONTROL_PORT, CONTROL_HOST, () => {
+    client.connect(CONTROL_SOCKET, () => {
       const payload = JSON.stringify({ action, ...params }) + "\n";
       client.write(payload);
     });
@@ -37,9 +37,9 @@ function sendCommand(action, params = {}, timeoutMs = 5000) {
 
     client.on("error", (err) => {
       clearTimeout(timeout);
-      if (err.code === "ECONNREFUSED") {
+      if (["ENOENT", "ECONNREFUSED"].includes(err.code)) {
         reject(new Error(
-          "Cannot connect to InjectionNext on port 8919. " +
+          `Cannot connect to InjectionNext control socket at ${CONTROL_SOCKET}. ` +
           "Make sure InjectionNext.app is running (build with ControlServer support)."
         ));
       } else {
