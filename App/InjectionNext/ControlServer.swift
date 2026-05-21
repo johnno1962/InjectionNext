@@ -15,6 +15,7 @@ class ControlServer {
 
     static let port: UInt16 = 8919
     static var shared: ControlServer?
+    static var servicedRequest = false
 
     private var serverSocket: Int32 = -1
     private let queue = DispatchQueue(label: "ControlServer", attributes: .concurrent)
@@ -106,6 +107,7 @@ class ControlServer {
 
         let result = executeAction(action, params: json)
         sendResponse(sock, success: result.success, data: result.data, error: result.error)
+        Self.servicedRequest = true
     }
 
     private func sendResponse(_ sock: Int32, success: Bool, data: [String: Any]? = nil, error: String? = nil) {
