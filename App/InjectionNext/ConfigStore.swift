@@ -475,8 +475,6 @@ final class ConfigStore: ObservableObject {
                  hostChangeWarned = true }
     }
     let injectionPort: String = HOTRELOADING_PORT
-    let controlPort: UInt16 = 8919
-
     // MARK: - Advanced
 
     @Published var verboseLogging: Bool {

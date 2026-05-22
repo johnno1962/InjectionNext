@@ -11,7 +11,9 @@
     "injection-next-mcp": "./index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "screenshot": "node take-screenshot.js",
+    "touch-events": "node touch-events.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

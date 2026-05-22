@@ -51,4 +51,12 @@ if [[ "$ACTION" = "install" ]]; then
     build_bundle tvOSDev AppleTVOS appletvos &&
     build_bundle xrOSDev XROS xros
 fi &&
+
+rsync -au \
+    --exclude node_modules \
+    --exclude .npm \
+    --exclude 'npm-debug.log*' \
+    --exclude .DS_Store \
+    ../mcp-server "$CODESIGNING_FOLDER_PATH/Contents/Resources" &&
+
 exit 0

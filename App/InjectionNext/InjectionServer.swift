@@ -38,6 +38,24 @@ class InjectionServer: SimpleSocket {
     var platform = "iPhoneSimulator"
     var arch = "arm64"
     var tmpPath = "/unset"
+    private final class PendingScreenshot {
+        let semaphore = DispatchSemaphore(value: 0)
+        var mimeType: String?
+        var data: Data?
+    }
+    private var pendingScreenshot: PendingScreenshot?
+    private var touchEvents = [String]()
+
+    func drainTouchEvents() -> [String] {
+        Self.clientQueue.sync {
+            defer { touchEvents.removeAll() }
+            return touchEvents
+        }
+    }
+
+    func replayTouchEvents(_ json: String) {
+        sendCommand(.replayEvents, with: json)
+    }
 
     @discardableResult
     class func alert(_ msg: String, cancel: String? = nil) -> Bool {
@@ -68,6 +86,40 @@ class InjectionServer: SimpleSocket {
         Self.clientQueue.async {
             _ = self.writeCommand(command.rawValue, with: string)
         }
+    }
+
+    func requestScreenshot(timeout: DispatchTimeInterval = .seconds(10))
+        -> (mimeType: String, data: Data)? {
+        let pending = PendingScreenshot()
+        var requestStarted = false
+        Self.clientQueue.sync {
+            if pendingScreenshot == nil {
+                pendingScreenshot = pending
+                requestStarted = writeCommand(InjectionCommand.screenshot.rawValue, with: nil)
+                if !requestStarted {
+                    pendingScreenshot = nil
+                }
+            }
+        }
+        guard requestStarted else {
+            return nil
+        }
+        guard pending.semaphore.wait(timeout: .now() + timeout) == .success,
+              let mimeType = pending.mimeType, !mimeType.isEmpty,
+              let data = pending.data, !data.isEmpty else {
+            Self.clientQueue.sync {
+                if pendingScreenshot === pending {
+                    pendingScreenshot = nil
+                }
+            }
+            return nil
+        }
+        Self.clientQueue.sync {
+            if pendingScreenshot === pending {
+                pendingScreenshot = nil
+            }
+        }
+        return (mimeType, data)
     }
 
     // Write message into Xcode console of client app.
@@ -180,6 +232,9 @@ class InjectionServer: SimpleSocket {
                         Self.connected.append(self)
                         AppDelegate.ui.setMenuIcon(.ok)
                         ConfigStore.shared.sendEnvVars(to: self)
+                        if Defaults.mcpServer {
+                            self.sendCommand(.captureEvents, with: nil)
+                        }
                     }
                 } else {
                     error("**** Bad tmp ****")
@@ -213,6 +268,28 @@ class InjectionServer: SimpleSocket {
                 if let executable = readString() {
                     Reloader.appName = URL(fileURLWithPath:
                                             executable).lastPathComponent
+                }
+            case .screenshotData:
+                guard let mimeType = readString(), let data = readData() else {
+                    error("**** Bad screenshot ****")
+                    return
+                }
+                Self.clientQueue.sync {
+                    pendingScreenshot?.mimeType = mimeType
+                    pendingScreenshot?.data = data
+                    pendingScreenshot?.semaphore.signal()
+                }
+            case .touchEvent:
+                if let json = readString() {
+                    Self.clientQueue.sync {
+                        touchEvents.append(json)
+                    }
+                } else {
+                    error("**** Bad touch event ****")
+                }
+            case .replayComplete:
+                if readString() == nil {
+                    error("**** Bad replay completion ****")
                 }
             case .detail:
                 if let detail = readString() {

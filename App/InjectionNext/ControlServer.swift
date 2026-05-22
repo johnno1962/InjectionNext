@@ -2,8 +2,8 @@
 //  ControlServer.swift
 //  InjectionNext
 //
-//  Local TCP control server for MCP integration.
-//  Listens on localhost:8919 for JSON commands and
+//  Local Unix domain socket control server for MCP integration.
+//  Listens for JSON commands from the bundled MCP server and
 //  maps them to existing AppDelegate actions.
 //
 
@@ -13,7 +13,9 @@ import Cocoa
 
 class ControlServer {
 
-    static let port: UInt16 = 8919
+    static let compatibilityPort: UInt16 = 8919
+    static let socketPath = "/tmp/InjectionNext-control.sock"
+    static var servicedRequest = false
     static var shared: ControlServer?
 
     private var serverSocket: Int32 = -1
@@ -21,6 +23,7 @@ class ControlServer {
 
     static func start() {
         guard shared == nil else { return }
+        CompatibilityControlServer.startServer(":\(compatibilityPort)")
         shared = ControlServer()
         shared?.listen()
     }
@@ -29,32 +32,46 @@ class ControlServer {
         queue.async { [weak self] in
             guard let self = self else { return }
 
-            self.serverSocket = socket(AF_INET, SOCK_STREAM, 0)
+            self.serverSocket = socket(AF_UNIX, SOCK_STREAM, 0)
             guard self.serverSocket >= 0 else {
                 NSLog("\(APP_PREFIX)ControlServer: socket() failed")
                 return
             }
 
-            var reuse: Int32 = 1
-            setsockopt(self.serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+            let socketPath = Self.socketPath
+            guard socketPath.utf8.count < MemoryLayout.size(ofValue: sockaddr_un().sun_path) else {
+                NSLog("\(APP_PREFIX)ControlServer: socket path too long: \(socketPath)")
+                close(self.serverSocket)
+                return
+            }
 
-            var addr = sockaddr_in()
-            addr.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-            addr.sin_family = sa_family_t(AF_INET)
-            addr.sin_port = Self.port.bigEndian
-            addr.sin_addr.s_addr = inet_addr("127.0.0.1")
+            unlink(socketPath)
+
+            var addr = sockaddr_un()
+            addr.sun_len = UInt8(MemoryLayout<sockaddr_un>.size)
+            addr.sun_family = sa_family_t(AF_UNIX)
+            let sunPathSize = MemoryLayout.size(ofValue: sockaddr_un().sun_path)
+            withUnsafeMutableBytes(of: &addr.sun_path) { buffer in
+                socketPath.withCString { source in
+                    if let baseAddress = buffer.baseAddress {
+                        strncpy(baseAddress.assumingMemoryBound(to: CChar.self),
+                                source, sunPathSize - 1)
+                    }
+                }
+            }
 
             let bindResult = withUnsafePointer(to: &addr) {
                 $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                    bind(self.serverSocket, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+                    bind(self.serverSocket, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
                 }
             }
 
             guard bindResult == 0 else {
-                NSLog("\(APP_PREFIX)ControlServer: bind() failed on port \(Self.port): \(String(cString: strerror(errno)))")
+                NSLog("\(APP_PREFIX)ControlServer: bind() failed at \(socketPath): \(String(cString: strerror(errno)))")
                 close(self.serverSocket)
                 return
             }
+            chmod(socketPath, S_IRUSR | S_IWUSR)
 
             guard Darwin.listen(self.serverSocket, 5) == 0 else {
                 NSLog("\(APP_PREFIX)ControlServer: listen() failed")
@@ -62,16 +79,10 @@ class ControlServer {
                 return
             }
 
-            NSLog("\(APP_PREFIX)ControlServer: listening on localhost:\(Self.port)")
+            NSLog("\(APP_PREFIX)ControlServer: listening at \(socketPath)")
 
             while true {
-                var clientAddr = sockaddr_in()
-                var clientLen = socklen_t(MemoryLayout<sockaddr_in>.size)
-                let clientSocket = withUnsafeMutablePointer(to: &clientAddr) {
-                    $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                        accept(self.serverSocket, $0, &clientLen)
-                    }
-                }
+                let clientSocket = accept(self.serverSocket, nil, nil)
                 guard clientSocket >= 0 else { continue }
                 self.queue.async {
                     self.handleClient(clientSocket)
@@ -106,6 +117,7 @@ class ControlServer {
 
         let result = executeAction(action, params: json)
         sendResponse(sock, success: result.success, data: result.data, error: result.error)
+        Self.servicedRequest = true
     }
 
     private func sendResponse(_ sock: Int32, success: Bool, data: [String: Any]? = nil, error: String? = nil) {
@@ -163,6 +175,15 @@ class ControlServer {
 
         case "get_last_error":
             return getLastError()
+
+        case "take_screenshot":
+            return takeScreenshot()
+
+        case "get_touch_events":
+            return getTouchEvents()
+
+        case "replay_touch_events":
+            return replayTouchEvents(params: params)
 
         case "prepare_swiftui_source":
             return prepareSwiftUISource()
@@ -268,6 +289,51 @@ class ControlServer {
         return .ok(["error": error])
     }
 
+    private func takeScreenshot() -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        guard let screenshot = client.requestScreenshot() else {
+            return .fail("Unable to capture screenshot from client app")
+        }
+        return .ok([
+            "mimeType": screenshot.mimeType,
+            "data": screenshot.data.base64EncodedString(),
+            "bytes": screenshot.data.count
+        ])
+    }
+
+    private func getTouchEvents() -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        let events = client.drainTouchEvents().compactMap { json -> Any? in
+            guard let data = json.data(using: .utf8) else { return nil }
+            return try? JSONSerialization.jsonObject(with: data)
+        }
+        return .ok(["events": events])
+    }
+
+    private func replayTouchEvents(params: [String: Any]) -> ActionResult {
+        guard let client = InjectionServer.currentClient else {
+            return .fail("No connected client app")
+        }
+        let payload: Any
+        if let events = params["events"] as? [Any] {
+            payload = ["events": events]
+        } else {
+            payload = params
+        }
+        guard JSONSerialization.isValidJSONObject(payload),
+              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let json = String(data: data, encoding: .utf8) else {
+            return .fail("Invalid touch event JSON payload")
+        }
+        client.replayTouchEvents(json)
+        let count = (payload as? [String: Any])?["events"] as? [Any]
+        return .ok(["events": count?.count ?? 0])
+    }
+
     private func prepareSwiftUISource() -> ActionResult {
         guard let lastSource = NextCompiler.lastSource else {
             return .fail("No source file currently being edited")
@@ -304,5 +370,24 @@ class ControlServer {
     private func clearLogs() -> ActionResult {
         LogBuffer.shared.clear()
         return .ok()
+    }
+
+    private final class CompatibilityControlServer: SimpleSocket {
+        override func run() {
+            let response: [String: Any] = [
+                "success": false,
+                "error": "InjectionNext now uses a Unix domain socket for MCP control. " +
+                "Upgrade your mcp-server or use the version bundled inside InjectionNext.app."
+            ]
+            guard let data = try? JSONSerialization.data(withJSONObject: response),
+                  let json = String(data: data, encoding: .utf8),
+                  let stream = fdopen(forMode: "w") else {
+                return
+            }
+            defer { fclose(stream) }
+            (json + "\n").withCString {
+                _ = fputs($0, stream)
+            }
+        }
     }
 }

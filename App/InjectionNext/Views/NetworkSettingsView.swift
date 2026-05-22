@@ -9,6 +9,8 @@ import SwiftUI
 
 struct NetworkSettingsView: View {
     @ObservedObject var config: ConfigStore
+    @State private var controlServerRunning = ControlServer.shared != nil
+    @State private var controlServerActive = ControlServer.servicedRequest
 
     var body: some View {
         Form {
@@ -20,7 +22,12 @@ struct NetworkSettingsView: View {
                 }
 
                 LabeledContent("Injection Port", value: config.injectionPort)
-                LabeledContent("Control Server Port", value: "\(config.controlPort)")
+                LabeledContent("Control Socket") {
+                    Text(ControlServer.socketPath)
+                        .font(.caption.monospaced())
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
             } header: {
                 Label("Connection", systemImage: "network")
             } footer: {
@@ -38,6 +45,15 @@ struct NetworkSettingsView: View {
                         Text(config.isClientConnected ? "Connected" : "Not Connected")
                     }
                 }
+                LabeledContent("Control Server") {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(controlServerColor)
+                            .frame(width: 8, height: 8)
+                        Text(controlServerText)
+                    }
+                }
+                .help("Local MCP control server socket")
             } header: {
                 Label("Status", systemImage: "antenna.radiowaves.left.and.right")
             }
@@ -53,5 +69,21 @@ struct NetworkSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onAppear(perform: refreshControlServerStatus)
+    }
+
+    private func refreshControlServerStatus() {
+        controlServerRunning = ControlServer.shared != nil
+        controlServerActive = ControlServer.servicedRequest
+    }
+
+    private var controlServerText: String {
+        return !controlServerRunning ? "Stopped" :
+            controlServerActive ? "Active" : "Running"
+    }
+
+    private var controlServerColor: Color {
+        return !controlServerRunning ? .gray :
+            controlServerActive ? .orange : .green
     }
 }

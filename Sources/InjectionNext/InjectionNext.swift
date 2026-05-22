@@ -8,6 +8,11 @@
 //
 #if DEBUG || !SWIFT_PACKAGE
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 #if canImport(InjectionImpl)
 import InjectionImpl
 #endif
@@ -17,7 +22,20 @@ import InjectionImpl
 
 @objc(InjectionNext)
 open class InjectionNext: SimpleSocket {
-    
+    private let responseQueue = DispatchQueue(label: "InjectionNextResponses")
+    private func sendResponse(_ response: InjectionResponse,
+                              with string: String? = nil,
+                              data: Data? = nil,
+                              extra: (() -> Void)? = nil) {
+        responseQueue.async {
+            _ = self.writeCommand(response.rawValue, with: string)
+            if let data = data {
+                self.write(data)
+            }
+            extra?()
+        }
+    }
+
     override class open func error(_ message: String) -> Int32 {
         let msg = String(format: message, strerror(errno))
         print(APP_PREFIX+APP_NAME+": "+msg)
@@ -32,6 +50,39 @@ open class InjectionNext: SimpleSocket {
     }
     func error(_ msg: String) {
         log("⚠️ "+msg)
+    }
+
+    private func screenshotData() -> Data? {
+        var data: Data?
+        let capture = {
+            #if canImport(UIKit) && !os(watchOS)
+            guard let window = UIApplication.shared.windows.first(where: {
+                $0.isKeyWindow
+            }) ?? UIApplication.shared.windows.first(where: {
+                !$0.isHidden && $0.alpha > 0
+            }) else { return }
+            let renderer = UIGraphicsImageRenderer(bounds: window.bounds)
+            data = renderer.image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }.pngData()
+            #elseif canImport(AppKit)
+            guard let window = NSApplication.shared.keyWindow ??
+                    NSApplication.shared.mainWindow ??
+                    NSApplication.shared.windows.first(where: {
+                        $0.isVisible
+                    }) else { return }
+            window.displayIfNeeded()
+            let bounds = window.contentView?.bounds ?? window.frame
+            guard let view = window.contentView,
+                  let rep = view.bitmapImageRepForCachingDisplay(in: bounds) else {
+                return
+            }
+            view.cacheDisplay(in: bounds, to: rep)
+            data = rep.representation(using: .png, properties: [:])
+            #endif
+        }
+        Thread.isMainThread ? capture() : DispatchQueue.main.sync(execute: capture)
+        return data
     }
 
     /// Connection from client app opened in ClientBoot.mm arrives here
@@ -78,25 +129,22 @@ open class InjectionNext: SimpleSocket {
         #endif
 
         // Let server side know the platform and architecture
-        writeCommand(InjectionResponse.platform.rawValue, with: platform)
-        super.write(arch)
+        sendResponse(.platform, with: platform) {
+            self.write(arch)
+        }
         if let projectRoot = getenv(INJECTION_PROJECT_ROOT) ??
                            getenv(BUILD_WORKSPACE_DIRECTORY) {
-            writeCommand(InjectionResponse.projectRoot.rawValue,
-                         with: String(cString: projectRoot))
+            sendResponse(.projectRoot, with: String(cString: projectRoot))
         }
-        writeCommand(InjectionResponse.tmpPath.rawValue, with: NSTemporaryDirectory())
+        sendResponse(.tmpPath, with: NSTemporaryDirectory())
         if let detail = getenv(INJECTION_DETAIL) {
-            writeCommand(InjectionResponse.detail.rawValue,
-                         with: String(cString: detail))
+            sendResponse(.detail, with: String(cString: detail))
         }
         if let bazelTarget = getenv(INJECTION_BAZEL_TARGET) {
-            writeCommand(InjectionResponse.bazelTarget.rawValue,
-                         with: String(cString: bazelTarget))
+            sendResponse(.bazelTarget, with: String(cString: bazelTarget))
         }
         if let executable = Bundle.main.executablePath {
-            writeCommand(InjectionResponse.executable.rawValue,
-                         with: executable)
+            sendResponse(.executable, with: executable)
         }
 
         Reloader.injectionQueue.sync {
@@ -217,7 +265,9 @@ open class InjectionNext: SimpleSocket {
         }
     }
 
+    nonisolated(unsafe)
     static var target: ImageSymbols?
+    nonisolated(unsafe)
     static var tracer: STTracer = { existing, symname in
         var traced = existing
         if SwiftTrace.injectableSymbol(symname),
@@ -258,10 +308,9 @@ open class InjectionNext: SimpleSocket {
                         """)
                 }
             } else {
-                writeCommand(InjectionResponse.unhide.rawValue, with: nil)
+                sendResponse(.unhide)
             }
-            writeCommand(succeeded ? InjectionResponse.injected.rawValue :
-                            InjectionResponse.failed.rawValue, with: nil)
+            sendResponse(succeeded ? .injected : .failed)
         }
 
         while true {
@@ -308,13 +357,35 @@ open class InjectionNext: SimpleSocket {
                     return error("Unable to read metrics JSON")
                 }
                 if let data = metricsJSON.data(using: .utf8),
-                   let metricsDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let metricsDict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
                    let notificationName = metricsDict["notification_name"] as? String {
                     NotificationCenter.default.post(
                         name: NSNotification.Name(notificationName),
                         object: nil,
                         userInfo: metricsDict
                     )
+                }
+            case .replayEvents:
+                guard let eventsJSON = readString() else {
+                    return error("Unable to read touch events JSON")
+                }
+                #if canImport(UIKit) && !os(watchOS)
+                eventsJSON.withCString {
+                    InjectionReplayTouchEventsJSON($0)
+                }
+                #endif
+                sendResponse(.replayComplete, with: eventsJSON)
+            case .captureEvents:
+                #if canImport(UIKit) && !os(watchOS)
+                InjectionInstallTouchEventCapture { [weak self] json in
+                    self?.sendResponse(.touchEvent, with: String(cString: json))
+                }
+                #endif
+            case .screenshot:
+                if let data = screenshotData() {
+                    sendResponse(.screenshotData, with: "image/png", data: data)
+                } else {
+                    sendResponse(.screenshotData, with: "", data: Data())
                 }
             case .setenv:
                 while let name = readString(), let value = readString() {
