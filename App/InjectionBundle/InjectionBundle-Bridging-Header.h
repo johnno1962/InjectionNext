@@ -7,6 +7,7 @@
 #import "SimpleSocket.h"
 #import "InjectionImplC.h"
 #import "InjectionClient.h"
+#import "InjectionTouchEvents.h"
 
 // InjectionBundle only
 #import "fishhook.h"

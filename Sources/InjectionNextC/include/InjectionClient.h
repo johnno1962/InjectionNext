@@ -11,7 +11,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "InjectionTouchEvents.h"
 
 #define HOTRELOADING_PORT ":8887"
 #define HOTRELOADING_MULTICAST "239.255.255.239"
