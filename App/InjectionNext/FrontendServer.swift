@@ -14,10 +14,6 @@ import Cocoa
 import Popen
 import Fortify
 
-#if INJECTION_III_APP
-struct Unhider { static var packageFrameworks: String? }
-#endif
-
 extension NextCompiler {
     func writeCache() {
         FrontendServer.writeCache(for: self.name, recompiler: self)

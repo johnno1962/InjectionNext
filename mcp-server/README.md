@@ -8,7 +8,9 @@ MCP (Model Context Protocol) server that lets AI agents control InjectionNext â€
 - **Node.js** 18.14.1+
 - **InjectionNext.app** built from this repo (with ControlServer support)
 
-## Step 1: Build InjectionNext with ControlServer
+## Step 1: Download or Build InjectionNext with ControlServer
+
+More recent versions of InjectionNext have the MCP server already integrated.
 
 ```bash
 # Clone and init submodules
@@ -51,7 +53,11 @@ defaults delete com.johnholdsworth.InjectionNext mcpServer
 
 ## Step 3: Install the MCP server
 
+When integrated, the mcp-server can now be found in the Resources directory 
+inside the downloaded application package. Copy it out to make it writable.
+
 ```bash
+cp -r /Applications/InjectionNext/Contents/Resources/mcp-server .
 cd mcp-server
 npm install
 ```
