@@ -117,8 +117,8 @@
 		BBDD84542C4FEB16000F3124 /* TupleRegex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84532C4FEB16000F3124 /* TupleRegex.swift */; };
 		BBDD84552C4FEC98000F3124 /* SimpleSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */; };
 		BBDD845A2C4FF646000F3124 /* ClientBoot.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBDD84592C4FF645000F3124 /* ClientBoot.mm */; };
-		BBF00D012FBCE00100F0D001 /* InjectionTouchEvents.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */; };
 		BBEB87122C74FD930044578A /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BBEB87112C74FD930044578A /* Quick */; };
+		BBF00D012FBCE00100F0D001 /* InjectionTouchEvents.mm in Sources */ = {isa = PBXBuildFile; fileRef = BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */; };
 		BBF6572E2DAFF00200638170 /* NIMBLE.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572C2DAFF00200638170 /* NIMBLE.md */; };
 		BBF6572F2DAFF00200638170 /* QUICK.md in Resources */ = {isa = PBXBuildFile; fileRef = BBF6572D2DAFF00200638170 /* QUICK.md */; };
 		BBFE1B422ED7C116004E14EE /* SwiftRefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */; };
@@ -256,8 +256,6 @@
 		BB5C8E8E2FA503D500646A0C /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		BB67DBB21FB0CDA8000EAC8A /* SimpleSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleSocket.h; path = ../../Sources/InjectionNextC/include/SimpleSocket.h; sourceTree = "<group>"; };
 		BB67DBB31FB0CDA8000EAC8A /* SimpleSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleSocket.mm; path = ../../Sources/InjectionNextC/SimpleSocket.mm; sourceTree = "<group>"; };
-		BBF00CFF2FBCE00100F0D001 /* InjectionTouchEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InjectionTouchEvents.h; path = ../../Sources/InjectionNextC/include/InjectionTouchEvents.h; sourceTree = "<group>"; };
-		BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionTouchEvents.mm; path = ../../Sources/InjectionNextC/InjectionTouchEvents.mm; sourceTree = "<group>"; };
 		BB6A56EF2C50E73600C92112 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		BB6A56F22C51154F00C92112 /* InjectionBundle-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionBundle-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB7AC1522FBCEDEF009269AF /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -287,6 +285,8 @@
 		BBDD84582C4FF0B9000F3124 /* copy_bundle.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = copy_bundle.sh; sourceTree = "<group>"; };
 		BBDD84592C4FF645000F3124 /* ClientBoot.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ClientBoot.mm; path = ../../Sources/InjectionNextC/ClientBoot.mm; sourceTree = "<group>"; };
 		BBDF943C2349277A00334E08 /* InjectionNext-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "InjectionNext-Bridging-Header.h"; sourceTree = "<group>"; };
+		BBF00CFF2FBCE00100F0D001 /* InjectionTouchEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InjectionTouchEvents.h; path = ../../Sources/InjectionNextC/include/InjectionTouchEvents.h; sourceTree = "<group>"; };
+		BBF00D002FBCE00100F0D001 /* InjectionTouchEvents.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = InjectionTouchEvents.mm; path = ../../Sources/InjectionNextC/InjectionTouchEvents.mm; sourceTree = "<group>"; };
 		BBF6572C2DAFF00200638170 /* NIMBLE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = NIMBLE.md; sourceTree = "<group>"; };
 		BBF6572D2DAFF00200638170 /* QUICK.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK.md; sourceTree = "<group>"; };
 		BBFE1B412ED7C116004E14EE /* SwiftRefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftRefs.swift; sourceTree = "<group>"; };
@@ -1215,7 +1215,8 @@
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACH_O_TYPE = mh_dylib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+                IOS_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -1262,7 +1263,8 @@
 				LIBRARY_SEARCH_PATHS = "$(PLATFORM_DIR)/Developer/usr/lib";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACH_O_TYPE = mh_dylib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+                IOS_DEPLOYMENT_TARGET = 15.0;
+                MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = (
