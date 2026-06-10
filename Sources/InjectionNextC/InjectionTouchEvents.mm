@@ -6,6 +6,7 @@
 //  UITouch/UITouchesEvent strategy Remote used for interactive mirroring.
 //
 
+#if DEBUG || !DEBUG_ONLY
 #import "include/InjectionTouchEvents.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
@@ -45,6 +46,7 @@ static NSString *InjectionPhaseName(UITouchPhase phase) {
         case UITouchPhaseStationary: return @"stationary";
         case UITouchPhaseEnded: return @"ended";
         case UITouchPhaseCancelled: return @"cancelled";
+        default: break;
     }
     return @"cancelled";
 }
@@ -312,4 +314,5 @@ void InjectionReplayTouchEventsJSON(const char *json) {
 void InjectionInstallTouchEventCapture(InjectionTouchEventCallback callback) {}
 void InjectionReplayTouchEventsJSON(const char *json) {}
 
+#endif
 #endif
