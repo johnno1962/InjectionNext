@@ -1329,7 +1329,7 @@
 			repositoryURL = "https://github.com/johnno1962/Fortify";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.12;
+				minimumVersion = 2.2.0;
 			};
 		};
 		224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */ = {
