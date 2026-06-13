@@ -6,7 +6,7 @@
 //  UITouch/UITouchesEvent strategy Remote used for interactive mirroring.
 //
 
-#if DEBUG || !DEBUG_ONLY
+#if (DEBUG || !DEBUG_ONLY) && !INJECTION_III_APP
 #import "include/InjectionTouchEvents.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
