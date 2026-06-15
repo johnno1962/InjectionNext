@@ -12,7 +12,7 @@
 #import <objc/runtime.h>
 #import <TargetConditionals.h>
 
-#if TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_VISION
+#if (TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_VISION) && !INJECTION_III_APP
 #import <UIKit/UIKit.h>
 
 @interface UITouch (InjectionReplay)

@@ -304,6 +304,7 @@ class ControlServer {
     }
 
     private func getTouchEvents() -> ActionResult {
+        #if !INJECTION_III_APP
         guard let client = InjectionServer.currentClient else {
             return .fail("No connected client app")
         }
@@ -312,9 +313,13 @@ class ControlServer {
             return try? JSONSerialization.jsonObject(with: data)
         }
         return .ok(["events": events])
+        #else
+        return .fail("Not available")
+        #endif
     }
 
     private func replayTouchEvents(params: [String: Any]) -> ActionResult {
+        #if !INJECTION_III_APP
         guard let client = InjectionServer.currentClient else {
             return .fail("No connected client app")
         }
@@ -332,6 +337,9 @@ class ControlServer {
         client.replayTouchEvents(json)
         let count = (payload as? [String: Any])?["events"] as? [Any]
         return .ok(["events": count?.count ?? 0])
+        #else
+        return .fail("Not available")
+        #endif
     }
 
     private func prepareSwiftUISource() -> ActionResult {
