@@ -63,7 +63,7 @@ var linkerSettings: [LinkerSetting] {
 and you cannot add/remove or rename properties with storage or add or 
 reorder methods in a non final class or change function signatures.
 
-To inject SwiftUI sucessfully a couple of minor code changes to each View are 
+To inject SwiftUI successfully a couple of minor code changes to each View are
 required. Consult the README of repo https://github.com/johnno1962/HotSwiftUI
 or you can make the required changes automatically using the menu item
 "Prepare SwiftUI/...". For SwiftUI you would generally also integrate
