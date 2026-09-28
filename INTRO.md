@@ -50,7 +50,7 @@ This is the more difficult part of injection to realise. You can have the
 new fuction implementtions loaded and rebound but you won't see any change in
 the appearance on the screen until that new code is called. With SwiftUI the
 esiest way to do this is to have an observed instance variable on your View 
-struct that changes when an injection has occured. There is code to do this in
+struct that changes when an injection has occurred. There is code to do this in
 the HotSwiftUI and Inject packages if you add an @ObserveInjection property
 wrapper to the View struct. It's a little more complicated for legacy
 UIViewController subclasses and what needs to happen generally is 
