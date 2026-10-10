@@ -179,26 +179,57 @@ final class LogManager: ObservableObject {
 
     private func readLoop(readFd: Int32, passthrough: Int32, level: LogLevel) {
         var scratch = [UInt8](repeating: 0, count: 4096)
-        var buffer = ""
+        var pending = Data()
 
         while true {
-            let n = read(readFd, &scratch, scratch.count)
-            if n <= 0 { break }
-
-            // Mirror raw bytes to the real fd (terminal, Console.app, etc).
-            _ = scratch.withUnsafeBufferPointer {
-                write(passthrough, $0.baseAddress, n)
+            let n = scratch.withUnsafeMutableBytes {
+                read(readFd, $0.baseAddress, $0.count)
             }
 
-            if let chunk = String(bytes: scratch[0..<n], encoding: .utf8) {
-                buffer.append(chunk)
+            if n < 0 {
+                if errno == EINTR { continue }
+                break
+            }
+            if n == 0 { break }
+
+            // Mirror the original bytes.
+            scratch.withUnsafeBytes { bytes in
+                var offset = 0
+                while offset < n {
+                    let written = write(
+                        passthrough,
+                        bytes.baseAddress!.advanced(by: offset),
+                        n - offset
+                    )
+                    if written > 0 {
+                        offset += written
+                    } else if written == -1 && errno == EINTR {
+                        continue
+                    } else {
+                        break
+                    }
+                }
             }
 
-            while let newline = buffer.firstIndex(of: "\n") {
-                let rawLine = String(buffer[..<newline])
-                buffer.removeSubrange(...newline)
-                ingestCapturedLine(rawLine, level: level)
+            // Accumulate bytes, not partially decoded strings.
+            pending.append(contentsOf: scratch.prefix(n))
+
+            while let newline = pending.firstIndex(of: 0x0A) {
+                let line = pending.prefix(upTo: newline)
+                ingestCapturedLine(
+                    String(decoding: line, as: UTF8.self),
+                    level: level
+                )
+                pending.removeSubrange(...newline)
             }
+        }
+
+        // Don't lose an unterminated final line.
+        if !pending.isEmpty {
+            ingestCapturedLine(
+                String(decoding: pending, as: UTF8.self),
+                level: level
+            )
         }
     }
 

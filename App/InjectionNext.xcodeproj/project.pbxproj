@@ -32,7 +32,6 @@
 		AAAA000000000000000000E2 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E1 /* LogManager.swift */; };
 		AAAA000000000000000000E4 /* ConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000E3 /* ConsoleView.swift */; };
 		BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECAF2C73C1610000A4E6 /* Quick */; };
-		BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = BB0CECB22C73C1890000A4E6 /* Nimble */; };
 		BB2A66362E3E753B001EDD38 /* BAZEL.md in Resources */ = {isa = PBXBuildFile; fileRef = BB2A66352E3E753B001EDD38 /* BAZEL.md */; };
 		BB2D41AC2DAD14EA0073C203 /* Popen in Frameworks */ = {isa = PBXBuildFile; productRef = BB2D41AB2DAD14EA0073C203 /* Popen */; };
 		BB42F8E12EB626F100FDBBCC /* SwiftAspects.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB42F8D62EB626F100FDBBCC /* SwiftAspects.swift */; };
@@ -326,7 +325,6 @@
 			files = (
 				BB0CECB02C73C1610000A4E6 /* Quick in Frameworks */,
 				BBEB87122C74FD930044578A /* Quick in Frameworks */,
-				BB0CECB32C73C1890000A4E6 /* Nimble in Frameworks */,
 				BBCCC3B72C73B6FD00E71F81 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -722,7 +720,6 @@
 				224E57F92C08978F00B71C79 /* XCRemoteSwiftPackageReference "SwiftRegex5" */,
 				2217BE7F2C0A65C20032A832 /* XCRemoteSwiftPackageReference "Fortify" */,
 				22E3D9892C19009900BB234E /* XCRemoteSwiftPackageReference "DLKit" */,
-				BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */,
 				BBEB87102C74FD930044578A /* XCRemoteSwiftPackageReference "Quick" */,
 				BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */,
 			);
@@ -1200,6 +1197,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
+					SWIFT_TRACE,
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 John Holdsworth. All rights reserved.";
@@ -1229,6 +1227,7 @@
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionBundle/InjectionBundle-Bridging-Header.h";
 				WRAPPER_EXTENSION = bundle;
@@ -1276,6 +1275,7 @@
 				PRODUCT_NAME = macOSInjection;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "InjectionBundle/InjectionBundle-Bridging-Header.h";
 				WRAPPER_EXTENSION = bundle;
@@ -1345,7 +1345,7 @@
 			repositoryURL = "https://github.com/johnno1962/DLKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.6.0;
+				minimumVersion = 3.6.1;
 			};
 		};
 		BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */ = {
@@ -1354,14 +1354,6 @@
 			requirement = {
 				branch = main;
 				kind = branch;
-			};
-		};
-		BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Quick/Nimble.git";
-			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 13.2.0;
 			};
 		};
 		BB2D41A42DAD10110073C203 /* XCRemoteSwiftPackageReference "Popen" */ = {
@@ -1407,11 +1399,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BB0CECAE2C73C1610000A4E6 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
-		};
-		BB0CECB22C73C1890000A4E6 /* Nimble */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BB0CECB12C73C1890000A4E6 /* XCRemoteSwiftPackageReference "Nimble" */;
-			productName = Nimble;
 		};
 		BB2D41AB2DAD14EA0073C203 /* Popen */ = {
 			isa = XCSwiftPackageProductDependency;
