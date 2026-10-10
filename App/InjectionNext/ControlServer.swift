@@ -126,12 +126,40 @@ class ControlServer {
         if let data = data { response["data"] = data }
         guard let jsonData = try? JSONSerialization.data(withJSONObject: response),
               let jsonStr = String(data: jsonData, encoding: .utf8) else { return }
-        let line = jsonStr + "\n"
-        _ = line.withCString { ptr in
-            send(sock, ptr, strlen(ptr), 0)
+        if let line = (jsonStr + "\n").data(using: .utf8) {
+            _ = sendAll(fd: sock, data: line)
         }
     }
 
+    func sendAll(fd: Int32, data: Data) -> Bool {
+        data.withUnsafeBytes { buffer in
+            guard let base = buffer.baseAddress else {
+                return data.isEmpty
+            }
+
+            var offset = 0
+
+            while offset < buffer.count {
+                let sent = send(
+                    fd,
+                    base.advanced(by: offset),
+                    buffer.count - offset,
+                    0
+                )
+
+                if sent > 0 {
+                    offset += sent
+                } else if sent == -1 && errno == EINTR {
+                    continue
+                } else {
+                    return false
+                }
+            }
+
+            return true
+        }
+    }
+    
     struct ActionResult {
         let success: Bool
         let data: [String: Any]?
