@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/ksh -x
 #
 #  copy_bundle.sh
 #  InjectionIII
@@ -60,7 +60,7 @@ if [[ "$CONFIGURATION" =~ Debug ]]; then
     (cd "$PRODUCTS_DIR" && for fwork in $TESTING_FRAMEWORKS \
         "$PLATFORM_DEVELOPER_LIBRARY_DIR"/Frameworks/_Testing_*.framework; do
         TESTING_COPIED="$CODESIGNING_FOLDER_PATH/Frameworks/$(basename "$fwork")"
-        if [ -f "$fwork/Info.plist" -a ! -d "$TESTING_COPIED" ]; then
+        if [ -f "$fwork/Info.plist" -a ! -d "$TESTING_COPIED" -a ! ( "$fwork" =~ Transferable ) ]; then
             rsync -a "$fwork" "$CODESIGNING_FOLDER_PATH/Frameworks" &&
             codesign -f --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der "$TESTING_COPIED"
         fi

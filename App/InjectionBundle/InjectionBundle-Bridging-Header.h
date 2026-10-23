@@ -10,7 +10,7 @@
 #import "InjectionTouchEvents.h"
 
 // InjectionBundle only
-#import "fishhook.h"
+#import "../../SwiftTrace/fishhook/fishhook.h"
 #import "DLKitC.h"
 
 #import "SwiftTrace.h"
