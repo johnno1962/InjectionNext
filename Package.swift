@@ -39,7 +39,7 @@ let package = Package(
             path: "Sources/InjectionNext", swiftSettings: [.define("DEBUG_ONLY")]),
         .target(
             name: "InjectionNextC",
-            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT")]+cSettings),
+            cSettings: [.define("DEBUG_ONLY"), .define("FISHHOOK_EXPORT"), .define("SWIFT_TRACE")]+cSettings),
         .testTarget(
             name: "InjectionNextTests",
             dependencies: ["InjectionBundle"]),
